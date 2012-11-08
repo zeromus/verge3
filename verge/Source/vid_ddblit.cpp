@@ -46,191 +46,9 @@ union Color {
 	};
 };
 
-byte _tbl_getcolor_16bpp[65536][3];
-byte _tbl_getcolor_15bpp[65536][3];
-byte _tbl_blendcolor_15bpp[256][32][32];
-
-void SetupTables()
-{
-	static bool initialized = false;
-	if(initialized) return;
-	initialized = true;
-
-	for(int c=0;c<65536;c++) {
-		int b = (c & 0x1F) << 3;
-		int g = ((c >> 5) & 0x3f) << 2;
-		int r = ((c >> 11) & 0x1f) << 3;
-
-		_tbl_getcolor_16bpp[c][0] = r;
-		_tbl_getcolor_16bpp[c][1] = g;
-		_tbl_getcolor_16bpp[c][2] = b;
-	}
-
-	for(int c=0;c<65536;c++) {
-		int b = (c & 0x1F) << 3;
-		int g = ((c >> 5) & 0x1f) << 3;
-		int r = ((c >> 10) & 0x1f) << 3;
-
-		_tbl_getcolor_15bpp[c][0] = r;
-		_tbl_getcolor_15bpp[c][1] = g;
-		_tbl_getcolor_15bpp[c][2] = b;
-	}
-
-	for(int a=0;a<256;a++)
-		for(int x=0;x<32;x++)
-			for(int y=0;y<32;y++) {
-				int pa = a;
-				int ipa = 255-pa;
-				_tbl_blendcolor_15bpp[a][x][y] = ((x*pa)+(y*ipa))>>8;
-			}
-}
 
 
 /***************************** code *****************************/
-
-// Overkill (2007-05-04): Converts HSV into a color
-int dd_HSVtoColor(int h, int s, int v)
-// Pass: Hue, Saturation, Value
-// Credit goes to Zip for original conversion code.
-// Returns: RGB color
-{
-	int r, g, b = 0;
-	int ixz;
-	int f;
-
-	h = (h + 360) % 360;
-	if (s > 255) s = 255;
-	else if (s < 0) s = 0;
-	if (v > 255) v = 255;
-	else if (v < 0) v = 0;
-
-	ixz = h / 60;
-	h = (h << 8) / 60;
-	f = h - (ixz << 8);
-	h = (v * (255 - ((s * (255 - f)) >> 8))) >> 8; // t =
-	f = (v * (255 - ((s * f) >> 8))) >> 8; // q =
-	s = (v * (255 - s)) >> 8; // p =
-
-	switch (ixz)
-	{
-		case 0:
-			r = v; g = h; b = s;
-			break;
-		case 1:
-			r = f; g = v; b = s;
-			break;
-		case 2:
-			r = s; g = v; b = h;
-			break;
-		case 3:
-			r = s; g = f; b = v;
-			break;
-		case 4:
-			r = h; g = s; b = v;
-			break;
-		case 5:
-			r = v; g = s; b = f;
-			break;
-	}
-	return MakeColor(r, g, b);
-}
-
-// Overkill (2007-05-04): Converts color into RGB, then RGB->HSV 
-void dd_GetHSV(int color, int &h, int &s, int &v)
-// Pass: Color, Hue reference, Saturation reference, Value reference
-// Credit goes to Zip for original conversion code.
-{
-	int r, g, b;
-	int maximum;
-	int delta;
-
-	GetColor(color, r, g, b);
-	// Figure out the maximum, the minimum
-	// and the change between them.
-	maximum = r;
-	delta = r;
-	if (g > maximum) maximum = g;
-	else if (g < delta) delta = g;
-	if (b > maximum) maximum = b;
-	else if (b < delta) delta = b;
-	delta = maximum - delta;
-
-	// Value
-	v = maximum;
-	// Saturation
-	if (maximum == 0) s = 0;
-	else s = (delta * 255) / maximum;
-
-	// Grey
-	if (delta == 0) h = 0;	
-	// (300) magenta -> (0) red -> (60) yellow
-	else if (r == maximum) h = (360 + ((60 * (g - b)) / delta)) % 360;
-	// (60) yellow -> (120) green -> (180) cyan
-	else if (g == maximum) h = (120) + ((60 * (b - r)) / delta);
-	// (180) cyan -> (240) blue -> (300) magenta
-	else h = (240) + ((60 * (r - g)) / delta);
-}
-
-// Overkill (2007-05-04): Finds a hue range in an image,
-// and replaces it with a different shade.
-void dd_HueReplace(int hue_find, int hue_tolerance, int hue_replace, image *img)
-// Pass: hue to find, range of tolerance, replacement hue, destination image
-// Credit goes to Zip for original replace code.
-{
-	int pixel;
-	int h, s, v;
-	for (int x = img->cx1; x <= img->cx2; x++)
-	{
-		for (int y = img->cy1; y <= img->cy2; y++)
-		{
-			pixel = ReadPixel(x, y, img);
-			if (pixel != transColor)
-			{
-				// Find out HSV info
-				GetHSV(pixel, h, s, v);
-				// Calculate tolerance
-				//if (hue_tolerance != 360)
-				//{
-				pixel = (h - hue_find) % (360 - hue_tolerance);
-				//}
-				//else
-				//{
-				//	pixel = 360 + (h - hue_find) % 360;
-				//}
-				// If this pixel matches the old shade
-				if (pixel <= hue_tolerance && pixel >= (0 - hue_tolerance))
-				{
-					// Set the pixel to the new shade
-					PutPixel(x, y, HSVtoColor(hue_replace + pixel, s, v), img);
-				}
-			}
-		}
-	}
-}
-
-// Overkill (2007-05-04): Finds an exact color in an image,
-// and replaces it with a new color.
-void dd_ColorReplace(int color_find, int color_replace, image *img)
-{
-	for (int x = img->cx1; x <= img->cx2; x++)
-	{
-		for (int y = img->cy1; y <= img->cy2; y++)
-		{
-			if (ReadPixel(x, y, img) == color_find)
-			{
-				PutPixel(x, y, color_replace, img);
-			}
-		}
-	}
-}  
-
-
-
-
-
-
-
-
 
 // Overkill 2006-02-04
 void dd_RectVGrad(int x, int y, int x2, int y2, int color, int color2, image *dest)
@@ -614,36 +432,6 @@ image *ImageWordTypeFrom32bpp(byte *src, int width, int height)
 
 /*********************** blitter managment **********************/
 
-image* ImageAdapt(image* src, int srcbpp, int dstbpp) {
-	//TODO - this needs to be a lot better (handle pitch, for one thing)
-	switch(dstbpp) {
-		case 32:
-			switch(srcbpp) {
-				case 15: return Image32bppFromWordType<15>((byte*)src->data,src->width,src->height);
-				case 16: return Image32bppFromWordType<16>((byte*)src->data,src->width,src->height);
-			}
-	}
-	err("Unsupported!");
-	return 0;
-}
-
-
-#define BPP 15
-#define PT word
-namespace Blitter15 {
-#include "blitter_include.h"
-}
-#undef BPP
-#undef PT
-
-#define BPP 16
-#define PT word
-namespace Blitter16 {
-#include "blitter_include.h"
-}
-#undef BPP
-#undef PT
-
 #define BPP 32
 #define PT quad
 namespace Blitter32 {
@@ -663,11 +451,7 @@ int SetLucent(int percent)
 
 	if(alpha == oldalpha) return oldalpha;
 
-	if(vid_bpp == 32)
-		Blitter32::SetForLucent(percent);
-	else if(vid_bpp==16)
-		Blitter16::SetForLucent(percent);
-	else Blitter15::SetForLucent(percent);
+	Blitter32::SetForLucent(percent);
 
 	return oldalpha;
 }
@@ -675,44 +459,16 @@ int SetLucent(int percent)
 
 void dd_RegisterBlitters()
 {
-	SetupTables();
+	Blitter32::SetForLucent(alpha );
 
-	if(vid_bpp == 32)
-		Blitter32::SetForLucent(alpha );
-	else if(vid_bpp==16)
-		Blitter16::SetForLucent(alpha );
-	else Blitter15::SetForLucent(alpha );
-
-	if(vid_bpp == 32) {
-		ImageFrom8bpp	= Image32bppFrom8bpp;
-		ImageFrom15bpp	= Image32bppFromWordType<15>;
-		ImageFrom16bpp	= Image32bppFromWordType<16>;
-		ImageFrom24bpp	= Image32bppFrom24bpp;
-		ImageFrom32bpp	= Image32bppFrom32bpp;
-	} else if(vid_bpp == 16) {
-		ImageFrom8bpp	= ImageWordTypeFrom8bpp<16>;
-		ImageFrom16bpp	= Image16bppFrom16bpp;
-		ImageFrom24bpp	= Image16bppFrom24bpp;
-		ImageFrom32bpp	= ImageWordTypeFrom32bpp<16>;
-	} else {
-		ImageFrom8bpp	= ImageWordTypeFrom8bpp<15>;
-		ImageFrom16bpp	= Image16bppFrom16bpp;
-		ImageFrom24bpp	= Image16bppFrom24bpp;
-		ImageFrom32bpp	= ImageWordTypeFrom32bpp<15>;
-	}
+	ImageFrom8bpp	= Image32bppFrom8bpp;
+	ImageFrom24bpp	= Image32bppFrom24bpp;
+	ImageFrom32bpp	= Image32bppFrom32bpp;
 	
 	RectVGrad = dd_RectVGrad;
 	RectHGrad = dd_RectHGrad;
 	RectRGrad = dd_RectRGrad;
 	Rect4Grad = dd_Rect4Grad;
-	HSVtoColor = dd_HSVtoColor;
-	GetHSV = dd_GetHSV;
-	HueReplace = dd_HueReplace;
-	ColorReplace = dd_ColorReplace;
-	#ifdef ENABLE_2XSAI
-	void Init_2xSAI();
-	Init_2xSAI();
-	#endif
 	transColor = MakeColor(255, 0, 255);
 	
 	//force the alpha-parameterized blitters to setup

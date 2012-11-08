@@ -8,10 +8,7 @@
 
 //------------------- script engine state variables ----------------
 int cur_stick = 0;
-VergeCallback renderfunc, timerfunc;
-
-int invc;
-bool die;
+VergeCallback renderfunc, timerfunc, showpagefunc, zonefunc, realRenderFunc;
 
 int event_tx;
 int event_ty;
@@ -25,12 +22,12 @@ int event_entity_hit;
 int __grue_actor_index;
 
 
-std::string event_str;
+StringRef event_str;
 
-std::string _trigger_onStep, _trigger_afterStep;
-std::string _trigger_beforeEntityScript, _trigger_afterEntityScript;
-std::string _trigger_onEntityCollide;
-std::string _trigger_afterPlayerMove;
+StringRef _trigger_onStep, _trigger_afterStep;
+StringRef _trigger_beforeEntityScript, _trigger_afterEntityScript;
+StringRef _trigger_onEntityCollide;
+StringRef _trigger_afterPlayerMove;
 
 int _input_killswitch = 0;
 
@@ -120,6 +117,7 @@ void ScriptEngine::WriteHvar(int category, int loc, int ofs, int value)
 				case 96: cameratracker = value; break;
 				case 101: playerstep = value >= 1 ? value : 1; break;
 				case 102: playerdiagonals = value ? 1 : 0; break;
+				case 130: cameraclamp = value; break;
 				default: vcerr("Unknown HVAR0 (%d) (set %d)", loc, value);
 			}
 			break;
@@ -130,9 +128,6 @@ void ScriptEngine::WriteHvar(int category, int loc, int ofs, int value)
 				case 43: if (ofs>=0 && ofs<entities) entity[ofs]->setxy(value, entity[ofs]->gety()); break;
 				case 44: if (ofs>=0 && ofs<entities) entity[ofs]->setxy(entity[ofs]->getx(), value); break;
 				case 45: if (ofs>=0 && ofs<entities) entity[ofs]->specframe = value; break;
-				#ifndef NOTIMELESS
-				case 52: skewlines[ofs] = value; break;
-				#endif
 				case 53: (*(byte *)ofs)=(byte) value; return;
 				case 54: (*(word *)ofs)=(word) value; return;
 				case 55: (*(quad *)ofs)=(quad) value; return;
@@ -155,8 +150,8 @@ void ScriptEngine::WriteHvar(int category, int loc, int ofs, int value)
 				case 78: if (ofs>=0 && ofs<entities) entity[ofs]->obstruction = (value!=0); return;
 				case 79: if (ofs>=0 && ofs<entities) entity[ofs]->obstructable = (value!=0); return;
 				case 94: if (current_map && ofs>=0 && ofs<current_map->numlayers) current_map->layers[ofs]->lucent = value; return;
-                case 97: if (current_map && ofs>=0 && ofs<current_map->numlayers) current_map->layers[ofs]->SetParallaxX(value / 65536.0); return;
-                case 98: if (current_map && ofs>=0 && ofs<current_map->numlayers) current_map->layers[ofs]->SetParallaxY(value / 65536.0); return;
+				case 97: if (current_map && ofs>=0 && ofs<current_map->numlayers) current_map->layers[ofs]->SetParallaxX(value / 65536.0); return;
+				case 98: if (current_map && ofs>=0 && ofs<current_map->numlayers) current_map->layers[ofs]->SetParallaxY(value / 65536.0); return;
 				case 105: if (ofs>=0 && ofs<sprites.size()) sprites[ofs].ent = value; return; // Overkill (2006-07-28)
 				case 106: if (ofs>=0 && ofs<sprites.size()) sprites[ofs].silhouette = value; return; // Overkill (2006-07-28)
 				case 107: if (ofs>=0 && ofs<sprites.size()) sprites[ofs].color = value; return; // Overkill (2006-07-28)
@@ -167,6 +162,8 @@ void ScriptEngine::WriteHvar(int category, int loc, int ofs, int value)
 				case 112: if (ofs>=0 && ofs<sprites.size()) sprites[ofs].timer = value; return; // Overkill (2006-07-28)
 				//case 113: ent.framew
 				//case 114: ent.frameh
+				case 128: if (ofs>=0 && ofs<entities) entity[ofs]->sortkey = value; return; //mbg 10-dec-2011
+				case 131: if (ofs>=0 && ofs<entities) entity[ofs]->flags = value; return; //mbg 14-jan-2012
 
 				default:
 					WriteHvar_derived(category,loc,ofs,value);
@@ -177,14 +174,14 @@ void ScriptEngine::WriteHvar(int category, int loc, int ofs, int value)
 	}
 }
 
-void ScriptEngine::WriteHvar_str(int category, int loc, int arg, const std::string& value)
+void ScriptEngine::WriteHvar_str(int category, int loc, int arg, CStringRef value)
 {
 	switch(category)
 	{
 	case strHSTR0:
 		switch (loc)
 		{
-			case 85: if (current_map) strcpy(current_map->renderstring, value.c_str());
+			case 85: if (current_map) strcpy(current_map->renderstring, to_upper_copy(value.str()).c_str());
 					 break;
 			case 95: clipboard_setText(value.c_str()); break;
 			case 104: if (current_map) strcpy(current_map->savevspname, value.c_str());
@@ -237,7 +234,7 @@ void ScriptEngine::WriteHvar_str(int category, int loc, int arg, const std::stri
 	}
 }
 
-void ScriptEngine::WriteHvar_str_derived(int category, int loc, int ofs, const std::string& value)
+void ScriptEngine::WriteHvar_str_derived(int category, int loc, int ofs, CStringRef value)
 {
 	switch(category)
 	{
@@ -251,19 +248,19 @@ void ScriptEngine::WriteHvar_str_derived(int category, int loc, int ofs, const s
 }
 
 
-std::string ScriptEngine::ReadHvar_str(int category, int loc, int arg)
+StringRef ScriptEngine::ReadHvar_str(int category, int loc, int arg)
 {
 	switch(category)
 	{
 		case strHSTR0:
 		switch (loc)
 		{
-			case 84: return current_map ? current_map->mapname : "";
-			case 85: return current_map ? current_map->renderstring : ""; break;
-			case 86: return current_map ? current_map->musicname : ""; break;
+			case 84: return current_map ? current_map->mapname : empty_string;
+			case 85: return current_map ? current_map->renderstring : empty_string; break;
+			case 86: return current_map ? current_map->musicname : empty_string; break;
 			case 95: return clipboard_getText(); break;
-            case 99: return current_map ? current_map->mapfname : ""; break;
-			case 104: return current_map ? current_map->savevspname : ""; break;
+            case 99: return current_map ? current_map->mapfname : empty_string; break;
+			case 104: return current_map ? current_map->savevspname : empty_string; break;
 			case 121: return _trigger_onStep;
 			case 122: return _trigger_afterStep;
 			case 123: return _trigger_beforeEntityScript;
@@ -279,23 +276,23 @@ std::string ScriptEngine::ReadHvar_str(int category, int loc, int arg)
 					if(arg >= 0 && arg < entities)
 						return entity[arg]->script;
 					else
-						return "";
+						return empty_string;
 				case 74:
 					if(arg >= 0 && arg < sprites.size())
 						return sprites[arg].thinkproc; // Overkill (2006-07-28): No more HSTR error 4 u.
 					else
-						return "";
+						return empty_string;
 					break;
 				case 88: // Overkill (2006-06-25): Now this actually has a use!
 						if (current_map)
 							if (arg >= 0 && arg < current_map->numzones)
 								return current_map->zones[arg]->name;
-						return "";
+						return empty_string;
 				case 89: // Overkill (2006-06-25): Now this actually has a use!
 						if (current_map)
 							if (arg >= 0 && arg < current_map->numzones)
 								return current_map->zones[arg]->script;
-						return "";
+						return empty_string;
 				case 100: //entity.chr
 					return ScriptEngine::Get_EntityChr(arg);
 				case 115:
@@ -307,11 +304,11 @@ std::string ScriptEngine::ReadHvar_str(int category, int loc, int arg)
 			break;
 		default:
 			vcerr("Fatal Error Code Boomerang"); 
-			return "";
+			return empty_string;
 	}
 }
 
-std::string ScriptEngine::ReadHvar_str_derived(int category, int loc, int ofs)
+StringRef ScriptEngine::ReadHvar_str_derived(int category, int loc, int ofs)
 {
 	switch(category)
 	{
@@ -322,7 +319,7 @@ std::string ScriptEngine::ReadHvar_str_derived(int category, int loc, int ofs)
 		default:
 			vcerr("Fatal Error Code Finagle"); break;
 	}
-	return "";
+	return empty_string;
 }
 
 int ScriptEngine::ReadHvar(int category, int loc, int ofs)
@@ -374,7 +371,7 @@ int ScriptEngine::ReadHvar(int category, int loc, int ofs)
 				case 41: return cameratracking;
 				case 42: return entities;
 				case 51: return transColor;
-				case 59: return gameWindow->getHandle();
+				case 59: return 0;
 				case 60: return lastkey;
 				case 80: return current_map ? current_map->mapwidth : 0;
 				case 81: return current_map ? current_map->mapheight : 0;
@@ -388,6 +385,7 @@ int ScriptEngine::ReadHvar(int category, int loc, int ofs)
 				case 103: return AppIsForeground;
 				case 116: return ReadHvar_derived(category,loc,ofs);
 				case 126: return event_entity_hit;
+				case 130: return cameraclamp;
 
 				default: vcerr("Unknown HVAR0 (%d)", loc);
 			}
@@ -405,9 +403,6 @@ int ScriptEngine::ReadHvar(int category, int loc, int ofs)
 				case 48: if (ofs>=0 && ofs<entities) return entity[ofs]->chr->hy; return 0;
 				case 49: if (ofs>=0 && ofs<entities) return entity[ofs]->chr->hw; return 0;
 				case 50: if (ofs>=0 && ofs<entities) return entity[ofs]->chr->hh; return 0;
-				#ifndef NOTIMELESS
-				case 52: return skewlines[ofs];
-				#endif
 				case 53: return (int) (*(byte *)ofs);
 				case 54: return (int) (*(word *)ofs);
 				case 55: return (int) (*(quad *)ofs);
@@ -432,8 +427,8 @@ int ScriptEngine::ReadHvar(int category, int loc, int ofs)
 				case 78: if (ofs>=0 && ofs<entities) return entity[ofs]->obstruction; return 0;
 				case 79: if (ofs>=0 && ofs<entities) return entity[ofs]->obstructable; return 0;
 				case 94: if (current_map && ofs>=0 && ofs<current_map->numlayers) return current_map->layers[ofs]->lucent;
-                case 97: if (current_map && ofs>=0 && ofs<current_map->numlayers) return (int)(current_map->layers[ofs]->parallax_x * 65536);
-                case 98: if (current_map && ofs>=0 && ofs<current_map->numlayers) return (int)(current_map->layers[ofs]->parallax_y * 65536);
+				case 97: if (current_map && ofs>=0 && ofs<current_map->numlayers) return (int)(current_map->layers[ofs]->parallax_x * 65536);
+				case 98: if (current_map && ofs>=0 && ofs<current_map->numlayers) return (int)(current_map->layers[ofs]->parallax_y * 65536);
 				case 105: if (ofs>=0 && ofs<sprites.size()) return sprites[ofs].ent; return 0; // Overkill (2006-07-28)
 				case 106: if (ofs>=0 && ofs<sprites.size()) return sprites[ofs].silhouette; return 0; // Overkill (2006-07-28)
 				case 107: if (ofs>=0 && ofs<sprites.size()) return sprites[ofs].color; return 0; // Overkill (2006-07-28)
@@ -444,6 +439,12 @@ int ScriptEngine::ReadHvar(int category, int loc, int ofs)
 				case 112: if (ofs>=0 && ofs<sprites.size()) return sprites[ofs].timer; return 0; // Overkill (2006-07-28)
 				case 113: return ScriptEngine::Get_EntityFrameW(ofs); // Overkill (2006-07-28)
 				case 114: return ScriptEngine::Get_EntityFrameH(ofs); // Overkill (2006-07-28)
+				case 128: if (ofs>=0 && ofs<entities) return entity[ofs]->sortkey; //mbg 10-dec-2011
+				case 129: 
+					if (ofs >= 0 && ofs < current_map->numzones)
+						return current_map->zones[ofs]->flags;
+					else return 0;
+				case 131: if (ofs>=0 && ofs<entities) return entity[ofs]->flags; //mbg 14-jan-2012
 				default:
 					return ReadHvar_derived(category,loc,ofs);
 			
@@ -498,11 +499,11 @@ void ScriptEngine::ArgumentPassAddInt(int value)
 	argument_t arg;
 	arg.type_id = t_INT;
 	arg.int_value = value;
-	arg.string_value = "";
+	arg.string_value = empty_string;
 	argument_pass_list.push_back(arg);
 }
 
-void ScriptEngine::ArgumentPassAddString(std::string value)
+void ScriptEngine::ArgumentPassAddString(StringRef value)
 {
 	argument_t arg;
 	arg.type_id = t_STRING;
@@ -516,7 +517,7 @@ void ScriptEngine::ArgumentPassClear()
 	argument_pass_list.clear();
 }
 
-void EnforceNoDirectories(std::string s)
+void EnforceNoDirectories(StringRef s)
 {
 	int	n = 0;
 	if (!s.length()) return;
@@ -536,6 +537,13 @@ void EnforceNoDirectories(std::string s)
     }
 }
 
+
+void HookShowPage()
+{
+	// To prevent hooktimer from happening before the script engine is loaded.
+	if(!se) return;
+	se->ExecuteCallback(showpagefunc, true);
+}
 
 void HookTimer()
 {
@@ -587,7 +595,7 @@ int HandleForImage(image *img)
 
 //-------------
 
-void ScriptEngine::Exit(const std::string& message) { err("%s",message.c_str()); }
+void ScriptEngine::Exit(CStringRef message) { err("%s",message.c_str()); }
 
 void ScriptEngine::SetButtonJB(int b, int jb) {
 	switch (b)
@@ -601,12 +609,12 @@ void ScriptEngine::SetButtonJB(int b, int jb) {
 
 // Overkill (2007-08-25): HookButton is supposed to start at 1, not 0.
 // It's meant to be consistent with Unpress().
-void ScriptEngine::HookButton(int b, const std::string& s) {
+void ScriptEngine::HookButton(int b, CStringRef s) {
 	if (b<1 || b>4) return;
 	bindbutton[b-1] = s;
 }
 
-void ScriptEngine::HookKey(int k, const std::string& s) {
+void ScriptEngine::HookKey(int k, CStringRef s) {
 	if (k<0 || k>127) return;
 	bindarray[k] = s;
 }
@@ -622,10 +630,25 @@ void ScriptEngine::HookRetrace(VergeCallback cb) {
 	renderfunc = cb;
 }
 
-void ScriptEngine::Log(const std::string& s) { log(s.c_str()); }
-void ScriptEngine::MessageBox(const std::string& msg) { showMessageBox(msg); }
+void ScriptEngine::HookRender(VergeCallback cb) {
+	se->ReleaseCallback(realRenderFunc);
+	realRenderFunc = cb;
+}
+
+void ScriptEngine::HookZone(VergeCallback cb) {
+	se->ReleaseCallback(zonefunc);
+	zonefunc = cb;
+}
+
+void ScriptEngine::HookShowPage(VergeCallback cb) {
+	se->ReleaseCallback(showpagefunc);
+	showpagefunc = cb;
+}
+
+void ScriptEngine::Log(CStringRef s) { log(s.c_str()); }
+void ScriptEngine::MessageBox(CStringRef msg) { showMessageBox(msg); }
 int ScriptEngine::Random(int min, int max) { return rnd(min, max); }
-void ScriptEngine::SetAppName(const std::string& s) { setWindowTitle(s.c_str()); }
+void ScriptEngine::SetAppName(CStringRef s) { setWindowTitle(s.c_str()); }
 
 void ScriptEngine::SetButtonKey(int b, int k) {
 	switch (b)
@@ -678,12 +701,85 @@ void ScriptEngine::Unpress(int n) {
 void ScriptEngine::UpdateControls() { ::UpdateControls(); }
 
 
+int ScriptEngine::Asc(CStringRef s) { if(s.length() == 0) return 0; else return (int)s[0]; }
+StringRef ScriptEngine::Chr(int c) { 
+	char buf[2] = {(char)c,0};
+	return buf;
+}
+StringRef ScriptEngine::GetToken(CStringRef s, CStringRef d, int i) {
+	int n = 0;
+	int tokenindex = 0;
+	while (n < s.length())
+	{
+		while (n < s.length() && isdelim(s[n], d))
+			n++;
+		int len = 0, start = n;
+		while (n < s.length() && !isdelim(s[n], d))
+		{
+			len++;
+			n++;
+		}
+		if (i == tokenindex)
+			return s.substr(start,len);
+		tokenindex++;
+	}
+
+	return empty_string;
+}
+StringRef ScriptEngine::Left(CStringRef str, int len) { return vc_strleft(str,len); }
+int ScriptEngine::Len(CStringRef s) { return s.length(); }
+StringRef ScriptEngine::Mid(CStringRef str, int pos, int len) { return vc_strmid(str,pos,len); }
+StringRef ScriptEngine::Right(CStringRef str, int len) { return vc_strright(str,len); }
+StringRef ScriptEngine::Str(int d) { return va("%d", d); }
+int ScriptEngine::Strcmp(CStringRef s1, CStringRef s2) { return strcmp(s1.c_str(), s2.c_str()); }
+StringRef ScriptEngine::Strdup(CStringRef s, int times) {
+	std::string ret;
+	int slen = s.length();
+	ret.reserve(s.size()*times);
+	for (int i=0; i<times; i++)
+		memcpy(&ret[slen*i],&s[0],slen);
+	return ret;
+}
+int ScriptEngine::TokenCount(CStringRef s, CStringRef d) {
+	int n = 0;
+	int tokenindex = 0;
+	while (n < s.length())
+	{
+		bool tp = false;
+
+		while (n < s.length() && isdelim(s[n], d))
+			n++;
+		while (n < s.length() && !isdelim(s[n], d))
+		{
+			tp = true;
+			n++;
+		}
+		if (tp) tokenindex++;
+	}
+	return tokenindex;
+}
+StringRef ScriptEngine::ToLower(CStringRef str) { 
+	std::string temp = str.str();
+	to_lower(temp); 
+	return temp;
+}
+
+StringRef ScriptEngine::ToUpper(CStringRef str)
+{
+	StringRef temp = str.str();
+	to_upper(temp.dangerous_peek()); 
+	return temp;
+}
+
+int ScriptEngine::Val(CStringRef s) { return atoi(s.c_str()); }
+
+
 //VI.d. Map Functions
 int ScriptEngine::GetObs(int x, int y) { if(!current_map) return 0; else return current_map->obstruct(x, y); }
 int ScriptEngine::GetObsPixel(int x, int y) { if(!current_map) return 0; else return current_map->obstructpixel(x, y); }
 int ScriptEngine::GetTile(int x, int y, int i) { if(!current_map) return 0; if(i>=current_map->numlayers) return 0; return current_map->layers[i]->GetTile(x,y); }
 int ScriptEngine::GetZone(int x, int y) { if(!current_map) return 0; else return current_map->zone(x,y); }
-void ScriptEngine::Map(const std::string& map) {
+void ScriptEngine::Map(CStringRef map) {
 	strcpy(mapname, map.c_str());
 	die = 1;
 	done = 1;
@@ -702,14 +798,25 @@ void ScriptEngine::SetTile(int x, int y, int i, int z) { if(!current_map) return
 void ScriptEngine::SetZone(int x, int y, int z) { if(!current_map) return; else if(z>=current_map->numzones) return; else current_map->SetZone(x,y,z); }
 
 //VI.e. Entity Functions
-void ScriptEngine::ChangeCHR(int e, const std::string& c) {
+void ScriptEngine::ChangeCHR(int e, CStringRef c) {
 	if (e<0 || e >= entities) return;
 	else entity[e]->set_chr(c);
 }
-void ScriptEngine::EntityMove(int e, const std::string& s) {
+void ScriptEngine::EntityMove(int e, CStringRef s) {
 	if (e<0 || e >= entities) return;
-	else entity[e]->SetMoveScript(s.c_str());
+	else {
+		//mbg 04-dec-2011 - think immediately after setting the movescript so that it takes effect on this frame.
+		//this scares me a bit, but i did it for the overworld arrows (which we'll get rid of eventually)
+		entity[e]->SetMoveScript(s.c_str());
+		entity[e]->think();
+	}
 }
+void ScriptEngine::EntityWarp(int e, int x, int y)
+{
+	if (e<0 || e >= entities) return;
+	entity[e]->warp(x,y);
+}
+
 void ScriptEngine::EntitySetWanderDelay(int e, int d) {
 	if (e<0 || e >= entities) return;
 	else entity[e]->SetWanderDelay(d);
@@ -722,7 +829,7 @@ void ScriptEngine::EntitySetWanderZone(int e) {
 	if (e<0 || e >= entities) return;
 	else entity[e]->SetWanderZone();
 }
-int ScriptEngine::EntitySpawn(int x, int y, const std::string& s) { return AllocateEntity(x*16,y*16,s.c_str()); }
+int ScriptEngine::EntitySpawn(int x, int y, CStringRef s) { return AllocateEntity(x*16,y*16,s.c_str()); }
 void ScriptEngine::EntityStalk(int stalker, int stalkee) {
 	if (stalker<0 || stalker>=entities)
 		return;
@@ -737,11 +844,11 @@ void ScriptEngine::EntityStop(int e) {
 	if (e<0 || e >= entities) return;
 	else entity[e]->SetMotionless();
 }
-void ScriptEngine::HookEntityRender(int i, const std::string& s) {
+void ScriptEngine::HookEntityRender(int i, CStringRef s) {
 	if (i<0 || i>=entities) err("vc_HookEntityRender() - no such entity %d", i);
 	entity[i]->hookrender = s;
 }
-void ScriptEngine::PlayerMove(const std::string& s) {
+void ScriptEngine::PlayerMove(CStringRef s) {
 	if (!myself) return;
 	myself->SetMoveScript( s.c_str() );
 
@@ -820,7 +927,7 @@ void ScriptEngine::BlitLucent(int x, int y, int lucent, int src, int dst) {
 void ScriptEngine::BlitTile(int x, int y, int t, int dst) {
 	image *d = ImageForHandle(dst);
 	if (current_map) {
-		current_map->tileset->UpdateAnimations();
+		//current_map->tileset->UpdateAnimations();
 		current_map->tileset->Blit(x, y, t, d);
 	}
 }
@@ -945,9 +1052,9 @@ void ScriptEngine::Line(int x1, int y1, int x2, int y2, int c, int dst) {
 	image *d = ImageForHandle(dst);
 	::Line(x1, y1, x2, y2, c, d);
 }
-int ScriptEngine::LoadImage(const std::string& fn) { return HandleForImage(::xLoadImage(fn.c_str())); }
-int ScriptEngine::LoadImage0(const std::string& fn) { return HandleForImage(::xLoadImage0(fn.c_str())); }
-int ScriptEngine::LoadImage8(const std::string& fn) { return HandleForImage(::xLoadImage8(fn.c_str())); }
+int ScriptEngine::LoadImage(CStringRef fn) { return HandleForImage(::xLoadImage(fn.c_str())); }
+int ScriptEngine::LoadImage0(CStringRef fn) { return HandleForImage(::xLoadImage0(fn.c_str())); }
+int ScriptEngine::LoadImage8(CStringRef fn) { return HandleForImage(::xLoadImage8(fn.c_str())); }
 int ScriptEngine::MakeColor(int r, int g, int b) { return ::MakeColor(r,g,b); }
 int ScriptEngine::MixColor(int c1, int c2, int p) {
 	if (p>255) p=255;
@@ -1015,15 +1122,6 @@ void ScriptEngine::SubtractiveBlit(int x, int y, int src, int dst) {
 	image *s = ImageForHandle(src);
 	image *d = ImageForHandle(dst);
 	::SubtractiveBlit(x, y, s, d);
-}
-void ScriptEngine::SuperSecretThingy(int xskew, int yofs, int y, int src, int dst) {
-	image *s = ImageForHandle(src);
-	image *d = ImageForHandle(dst);
-
-	if (s->width != 256 || s->height != 256)
-		err("SuperSecretThingy() - Source image MUST be 256x256!!");
-
-	::Timeless(xskew, yofs, y, s, d);
 }
 void ScriptEngine::TAdditiveBlit(int x, int y, int src ,int dst) {
 	image *s = ImageForHandle(src);
@@ -1099,9 +1197,9 @@ void ScriptEngine::FreeSong(int handle) { ::FreeSong(handle); }
 void ScriptEngine::FreeSound(int slot) { ::FreeSample((void*)slot); }
 int ScriptEngine::GetSongPos(int handle) { return ::GetSongPos(handle); }
 int ScriptEngine::GetSongVolume(int handle) { return ::GetSongVol(handle); }
-int ScriptEngine::LoadSong(const std::string& fn) { return ::LoadSong(fn.c_str()); }
-int ScriptEngine::LoadSound(const std::string& fn) { return (int)LoadSample(fn.c_str()); }
-void ScriptEngine::PlayMusic(const std::string& fn) { ::PlayMusic(fn.c_str()); }
+int ScriptEngine::LoadSong(CStringRef fn) { return ::LoadSong(fn.c_str()); }
+int ScriptEngine::LoadSound(CStringRef fn) { return (int)LoadSample(fn.c_str()); }
+void ScriptEngine::PlayMusic(CStringRef fn) { ::PlayMusic(fn.c_str()); }
 void ScriptEngine::PlaySong(int handle) { ::PlaySong(handle); }
 int ScriptEngine::PlaySound(int slot, int volume) { return ::PlaySample((void*) slot, volume * 255 / 100); }
 void ScriptEngine::SetMusicVolume(int v) { ::SetMusicVolume(v); }
@@ -1125,12 +1223,12 @@ void ScriptEngine::FreeFont(int f) {
 	Font *font = (Font*) f;
 	if (font) delete font;
 }
-int ScriptEngine::LoadFont(const std::string& filename, int width, int height) {
+int ScriptEngine::LoadFont(CStringRef filename, int width, int height) {
 	return (int) new Font(filename.c_str(), width, height);
 }
-int ScriptEngine::LoadFontEx(const std::string& filename) { return (int) new Font(filename.c_str()); }
+int ScriptEngine::LoadFontEx(CStringRef filename) { return (int) new Font(filename.c_str()); }
 //helper:
-static void print(int x, int y, image *dest, Font *font, const std::string& text, int which) {
+static void print(int x, int y, image *dest, Font *font, CStringRef text, int which) {
 	switch(which) {
 		case 0:	
 			if (font == 0) {
@@ -1148,10 +1246,10 @@ static void print(int x, int y, image *dest, Font *font, const std::string& text
 			break;
 	}
 }
-void ScriptEngine::PrintCenter(int x, int y, int d, int fh, const std::string& text) { print(x,y,ImageForHandle(d),(Font*)fh,text,1); }
-void ScriptEngine::PrintRight(int x, int y, int d, int fh, const std::string& text) { print(x,y,ImageForHandle(d),(Font*)fh,text,2); }
-void ScriptEngine::PrintString(int x, int y, int d, int fh, const std::string& text) { print(x,y,ImageForHandle(d),(Font*)fh,text,0); }
-int ScriptEngine::TextWidth(int fh, const std::string& text) {
+void ScriptEngine::PrintCenter(int x, int y, int d, int fh, CStringRef text) { print(x,y,ImageForHandle(d),(Font*)fh,text,1); }
+void ScriptEngine::PrintRight(int x, int y, int d, int fh, CStringRef text) { print(x,y,ImageForHandle(d),(Font*)fh,text,2); }
+void ScriptEngine::PrintString(int x, int y, int d, int fh, CStringRef text) { print(x,y,ImageForHandle(d),(Font*)fh,text,0); }
+int ScriptEngine::TextWidth(int fh, CStringRef text) {
 	Font *font = (Font*)fh;
 	if (font == 0) return ::pixels(text.c_str());
 	else return font->Pixels(text.c_str());
@@ -1249,8 +1347,8 @@ void ScriptEngine::FileClose(int handle) {
 	switch (vcfiles[handle].mode)
 	{
 		case VC_READ:
-			vclose(vcfiles[handle].vfptr);
-			vcfiles[handle].vfptr = 0;
+			fclose(vcfiles[handle].fptr);
+			vcfiles[handle].fptr = 0;
 			vcfiles[handle].mode = 0;
 			vcfiles[handle].active = false;
 			break;
@@ -1272,7 +1370,7 @@ int ScriptEngine::FileCurrentPos(int handle) {
 	switch (vcfiles[handle].mode)
 	{
 		case VC_READ:
-			return vtell(vcfiles[handle].vfptr);
+			return vtell(vcfiles[handle].fptr);
 			break;
 		case VC_WRITE:
 			return ftell(vcfiles[handle].fptr);
@@ -1289,10 +1387,10 @@ bool ScriptEngine::FileEOF(int handle) {
 	if (!vcfiles[handle].active) se->Error("FileEOF() - given file handle is not open.");
 	if (vcfiles[handle].mode != VC_READ) se->Error("FileEOF() - given file handle is a write-mode file.");
 
-	return veof(vcfiles[handle].vfptr)!=0;
+	return veof(vcfiles[handle].fptr)!=0;
 }
 
-int ScriptEngine::FileOpen(const std::string& fname, int filemode) {
+int ScriptEngine::FileOpen(CStringRef fname, int filemode) {
 	int index;
 
 	for (index=1; index<VCFILES; index++)
@@ -1314,8 +1412,8 @@ int ScriptEngine::FileOpen(const std::string& fname, int filemode) {
 	switch (filemode)
 	{
 		case VC_READ:
-			vcfiles[index].vfptr = vopen(cpfname);
-			if (!vcfiles[index].vfptr)
+			vcfiles[index].fptr = fopen(cpfname,"rb");
+			if (!vcfiles[index].fptr)
 			{
 				//log("opening of %s for reading failed.", cpfname);
 				return 0;
@@ -1349,11 +1447,11 @@ int ScriptEngine::FileReadByte(int handle) {
 		se->Error("FileReadByte() - given file handle is a write-mode file.");
 
 	int ret=0;
-	vread(&ret, 1, vcfiles[handle].vfptr);
+	vread(&ret, 1, vcfiles[handle].fptr);
 	return ret;
 }
 
-std::string ScriptEngine::FileReadln(int handle) {
+StringRef ScriptEngine::FileReadln(int handle) {
 	if (!handle) se->Error("FileReadln() - File is not open.");
 	if (handle > VCFILES) se->Error("FileReadln() - given file handle is not a valid file handle.");
 	if (!vcfiles[handle].active) se->Error("FileReadln() - given file handle is not open.");
@@ -1364,7 +1462,7 @@ std::string ScriptEngine::FileReadln(int handle) {
 	std::string result = ""; // all the text so far
 	int eol = 0;        // flag for when we've hit the end of a line
 	do {
-		vgets(buffer, 255, vcfiles[handle].vfptr); // read it
+		vgets(buffer, 255, vcfiles[handle].fptr); // read it
 
 		if(buffer[0] == '\0')  {
 			eol = 1; // we didn't read anything, this is eof
@@ -1386,10 +1484,10 @@ int ScriptEngine::FileReadQuad(int handle) {
 		se->Error("FileReadQuad() - given file handle is a write-mode file.");
 
 	int ret=0;
-	vread(&ret, 4, vcfiles[handle].vfptr);
+	vread(&ret, 4, vcfiles[handle].fptr);
 	return ret;
 }
-std::string ScriptEngine::FileReadString(int handle){
+StringRef ScriptEngine::FileReadString(int handle){
 	int len = 0;
 	char *buffer;
 
@@ -1398,15 +1496,15 @@ std::string ScriptEngine::FileReadString(int handle){
 	if (vcfiles[handle].mode != VC_READ)
 		se->Error("FileReadString() - given file handle is a write-mode file.");
 
-	vread(&len, 2, vcfiles[handle].vfptr);
+	vread(&len, 2, vcfiles[handle].fptr);
 	buffer = new char[len+1];
-	vread(buffer, len, vcfiles[handle].vfptr);
+	vread(buffer, len, vcfiles[handle].fptr);
 	buffer[len]=0;
-	std::string ret = buffer;
+	StringRef ret = buffer;
 	delete[] buffer;
 	return ret;
 }
-std::string ScriptEngine::FileReadToken(int handle) {
+StringRef ScriptEngine::FileReadToken(int handle) {
 	if (!handle) se->Error("FileReadToken() - File is not open.");
 	if (handle > VCFILES) se->Error("FileReadToken() - given file handle is not a valid file handle.");
 	if (!vcfiles[handle].active) se->Error("FileReadToken() - given file handle is not open.");
@@ -1414,7 +1512,7 @@ std::string ScriptEngine::FileReadToken(int handle) {
 
 	char buffer[255];
 	buffer[0] = '\0'; // ensure sending back "" on error
-	vscanf(vcfiles[handle].vfptr, "%s", buffer);
+	fscanf(vcfiles[handle].fptr, "%s", buffer);
 	strclean(buffer);
 	return buffer;
 }
@@ -1425,7 +1523,7 @@ int ScriptEngine::FileReadWord(int handle) {
 		se->Error("FileReadWord() - given file handle is a write-mode file.");
 
 	int ret = 0;
-	vread(&ret, 2, vcfiles[handle].vfptr);
+	vread(&ret, 2, vcfiles[handle].fptr);
 	return ret;
 }
 void ScriptEngine::FileSeekLine(int handle, int line) {
@@ -1434,10 +1532,10 @@ void ScriptEngine::FileSeekLine(int handle, int line) {
 	if (!vcfiles[handle].active) se->Error("FileSeekLine() - given file handle is not open.");
 	if (vcfiles[handle].mode != VC_READ) se->Error("FileSeekLine() - given file handle is a write-mode file.");
 
-	vseek(vcfiles[handle].vfptr, 0, SEEK_SET);
+	vseek(vcfiles[handle].fptr, 0, SEEK_SET);
 	char temp[256+1];
 	while (line-->0)
-        vgets(temp, 256, vcfiles[handle].vfptr);
+        vgets(temp, 256, vcfiles[handle].fptr);
 }
 void ScriptEngine::FileSeekPos(int handle, int offset, int mode) {
 	if (!handle || handle > VCFILES || !vcfiles[handle].active)
@@ -1446,7 +1544,7 @@ void ScriptEngine::FileSeekPos(int handle, int offset, int mode) {
 	switch (vcfiles[handle].mode)
 	{
 		case VC_READ:
-			vseek(vcfiles[handle].vfptr, offset, mode);
+			vseek(vcfiles[handle].fptr, offset, mode);
 			break;
 		case VC_WRITE:
 			fseek(vcfiles[handle].fptr, offset, mode);
@@ -1455,7 +1553,7 @@ void ScriptEngine::FileSeekPos(int handle, int offset, int mode) {
 			se->Error("SFileeekPos() - File mode not valid! That's bad!");
 	}
 }
-void ScriptEngine::FileWrite(int handle, const std::string& s) {
+void ScriptEngine::FileWrite(int handle, CStringRef s) {
 	if (!handle) se->Error("FileWrite() - Yo, you be writin' to a file that aint open, foo.");
 	if (handle > VCFILES) se->Error("FileWrite() - given file handle is not a valid file handle.");
 	if (!vcfiles[handle].active) se->Error("FileWrite() - given file handle is not open.");
@@ -1468,10 +1566,9 @@ void ScriptEngine::FileWriteByte(int handle, int var) {
 		se->Error("FileWriteByte() - file handle is either invalid or file is not open.");
 	if (vcfiles[handle].mode != VC_WRITE)
 		se->Error("FileWriteByte() - given file handle is a read-mode file.");
-	flip(&var, sizeof(var)); // ensure little-endian writing
 	fwrite(&var, 1, 1, vcfiles[handle].fptr);
 }
-void ScriptEngine::FileWriteln(int handle, const std::string& s) {
+void ScriptEngine::FileWriteln(int handle, CStringRef s) {
 	if (!handle) se->Error("FileWriteln() - Yo, you be writin' to a file that aint open, foo.");
 	if (handle > VCFILES) se->Error("FileWriteln() - given file handle is not a valid file handle.");
 	if (!vcfiles[handle].active) se->Error("FileWriteln() - given file handle is not open.");
@@ -1485,10 +1582,9 @@ void ScriptEngine::FileWriteQuad(int handle, int var) {
 		se->Error("FileWriteQuad() - file handle is either invalid or file is not open.");
 	if (vcfiles[handle].mode != VC_WRITE)
 		se->Error("FileWriteQuad() - given file handle is a read-mode file.");
-	flip(&var, sizeof(var)); // ensure little-endian writing
 	fwrite(&var, 1, 4, vcfiles[handle].fptr);
 }
-void ScriptEngine::FileWriteString(int handle, const std::string& s) {
+void ScriptEngine::FileWriteString(int handle, CStringRef s) {
 	if (!handle || handle > VCFILES || !vcfiles[handle].active)
 		se->Error("FileWriteString() - file handle is either invalid or file is not open.");
 	if (vcfiles[handle].mode != VC_WRITE)
@@ -1497,7 +1593,6 @@ void ScriptEngine::FileWriteString(int handle, const std::string& s) {
 	int l = s.length();
 	int writeLength = l;
 
-	flip(&writeLength, sizeof(writeLength)); // ensure little-endian writing
 	fwrite(&writeLength, 1, 2, vcfiles[handle].fptr);
 	fwrite(s.c_str(), 1, l, vcfiles[handle].fptr);
 }
@@ -1506,10 +1601,9 @@ void ScriptEngine::FileWriteWord(int handle, int var) {
 		se->Error("vc_FileWriteWord() - file handle is either invalid or file is not open.");
 	if (vcfiles[handle].mode != VC_WRITE)
 		se->Error("vc_FileWriteWord() - given file handle is a read-mode file.");
-	flip(&var, sizeof(var)); // ensure little-endian writing
 	fwrite(&var, 1, 2, vcfiles[handle].fptr);
 }
-std::string ScriptEngine::ListFilePattern(const std::string& pattern) {
+StringRef ScriptEngine::ListFilePattern(CStringRef pattern) {
 	std::vector<std::string> result;
 	listFilePattern(result, pattern);
 	std::string ret;
@@ -1560,303 +1654,13 @@ void ScriptEngine::FileWriteVSP(int handle) {
 }
 
 //VI.l. Window Managment Functions
-//helper"
-static void checkhandle(char *func, int handle, AuxWindow *auxwin) {
-	if(!handle)
-		se->Error("%s() - cannot access a null window handle!",func);
-	if(!auxwin)
-		se->Error("%s() - invalid window handle!",func);
-}
-void ScriptEngine::WindowClose(int win) {
-	if(win == 1) se->Error("WindowClose() - cannot close gameWindow");
-	AuxWindow *auxwin = vid_findAuxWindow(win);
-	checkhandle("WindowClose",win,auxwin);
-	auxwin->dispose();
-}
-int ScriptEngine::WindowCreate(int x, int y, int w, int h, const std::string& s) {
-	AuxWindow *auxwin = vid_createAuxWindow();
-	auxwin->setTitle(s.c_str());
-	auxwin->setPosition(x,y);
-	auxwin->setResolution(w,h);
-	auxwin->setSize(w,h);
-	auxwin->setVisibility(true);
-	return auxwin->getHandle();
-}
-int ScriptEngine::WindowGetHeight(int win) {
-	AuxWindow *auxwin = vid_findAuxWindow(win);
-	checkhandle("WindowGetHeight",win,auxwin);
-	return auxwin->getHeight();
-}
-int ScriptEngine::WindowGetImage(int win) {
-	AuxWindow *auxwin = vid_findAuxWindow(win);
-	checkhandle("WindowGetImage",win,auxwin);
-	return auxwin->getImageHandle();
-}
-int ScriptEngine::WindowGetWidth(int win) {
-	AuxWindow *auxwin = vid_findAuxWindow(win);
-	checkhandle("WindowGetWidth",win,auxwin);
-	return auxwin->getWidth();
-}
-int ScriptEngine::WindowGetXRes(int win) {
-	AuxWindow *auxwin = vid_findAuxWindow(win);
-	checkhandle("WindowGetXRes",win,auxwin);
-	return auxwin->getXres();
-}
-int ScriptEngine::WindowGetYRes(int win) {
-	AuxWindow *auxwin = vid_findAuxWindow(win);
-	checkhandle("WindowGetYRes",win,auxwin);
-	return auxwin->getYres();
-}
-void ScriptEngine::WindowHide(int win) {
-	AuxWindow *auxwin = vid_findAuxWindow(win);
-	checkhandle("WindowHide",win,auxwin);
-	auxwin->setVisibility(false);
-}
-void ScriptEngine::WindowPositionCommand(int win, int command, int arg1, int arg2) {
-	AuxWindow *auxwin = vid_findAuxWindow(win);
-	checkhandle("WindowPositionCommand",win,auxwin);
-	auxwin->positionCommand(command,arg1,arg2);
-}
-void ScriptEngine::WindowSetPosition(int win, int x, int y) {
-	AuxWindow *auxwin = vid_findAuxWindow(win);
-	checkhandle("WindowSetPosition",win,auxwin);
-	auxwin->setPosition(x,y);
-}
-void ScriptEngine::WindowSetResolution(int win, int w, int h) {
-	AuxWindow *auxwin = vid_findAuxWindow(win);
-	checkhandle("WindowSetResolution",win,auxwin);
-	auxwin->setResolution(w,h);
-	auxwin->setSize(w,h);
-}
-void ScriptEngine::WindowSetSize(int win, int w, int h) {
-	AuxWindow *auxwin = vid_findAuxWindow(win);
-	checkhandle("WindowSetSize",win,auxwin);
-	auxwin->setSize(w,h);
-}
-void ScriptEngine::WindowSetTitle(int win, const std::string& s) {
-	AuxWindow *auxwin = vid_findAuxWindow(win);
-	checkhandle("WindowSetTitle",win,auxwin);
-	auxwin->setTitle(s.c_str());
-}
-void ScriptEngine::WindowShow(int win) {
-	AuxWindow *auxwin = vid_findAuxWindow(win);
-	checkhandle("WindowShow",win,auxwin);
-	auxwin->setVisibility(true);
-}
-//VI.m. Movie Playback Functions
-void ScriptEngine::AbortMovie() { win_movie_abortSimple(); }
-void ScriptEngine::MovieClose(int m) { win_movie_close(m); }
-int ScriptEngine::MovieGetCurrFrame(int m) { return win_movie_getCurrFrame(m); }
-int ScriptEngine::MovieGetFramerate(int m) { return win_movie_getFramerate(m); }
-int ScriptEngine::MovieGetImage(int m) { return win_movie_getImage(m); }
-int ScriptEngine::MovieLoad(const std::string& s, bool mute) { return win_movie_load(s.c_str(), mute); }
-void ScriptEngine::MovieNextFrame(int m) { win_movie_nextFrame(m); }
-void ScriptEngine::MoviePlay(int m, bool loop) { win_movie_play(m, loop?1:0); }
-void ScriptEngine::MovieRender(int m) { win_movie_render(m); }
-void ScriptEngine::MovieSetFrame(int m, int f) { win_movie_setFrame(m,f); }
-int ScriptEngine::PlayMovie(const std::string& s){ return win_movie_playSimple(s.c_str()); }
-
-//VI.n. Netcode Functions
-ServerSocket *vcserver = 0;
-
-// Overkill (2008-04-17): Socket port can be switched to something besides 45150.
-int vcsockport = 45150;
-void ScriptEngine::SetConnectionPort(int port)
-{
-	vcsockport = port;
-}
-
-// Overkill (2008-04-17): Socket port can be switched to something besides 45150.
-int ScriptEngine::Connect(const std::string& ip) {
-	Socket *s;
-	try
-	{
-		s = new Socket(ip.c_str(), vcsockport);
-	}
-	catch (NetworkException ne) {
-		return 0;
-	}
-	return (int) s;
-}
-
-// Overkill (2008-04-17): Socket port can be switched to something besides 45150.
-// Caveat: The server currently may not switch listen ports once instantiated.
-int ScriptEngine::GetConnection() {
-	try {
-		if (!vcserver)
-			vcserver = new ServerSocket(vcsockport);
-		Socket *s = vcserver->accept();
-		return (int) s;
-	}
-	catch(NetworkException e) {
-		return 0;
-    }
-}
-
-int ScriptEngine::GetUrlImage(const std::string& url) { return ::getUrlImage(url); }
-std::string ScriptEngine::GetUrlText(const std::string& url) { return ::getUrlText(url); }
-void ScriptEngine::SocketClose(int sh) { delete ((Socket *)sh); }
-bool ScriptEngine::SocketConnected(int sh) { return ((Socket*)sh)->connected()!=0; }
-std::string ScriptEngine::SocketGetFile(int sh, const std::string& override) {
-	static char stbuf[4096];
-	Socket *s = (Socket *) sh;
-	std::string retstr;
-
-	EnforceNoDirectories(override);
-
-	int stlen = 0, ret;
-	ret = s->blockread(2, &stlen);
-	if (!ret)
-		return std::string();
-
-	ret = s->blockread(stlen, stbuf);
-	stbuf[stlen] = 0;
-
-	std::string fn = stbuf;
-	EnforceNoDirectories(fn);
-
-	int fl;
-	s->blockread(4, &fl);
-
-	char *buf = new char[fl];
-	s->blockread(fl, buf);
-
-	FILE *f;
-	if (override.length())
-	{
-		retstr = override;
-		f = fopen(override.c_str(), "wb");
-	}
-	else
-	{
-		retstr = fn;
-		f = fopen(fn.c_str(), "wb");
-	}
-	if (!f)
-		err("SocketGetFile: couldn't open file for writing!");
-	fwrite(buf, 1, fl, f);
-	fclose(f);
-	delete[] buf;
-
-	return retstr;
-}
-int ScriptEngine::SocketGetInt(int sh) {
-	Socket *s = (Socket *) sh;
-	int ret;
-	char t;
-	ret = s->blockread(1, &t);
-	if (t != '1')
-		err("SocketGetInt() - packet being received is not an int");
-	int temp;
-	ret = s->blockread(4, &temp);
-	return temp;
-}
-std::string ScriptEngine::SocketGetString(int sh) {
-	static char buf[4096];
-	Socket *s = (Socket *) sh;
-	int stlen = 0, ret;
-	char t;
-	ret = s->blockread(1, &t);
-	if (t != '3')
-		err("SocketGetString() - packet being received is not a string");
-	ret = s->blockread(2, &stlen);
-	if (!ret)
-		return std::string();
-
-#ifdef __BIG_ENDIAN__
-	stlen >>= 16;
-#endif
-
-	if (stlen>4095) err("yeah uh dont send such big strings thru the network plz0r");
-	ret = s->blockread(stlen, buf);
-	buf[stlen] = 0;
-	return buf;
-}
-bool ScriptEngine::SocketHasData(int sh) { return ((Socket*)sh)->dataready()!=0; }
-void ScriptEngine::SocketSendFile(int sh, const std::string& fn) {
-	Socket *s = (Socket *) sh;
-
-	EnforceNoDirectories(fn);
-
-	VFILE *f = vopen(fn.c_str());
-	if (!f)
-		err("ehhhhhh here's a tip. SocketSendFile can't send a file that doesnt exist (you tried to send %s)", fn.c_str());
-
-	int i = fn.length();
-	s->write(2, &i);
-	s->write(i, fn.c_str());
-
-	int l = filesize(f);
-	s->write(4, &l);
-	char *buf = new char[l];
-	vread(buf, l, f);
-	s->write(l, buf);
-	delete[] buf;
-	vclose(f);
-}
-void ScriptEngine::SocketSendInt(int sh, int i) {
-	Socket *s = (Socket *) sh;
-	char t = '1';
-	s->write(1, &t);
-	s->write(4, &i);
-}
-void ScriptEngine::SocketSendString(int sh, const std::string& str) {
-	Socket *s = (Socket *) sh;
-	int len = str.length();
-	if (len>4095) err("yeah uh dont send such big strings thru the network plz0r");
-	char t = '3';
-	s->write(1, &t);
-
-#ifdef __BIG_ENDIAN__
-	len <<= 16;
-#endif
-
-	s->write(2, &len);
-
-#ifdef __BIG_ENDIAN__
-	len >>= 16;
-#endif
-
-	s->write(len, str.c_str());
-}
-
-// Overkill (2008-04-17): Sockets can send and receive raw length-delimited strings
-std::string ScriptEngine::SocketGetRaw(int sh, int len)
-{
-	static char buf[4096];
-	Socket *s = (Socket *) sh;
-	if (len > 4095)
-	{
-		err("SocketGetRaw() - can only receive a maximum of 4095 characters at a time. You've tried to get %d", len);
-	}
-	int ret = s->nonblockread(len, buf);
-	buf[ret] = 0;
-	return buf;
-}
-
-// Overkill (2008-04-17): Sockets can send and receive raw length-delimited strings
-void ScriptEngine::SocketSendRaw(int sh, const std::string& str)
-{
-	Socket *s = (Socket *) sh;
-	int len = str.length();
-	s->write(len, str.c_str());
-}
-
-// Overkill (2008-04-20): Peek at how many bytes are in buffer. Requested by ustor.
-int ScriptEngine::SocketByteCount(int sh)
-{
-	Socket *s = (Socket *) sh;
-	return s->byteCount();
-}
-
-//XX: unsorted functions and variables, mostly newly added and undocumented
-std::string ScriptEngine::Get_EntityChr(int arg) {
+CStringRef ScriptEngine::Get_EntityChr(int arg) {
 	if(arg >= 0 && arg < entities && entity[arg]->chr != 0)
 		return entity[arg]->chr->name;
 	else
-		return "";
+		return empty_string;
 }
-void ScriptEngine::Set_EntityChr(int arg, const std::string& chr) {
+void ScriptEngine::Set_EntityChr(int arg, CStringRef chr) {
 	if(arg >= 0 && arg < entities)
 		entity[arg]->set_chr(chr);
 }
@@ -1867,18 +1671,18 @@ int ScriptEngine::Get_EntityFrameH(int ofs) {
 	if (ofs>=0 && ofs<entities) return entity[ofs]->chr->fysize; else return 0;
 }
 
-std::string ScriptEngine::Get_EntityDescription(int arg) {
+CStringRef ScriptEngine::Get_EntityDescription(int arg) {
 	if(arg >= 0 && arg < entities)
 		return entity[arg]->description;
 	else
-		return "";
+		return empty_string;
 }
-void ScriptEngine::Set_EntityDescription(int arg, const std::string& val) { 
+void ScriptEngine::Set_EntityDescription(int arg, CStringRef val) { 
 	if(arg >= 0 && arg < entities)
 		entity[arg]->description = val;
 }
 
-void ScriptEngine::Set_EntityActivateScript(int arg, const std::string& val)
+void ScriptEngine::Set_EntityActivateScript(int arg, CStringRef val)
 {
 	if(arg >= 0 && arg < entities)
 		entity[arg]->script = val;
@@ -1909,7 +1713,7 @@ void ScriptEngine::Rect4Grad(int x1, int y1, int x2, int y2, int c1, int c2, int
 
 // Overkill: 2005-12-28
 // Helper function for WrapText.
-static int TextWidth(int f, const std::string& text, int pos, int len)
+static int TextWidth(int f, CStringRef text, int pos, int len)
 {
 	Font *font = (Font*) f;
 	if (font == 0)
@@ -1922,39 +1726,73 @@ static int TextWidth(int f, const std::string& text, int pos, int len)
 	}
 }
 
-int ScriptEngine::HSV(int h, int s, int v) { return ::HSVtoColor(h,s,v); }
-int ScriptEngine::GetH(int col) {
-	int h, s, v;
-	::GetHSV(col, h, s, v);
-	return h;
-}
-int ScriptEngine::GetS(int col) {
-	int h, s, v;
-	::GetHSV(col, h, s, v);
-	return s;
-}
-int ScriptEngine::GetV(int col) {
-	int h, s, v;
-	::GetHSV(col, h, s, v);
-	return v;
-}
-void ScriptEngine::HueReplace(int hue_find, int hue_tolerance, int hue_replace, int image) {
-	::HueReplace(hue_find, hue_tolerance, hue_replace, ImageForHandle(image));
-}
-void ScriptEngine::ColorReplace(int find, int replace, int image)
+// Overkill: 2005-12-28
+// Thank you, Zip.
+StringRef ScriptEngine::strovr(CStringRef rep, CStringRef source, int offset)
 {
-	::ColorReplace(find, replace, ImageForHandle(image));
+	return ::strovr(source, rep, offset);
+}
+
+// Overkill: 2005-12-19
+// Thank you, Zip.
+// Rewritten, Kildorf: 2007-10-16
+StringRef ScriptEngine::WrapText(int wt_font, CStringRef wt_s, int wt_linelen)
+// Pass: The font to use, the string to wrap, the length in pixels to fit into
+// Return: The passed string with \n characters inserted as breaks
+// Assmes: The font is valid, and will overrun if a word is longer than linelen
+// Note: Existing breaks will be respected, but adjacent \n characters will be
+//     replaced with a single \n so add a space for multiple line breaks
+{
+	int lastbreak = -1; // beginning of the current line
+	int lastws = -1; // last whitespace character
+	int currloc = 0; // current character
+	int len = wt_s.length(); // length of string
+
+	StringRef temp = wt_s.str();
+
+	while (currloc < len)
+	{
+		if (temp[currloc] == ' ')
+		{
+			lastws = currloc;
+		}
+		else if (temp[currloc] == '\n')
+		{
+			lastws = currloc;
+			lastbreak = currloc;
+		}
+		else if (temp[currloc] == '\r')
+		{
+			if (temp[currloc+1] == '\n')
+				currloc++;
+			lastws = currloc;
+			lastbreak = currloc;
+		}
+		else if (::TextWidth(wt_font, temp, lastbreak+1, currloc - (lastbreak)) > wt_linelen && lastws != lastbreak)
+		{
+			temp.dangerous_peek()[lastws] = '\n';
+			lastbreak = lastws;
+		}
+
+		currloc++;
+	}
+
+	return temp;
+}
+
+int ScriptEngine::strpos(CStringRef sub, CStringRef source, int start) {
+	return source.str().find(sub.str(), start);
 }
 
 // Overkill (2006-06-30): Gets the contents of the key buffer.
 // TODO: Implement for other platforms.
-std::string ScriptEngine::GetKeyBuffer()
+StringRef ScriptEngine::GetKeyBuffer()
 {
 	#ifdef __WIN32__
-		return ::GetKeyBuffer();
+		return keybuffer;
 	#else 
 		err("The function GetKeyBuffer() is not defined for this platform.");
-		return std::string();
+		return StringRef();
 	#endif
 }
 

@@ -15,41 +15,20 @@
  ****************************************************************/
 
 #include "xerxes.h"
-#include <cassert>
-
-corona::Image* load_image_from_packfile(const char* filename)
-{
-	VFILE* vf = vopen(filename);
-	if (!vf)
-	{
-		err("loadimage: couldn't load image %s; couldnt find a file or a vfile", filename);
-	}
-	int l = filesize(vf);
-	std::auto_ptr<char> buffer(new char[l]);
-	vread(buffer.get(), l, vf);
-	vclose(vf);
-	std::auto_ptr<corona::File> memfile(corona::CreateMemoryFile(buffer.get(), l));
-	return corona::OpenImage(memfile.get(), corona::FF_AUTODETECT, corona::PF_DONTCARE);
-}
 
 corona::Image* load_image_from_disk_or_packfile(const char* filename)
 {
-	corona::Image* img;
-	//log("loading image %s", filename);
-	if (Exist(filename))
-	{
-		img = corona::OpenImage(filename, corona::FF_AUTODETECT, corona::PF_DONTCARE);
-	}
-	else
-	{
-		img = load_image_from_packfile(filename);
-	}
-
+	corona::Image* img = corona::OpenImage(filename, corona::FF_AUTODETECT, corona::PF_B8G8R8A8);
 	if (!img)
 	{
 		err("loadimage: couldn't load image %s; corona just bombed.", filename);
 	}
 	return img;
+}
+
+image* create_image_from_32bit_corona(corona::Image* img)
+{
+	return ImageFrom32bpp((byte*)img->getPixels(), img->getWidth(), img->getHeight());
 }
 
 image* create_image_from_24bit_corona(corona::Image* img)
@@ -98,27 +77,7 @@ image* create_image_from_8bit_corona(corona::Image* img, int transparency_index,
 image* load_image(const char* fname, bool use_transparency_index, int tflag)
 {
 	corona::Image* img = load_image_from_disk_or_packfile(fname);
-	if (img->getFormat() == corona::PF_I8)
-	{
-		int transparency_index = 0;
-		if (img->getPaletteFormat() != corona::PF_R8G8B8)
-		{
-			//we can convert this one. we get it with new corona 1.0.2
-			//8bpp gif loader
-			if (img->getPaletteFormat() == corona::PF_R8G8B8A8)
-			{
-				transparency_index = convert_quad_palette_to_triplets(img);
-			}
-			else
-			{
-				err("loadimage: couldnt load image %s; unexpected pixel format", fname);
-			}
-		}
-
-		return create_image_from_8bit_corona(img, use_transparency_index ? transparency_index : 0, tflag);
-	}
-
-    return create_image_from_24bit_corona(img);
+	return create_image_from_32bit_corona(img);
 }
 
 image* xLoadImage_int_respect8bitTransparency(const char* fname)

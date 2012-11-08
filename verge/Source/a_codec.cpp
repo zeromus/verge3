@@ -64,9 +64,9 @@ void cfread(void *ptr, int size1, int size2, FILE *f)
 }
 
 #ifdef VFILE_H
-void cvread(word *dest, int len, VFILE *f)
+void cfread(word *dest, int len,1,f)
 {
-	_cvread(dest, len, f);
+	_cfread(dest, len,1,f);
 	int num = len/sizeof(word);
 	if(num == 0) num = 1;
 	for(int i = 0; i < num; i++)
@@ -75,9 +75,9 @@ void cvread(word *dest, int len, VFILE *f)
 	}
 }
 
-void cvread(quad *dest, int len, VFILE *f)
+void cfread(quad *dest, int len,1,f)
 {
-	_cvread(dest, len, f);
+	_cfread(dest, len,1,f);
 	int num = len/sizeof(quad);
 	if(num == 0) num = 1;
 	for(int i = 0; i < num; i++)
@@ -86,50 +86,50 @@ void cvread(quad *dest, int len, VFILE *f)
 	}
 }
 
-void cvread(byte *dest, int len, VFILE *f)
+void cfread(byte *dest, int len,1,f)
 {
-	_cvread(dest, len, f);
+	_cfread(dest, len,1,f);
 }
 
-void cvread(double *dest, int len, VFILE *f)
+void cfread(double *dest, int len,1,f)
 {
-	_cvread(dest, len, f);
+	_cfread(dest, len,1,f);
 	int num = len/sizeof(double);
 	if(num == 0) num = 1;
 	for(int i = 0; i < num; i++)
 		flip(dest+i, sizeof(double));
 }
 
-void cvread(float *dest, int len, VFILE *f)
+void cfread(float *dest, int len,1,f)
 {
-	_cvread(dest, len, f);
+	_cfread(dest, len,1,f);
 	int num = len/sizeof(float);
 	if(num == 0) num = 1;
 	for(int i = 0; i < num; i++)
 		flip(dest+i, sizeof(float));
 }
 
-void cvread(unsigned long *dest, int len, VFILE *f)
+void cfread(unsigned long *dest, int len,1,f)
 {
-	_cvread(dest, len, f);
+	_cfread(dest, len,1,f);
 	int num = len/sizeof(unsigned long);
 	if(num == 0) num = 1;
 	for(int i = 0; i < num; i++)
 		flip(dest+i, sizeof(unsigned long));
 }
 
-void cvread(long *dest, int len, VFILE *f)
+void cfread(long *dest, int len,1,f)
 {
-	_cvread(dest, len, f);
+	_cfread(dest, len,1,f);
 	int num = len/sizeof(long);
 	if(num == 0) num = 1;
 	for(int i = 0; i < num; i++)
 		flip(dest+i, sizeof(long));
 }
 
-void cvread(short *dest, int len, VFILE *f)
+void cfread(short *dest, int len,1,f)
 {
-	_cvread(dest, len, f);
+	_cfread(dest, len,1,f);
 	int num = len/sizeof(short);
 	if(num == 0) num = 1;
 	for(int i = 0; i < num; i++)
@@ -138,9 +138,9 @@ void cvread(short *dest, int len, VFILE *f)
 	}
 }
 
-void cvread(int *dest, int len, VFILE *f)
+void cfread(int *dest, int len,1,f)
 {
-	_cvread(dest, len, f);
+	_cfread(dest, len,1,f);
 	int num = len/sizeof(int);
 	if(num == 0) num = 1;
 	for(int i = 0; i < num; i++)
@@ -149,23 +149,23 @@ void cvread(int *dest, int len, VFILE *f)
 	}
 }
 
-void cvread(char *dest, int len, VFILE *f)
+void cfread(char *dest, int len,1,f)
 {
-	_cvread(dest, len, f);
+	_cfread(dest, len,1,f);
 }
 
 
 
-void _cvread(void *ptr, int size1, VFILE *f)
+void _cfread(void *ptr, int size1,1,f)
 {
 	uLong size = size1, comprLen;
 	unsigned int mysize;
-	vread(&mysize, 4, f);
+	fread(&mysize, 4,1,f);
 	if (mysize != size) err("cvread(): block sizes do not match");
-	vread(&comprLen, 4, f);
+	fread(&comprLen, 4,1,f);
 	byte *inbuf = new byte[comprLen];
 	byte *outbuf = (byte *) ptr;
-	vread(inbuf, comprLen, f);
+	fread(inbuf, comprLen,1,f);
 
 	int myErr = uncompress(outbuf, &size, inbuf, comprLen);
 

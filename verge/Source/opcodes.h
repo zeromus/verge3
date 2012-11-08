@@ -117,12 +117,12 @@
 #define t_VARARG			4
 #define t_VOID				5
 #define t_STRUCT			6
-#define t_BOOL				7 // For better lua compatibility with builtins.
+#define t_BOOL				7 // For better  lua compatibility with builtins.
 #define t_CALLBACK			8 // For function pointers.
 
-#define NUM_LIBFUNCS		281
-#define NUM_HVARS			128
-#define NUM_HDEFS			111
+#define NUM_LIBFUNCS		233
+#define NUM_HVARS			132
+#define NUM_HDEFS			112
 
 struct VcFunctionDecl {
 	const char* returnType;

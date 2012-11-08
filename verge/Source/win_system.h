@@ -15,14 +15,13 @@
 #include <vector>
 
 LRESULT APIENTRY win_gameWindowProc(HWND hWnd, UINT message,WPARAM wParam, LPARAM lParam);
-LRESULT APIENTRY win_auxWindowProc(HWND hWnd, UINT message,WPARAM wParam, LPARAM lParam);
 
 void win_addWindow(HWND window);
 void win_removeWindow(HWND window);
 
 void setWindowTitle(const char *str);
 
-std::string clipboard_getText();
+StringRef clipboard_getText();
 void clipboard_setText(const char *text);
 image *clipboard_getImage();
 void clipboard_putImage(image *img);
@@ -43,10 +42,10 @@ int getHour();
 int getMinute();
 int getSecond();
 
-void listFilePattern(std::vector<std::string> &res, const std::string& pattern);
+void listFilePattern(std::vector<std::string> &res, CStringRef pattern);
 
 
-void showMessageBox(const std::string& message);
-std::string GetSystemSaveDirectory(const std::string& name);
+void showMessageBox(CStringRef message);
+StringRef GetSystemSaveDirectory(CStringRef name);
 
 #endif

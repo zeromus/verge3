@@ -14,7 +14,15 @@ struct Zone
 {
 	char name[256];
 	char script[256];
-	int method;
+	union
+	{
+		struct
+		{
+			byte method:1;
+			byte facing:2;
+		};
+		byte flags;
+	};
 	int percent;
 	int delay;
 };
@@ -22,7 +30,7 @@ struct Zone
 class Layer
 {
 public:
-	Layer(VFILE *f);
+	Layer(FILE *f);
 	Layer(int width, int height);
 	~Layer();
 	void save(FILE *f); // Overkill (2006-07-20): Saver functions!

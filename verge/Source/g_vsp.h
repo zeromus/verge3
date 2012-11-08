@@ -32,9 +32,9 @@ public:
 	char *obs;
 
 	VSP(char *fname);
-	VSP(VFILE *f);
+	VSP(FILE *f);
 	~VSP();
-	void LoadVSP(VFILE *f);
+	void LoadVSP(FILE *f);
 	void save(FILE *f);	// Overkill (2006-07-20): Saver functions!
 	void Blit(int x, int y, int index, image *dest);
 	void TBlit(int x, int y, int index, image *dest);

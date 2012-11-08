@@ -18,68 +18,7 @@
 #include <crtdbg.h>
 #include <stack>
 
-//todo
-
-//when you start off in fullscreen mode, a good window position is not being selected
-//for when you alt-enter back into windowmode
-
-class gdi_Window : public AuxWindow
-{
-public:
-    BITMAPINFO bmi;
-    HDC hdc, backDC;
-    HANDLE backOld;
-    HBITMAP backSurface;
-    void* backBuffer;
-    
-	image* img;
-	int imgHandle;
-	HWND hwnd;
-	bool bGameWindow;
-	bool bActive;
-	int handle;
-	int xres, yres;
-	bool bVisible;
-
-	int winx, winy;
-	int winw, winh;
-
-
-	gdi_Window(bool bGameWindow);
-	void dispose();
-	void flip_win();
-	void flip_fullscreen();
-	int set_win(int w, int h, int bpp);
-	void shutdown_win();
-	int set_fullscreen(int w, int h, int bpp);
-	void deactivate();
-	void activate();
-	void createWindow();
-	void setupDummyImage();
-	void adjust(int w, int h, RECT* r);
-
-	//
-	//specifically for AuxWindow
-	int getHandle();
-	int getImageHandle();
-	image* getImage();
-	int getXres();
-	int getYres();
-	int getWidth();
-	int getHeight();
-	void setResolution(int w, int h);
-	void setPosition(int x, int y);
-	void setSize(int w, int h);
-	void setVisibility(bool vis);
-	void setTitle(const char* title);
-	void positionCommand(int command, int arg1, int arg2);
-};
-
 gdi_Window* dd_gameWindow;
-
-//forward decl
-AuxWindow* dd_createAuxWindow();
-AuxWindow* dd_findAuxWindow(int handle);
 
 /***************************** data *****************************/
 
@@ -88,46 +27,13 @@ bool dd_bHasBeenFullscreen = false;
 bool dd_bGameWindowRectInitialized = false;
 bool dd_bWasMaximized = false;
 
-//gdi_Window *gameWindow;
-
-std::vector<gdi_Window*> dd_windows;
-std::stack<int> dd_handles;
-int dd_handleCount;
-
 /***************************** code *****************************/
 
 #define DX_RELEASE(x) { if (x) { x->Release(); x=0; } }
 
-int dd_handlePop()
-{
-	if(dd_handles.empty())
-	{
-		for(int i=1;i<=4;i++)
-			dd_handles.push(dd_handleCount+i);
-		dd_handleCount += 4;
-	}
-
-	int handle = dd_handles.top();
-	dd_handles.pop();
-	return handle;
-}
-
-void dd_removeWindow(gdi_Window *window)
-{
-	for(std::vector<gdi_Window*>::iterator it = dd_windows.begin(); it != dd_windows.end(); it++)
-		if(*it == window)
-		{
-			dd_windows.erase(it);
-			return;
-		}
-}
 
 void dd_init()
 {
-    for(int i=16;i>0;i--)
-		dd_handles.push(i);
-	dd_handleCount=16;
-
 	WNDCLASS WndClass;
 	memset(&WndClass, 0, sizeof(WNDCLASS));
 	WndClass.hCursor = LoadCursor(0, IDC_ARROW);
@@ -135,31 +41,16 @@ void dd_init()
 	WndClass.lpszClassName = "xerxes-dd-gamewindow";
 	WndClass.hInstance = hMainInst;
 	WndClass.lpfnWndProc = win_gameWindowProc;
-    WndClass.style = CS_OWNDC;
-	RegisterClass(&WndClass);
-
-	memset(&WndClass, 0, sizeof(WNDCLASS));
-	WndClass.hCursor = LoadCursor(0, IDC_ARROW);
-	WndClass.lpszClassName = "xerxes-dd-auxwindow";
-	WndClass.hInstance = hMainInst;
-	WndClass.lpfnWndProc = win_auxWindowProc;
-    WndClass.style = CS_OWNDC;
+	WndClass.style = CS_OWNDC;
 	RegisterClass(&WndClass);
 
 	dd_gameWindow = new gdi_Window(true);
-	gameWindow = dynamic_cast<AuxWindow*>(dd_gameWindow);
 	hMainWnd = dd_gameWindow->hwnd;
-	dd_gameWindow->setVisibility(true);
-
-	if(automax)
-	{
-		ShowWindow(dd_gameWindow->hwnd,SW_SHOWMAXIMIZED);
-	}
+	ShowWindow(dd_gameWindow->hwnd,SW_SHOWNA);
+	dd_gameWindow->bVisible = true;
 
 	vid_Close = dd_Close;
 	Flip = dd_Flip;
-	vid_createAuxWindow = dd_createAuxWindow;
-	vid_findAuxWindow = dd_findAuxWindow;
 	dd_initd = true;
 }
 
@@ -201,14 +92,6 @@ int dd_SetMode(int xres, int yres, int bpp, bool windowflag)
 
 		dd_bGameWindowRectInitialized = true;
 	}
-
-	//must deactivate all auxwindows
-	if(vid_window && !windowflag)
-		for(std::vector<gdi_Window*>::iterator it = dd_windows.begin(); it != dd_windows.end(); it++)
-		{
-			if(!(*it)->bGameWindow)
-				(*it)->deactivate();
-		}
 
 	if (!windowflag)
 	{
@@ -289,12 +172,6 @@ int dd_SetMode(int xres, int yres, int bpp, bool windowflag)
 			}
 		}
 
-		//must activate all auxwindows
-		if(!vid_window)
-			for(std::vector<gdi_Window*>::iterator it = dd_windows.begin(); it != dd_windows.end(); it++)
-				if(!(*it)->bGameWindow)
-					(*it)->activate();
-
 		//bring the gamewindow back to the front
 		SetWindowPos(dd_gameWindow->hwnd,HWND_TOP,0,0,0,0,SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOSIZE);
 
@@ -313,38 +190,13 @@ int dd_SetMode(int xres, int yres, int bpp, bool windowflag)
 
 void dd_Flip()
 {
-	if(vid_window)
-	{
-		for(std::vector<gdi_Window*>::iterator it = dd_windows.begin(); it != dd_windows.end(); it++)
-			(*it)->flip_win();
-	}
-	else
-		dd_gameWindow->flip_fullscreen();
+	dd_gameWindow->flip_fullscreen();
 }
 
 void dd_Close()
 {
-	std::vector<gdi_Window*> deletes;
-	for(std::vector<gdi_Window*>::iterator it = dd_windows.begin(); it != dd_windows.end(); it++)
-		deletes.push_back(*it);
-
-	for(std::vector<gdi_Window*>::iterator it = deletes.begin(); it != deletes.end(); it++)
-		(*it)->dispose();
+	dd_gameWindow->dispose();
 }
-
-AuxWindow* dd_createAuxWindow()
-{
-	return dynamic_cast<AuxWindow *>(new gdi_Window(false));
-}
-
-AuxWindow* dd_findAuxWindow(int handle)
-{
-	for(std::vector<gdi_Window*>::iterator it = dd_windows.begin(); it != dd_windows.end(); it++)
-		if((*it)->handle == handle)
-			return dynamic_cast<AuxWindow *>(*it);
-	return 0;
-}
-
 
 //////////////////////////////
 /////// gdi_Window implementation
@@ -355,181 +207,24 @@ int gdi_Window::getHandle() { return handle; }
 int gdi_Window::getImageHandle() { return imgHandle; }
 image* gdi_Window::getImage() { return img; }
 
-int gdi_Window::getXres()
-{
-	return this->xres;
-}
-int gdi_Window::getYres()
-{
-	return this->yres;
-}
-int gdi_Window::getWidth()
-{
-	RECT r;
-	GetClientRect(hwnd,&r);
-	return r.right - r.left;
-}
-int gdi_Window::getHeight()
-{
-	RECT r;
-	GetClientRect(hwnd,&r);
-	return r.bottom - r.top;
-}
-
-
-void gdi_Window::setPosition(int x, int y)
-{
-	//SetWindowPos(hwnd,0,x,y,0,0,SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOSIZE);
-	HWND hw = GetActiveWindow();
-	WINDOWPLACEMENT wp;
-	wp.length = sizeof(WINDOWPLACEMENT);
-	GetWindowPlacement(hwnd,&wp);
-	int w = wp.rcNormalPosition.right - wp.rcNormalPosition.left;
-	int h = wp.rcNormalPosition.bottom - wp.rcNormalPosition.top;
-	wp.rcNormalPosition.left = x;
-	wp.rcNormalPosition.top = y;
-	wp.rcNormalPosition.right = wp.rcNormalPosition.left + w;
-	wp.rcNormalPosition.bottom = wp.rcNormalPosition.top + h;
-	SetWindowPlacement(hwnd,&wp);
-	SetActiveWindow(hw);
-}
-
-void gdi_Window::positionCommand(int command, int arg1, int arg2)
-{
-	//todo: validate window args
-	switch(command)
-	{
-	case 0:
-		{
-			RECT rDest;
-			RECT rSrc;
-			int w,h;
-
-			gdi_Window *destwin = (gdi_Window *)(dd_findAuxWindow(arg1));
-			GetWindowRect(destwin->hwnd,&rDest);
-			GetWindowRect(hwnd,&rSrc);
-			w = rSrc.right - rSrc.left;
-			h = rSrc.bottom - rSrc.top;
-			rSrc.left = rDest.left - w;
-			rSrc.top = rDest.top;
-			//SetWindowPos(hwnd,0,rSrc.left,rSrc.top,0,0,SWP_NOACTIVATE | SWP_NOSIZE | SWP_NOZORDER);
-			setPosition(rSrc.left,rSrc.top);
-		}
-	}
-}
-
-void gdi_Window::setupDummyImage()
-{
-	if(!img)
-	{
-		img = new image(xres,yres);
-		SetHandleImage(imgHandle,img);
-		return;
-	}
-
-
-	image *newimg = new image(xres,yres);
-
-	//copy current image to the new dummy image
-	Blit(0,0,img,newimg);
-
-	if(img)
-		delete img;
-
-	img = newimg;
-	SetHandleImage(imgHandle,img);
-}
-
-
-void gdi_Window::setResolution(int w, int h)
-{
-	xres = w;
-	yres = h;
-	if(bActive)
-	{
-		if(bGameWindow)
-			dd_SetMode(w,h,vid_bpp,vid_window);
-		else
-			set_win(w,h,vid_bpp);
-	}
-	else
-		setupDummyImage();
-}
-
-void gdi_Window::setSize(int w, int h)
-{
-	RECT r;
-	adjust(w,h,&r);
-
-	WINDOWPLACEMENT wp;
-	wp.length = sizeof(WINDOWPLACEMENT);
-	GetWindowPlacement(hwnd,&wp);
-	wp.rcNormalPosition.right = wp.rcNormalPosition.left + (r.right-r.left);
-	wp.rcNormalPosition.bottom = wp.rcNormalPosition.top + (r.bottom-r.top);
-	SetWindowPlacement(hwnd,&wp);
-}
-
-void gdi_Window::setVisibility(bool vis)
-{
-	if(bActive)
-	{
-		if(!bVisible && vis)
-		{
-			ShowWindow(hwnd,SW_SHOWNA);
-			if(!bGameWindow)
-				SetWindowPos(hwnd,hMainWnd,0,0,0,0,SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOSIZE);
-		}
-		if(bVisible && !vis)
-			ShowWindow(hwnd,SW_HIDE);
-	}
-	bVisible = vis;
-}
-void gdi_Window::setTitle(const char* title)
-{
-	SetWindowText(hwnd,title);
-}
-
-
 void gdi_Window::createWindow()
 {
-	if(bGameWindow)
-	{
-		hwnd = CreateWindowEx(0, "xerxes-dd-gamewindow", "xerxes", WS_VISIBLE | WS_OVERLAPPEDWINDOW | WS_THICKFRAME | WS_CAPTION, 0,0,0,0, NULL, NULL, hMainInst, NULL);
-		SetWindowLong(hwnd,GWL_USERDATA,(long)dynamic_cast<AuxWindow*>(this));
-		win_addWindow(hwnd);
-	}
-	else
-	{
-		hwnd = CreateWindowEx(0, "xerxes-dd-auxwindow", "xerxes", WS_CAPTION | WS_THICKFRAME, 0,0,0,0,0,0,hMainInst,0);
-		SetWindowLong(hwnd,GWL_USERDATA,(long)dynamic_cast<AuxWindow*>(this));
-		win_addWindow(hwnd);
-	}
+	hwnd = CreateWindowEx(0, "xerxes-dd-gamewindow", "astral dynasty: the shattered circle PC build CONFIDENTIAL copyright 2012 DO NOT DISTRIBUTE", WS_VISIBLE | WS_OVERLAPPEDWINDOW | WS_THICKFRAME | WS_CAPTION, 0,0,0,0, NULL, NULL, hMainInst, NULL);
+	SetWindowLong(hwnd,GWL_USERDATA,(long)(this));
+	win_addWindow(hwnd);
 }
 
 void gdi_Window::shutdown_win()
 {
-    SelectObject(backDC, backOld);
-    DeleteObject(backSurface);
+	SelectObject(backDC, backOld);
+	DeleteObject(backSurface);
 	DeleteDC(backDC);
 
-    ReleaseDC(hwnd, hdc);
+	ReleaseDC(hwnd, hdc);
 }
 
 void gdi_Window::dispose()
 {
-	if(bGameWindow)
-		return;
-
-	dd_removeWindow(this);
-	dd_handles.push(handle);
-
-	if(!bGameWindow)
-		FreeImageHandle(this->imgHandle);
-
-	shutdown_win();
-
-	win_removeWindow(hwnd);
-	DestroyWindow(hwnd);
 }
 
 void gdi_Window::deactivate()
@@ -537,7 +232,6 @@ void gdi_Window::deactivate()
 	if(!bActive)
 		return;
 	bActive = false;
-	setupDummyImage();
 	shutdown_win();
 	ShowWindow(hwnd,SW_HIDE);
 }
@@ -567,12 +261,6 @@ void gdi_Window::flip_win()
 	if(!img)
 		return;
 
-	//convert the image format if necessary
-	/*if(DesktopBPP != vid_bpp) {
-		image* temp = ImageAdapt(img, vid_bpp, DesktopBPP);
-		memcpy((quad*)dx_win_bsd.lpSurface,temp->data,img->width*img->height*DesktopBPP/8);
-		delete temp;
-	}*/
 
 	GetClientRect(hwnd, &r);
 
@@ -784,6 +472,7 @@ int gdi_Window::set_win(int w, int h, int bpp)
 	{
 		SetHandleImage(1, img);
 		screen = img;
+		rtarget = screen;
 	}
 	
 
@@ -891,16 +580,13 @@ int gdi_Window::set_fullscreen(int w, int h, int bpp)
 	return 1;
 }
 
-gdi_Window::gdi_Window(bool bGameWindow) : AuxWindow()
+gdi_Window::gdi_Window(bool bGameWindow) 
 {
+	bMouseInside = false;
 	img = 0;
-    backSurface = 0;
-    backBuffer = 0;    
+	backSurface = 0;
+	backBuffer = 0;    
 	bVisible = false;
-    handle = dd_handles.top();
-
-	dd_handles.pop();
-	dd_windows.push_back(this);
 
 	//get an image handle to use from now on. we will fill in the imagebank slot for that handle
 	//when we have an image to put there

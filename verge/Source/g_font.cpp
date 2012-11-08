@@ -74,11 +74,14 @@ Font::Font(const char *fname)
 	selected = 0;
 	incolor = false;
 
+	int oldalpha = alpha;
+	alpha = 0;
 	rawdata = new image(xsize, ysize*100*subsets);
 	for (int yl = 0; yl<5 * subsets; yl++)
 		for (int xl = 0; xl<20; xl++)
 			GrabRegion(1+(xl*(xsize+1)), 1+(yl*(ysize+1)), width+1+(xl*(xsize+1)), height+1+(yl*(ysize+1)),
 				0, ((yl * 20) + xl) * ysize, workingimage, rawdata);
+	alpha = oldalpha;
 
 	for (int i=0; i<100; i++)
 		fwidth[i] = xsize;

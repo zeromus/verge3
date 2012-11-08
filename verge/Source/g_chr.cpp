@@ -25,73 +25,69 @@
 
 CHR::CHR(const char *fname)
 {
-	VFILE *f = vopen(fname);
+	FILE *f = fopen(fname,"rb");
 	if (!f) err("CHR::CHR(), couldn't open %s", fname);
 
 	name = fname;
 
 	int signature;
-	vread(&signature, 4, f);
+	fread(&signature, 4,1,f);
 	if (signature != CHR_SIGNATURE)
 		err("CHR::CHR(), %s is not a valid CHR file!", fname);
 
 	int version;
-	vread(&version, 4, f);
+	fread(&version, 4,1,f);
 	if (version != CHR_VERSION)
 		err("CHR::CHR(), %s is not the correct CHR version!", fname);
 
 	int bpp;
-	vread(&bpp, 4, f);
-	if (bpp != 24 && bpp != 32)
-		err("CHR::CHR(), %s is neither 24-bpp or 32-bpp", fname);
+	fread(&bpp, 4,1,f);
 
 	int flags;
-	vread(&flags, 4, f);
+	fread(&flags, 4,1,f);
 
 	int tcol;
-	vread(&tcol, 4, f);   // FIXME properly support this
-	vread(&hx, 4, f);
-	vread(&hy, 4, f);
-	vread(&hw, 4, f);
-	vread(&hh, 4, f);
-	vread(&fxsize, 4, f);
-	vread(&fysize, 4, f);
-	vread(&totalframes, 4, f);
-	vread(&idle[SOUTH], 4, f);
-	vread(&idle[NORTH], 4, f);
-	vread(&idle[WEST], 4, f);
-	vread(&idle[EAST], 4, f);
+	fread(&tcol, 4,1,f);   // FIXME properly support this
+	fread(&hx, 4,1,f);
+	fread(&hy, 4,1,f);
+	fread(&hw, 4,1,f);
+	fread(&hh, 4,1,f);
+	fread(&fxsize, 4,1,f);
+	fread(&fysize, 4,1,f);
+	fread(&totalframes, 4,1,f);
+	fread(&idle[SOUTH], 4,1,f);
+	fread(&idle[NORTH], 4,1,f);
+	fread(&idle[WEST], 4,1,f);
+	fread(&idle[EAST], 4,1,f);
+	int customscripts;
+	fread(&customscripts, 4,1,f); // ignored for now
 
 	char animbuf[255];
-	int indexes[] = { 0, 2, 1, 3, 4, 5, 6, 7, 8 };
+	int indexes[] = { 0, 2, 1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18 };
 
-	for (int b=1; b<9; b++)
+	int numAnims = 9 + customscripts;
+	for (int b=1; b<numAnims; b++)
     {
 		int n;
-		vread(&n, 4, f);
+		fread(&n, 4,1,f);
 		if (n>=254)
 			err("Animation strand too long. %d", n);
-		vread(animbuf, n+1, f);
+		fread(animbuf, n+1,1,f);
 
 		animsize[indexes[b]] = GetAnimLength(animbuf);
 		anims[indexes[b]] = new int[animsize[indexes[b]]];
 		ParseAnimation(indexes[b], animbuf);
 	}
 
-	int customscripts;
-	vread(&customscripts, 4, f); // ignored for now
+
 	int compression;
-	vread(&compression, 4, f); // assume always zlib for now
+	fread(&compression, 4,1,f); // assume always zlib for now
 
 	byte *raw = new byte[totalframes*fxsize*fysize*(bpp/8)];
-	cvread(raw, totalframes*fxsize*fysize*(bpp/8), f);
-	vclose(f);
+	cfread(raw, totalframes*fxsize*fysize*(bpp/8),1,f);
+	fclose(f);
 
-	switch(bpp)
-	{
-		case 24: rawdata = ImageFrom24bpp(raw, fxsize, fysize*totalframes); break;
-		case 32: rawdata = ImageFrom32bpp(raw, fxsize, fysize*totalframes); break;
-	}
+	rawdata = ImageFrom32bpp(raw, fxsize, fysize*totalframes);
 	container = new image(fxsize, fysize);
 	container->delete_data();
 	delete[] raw;
@@ -178,8 +174,8 @@ void CHR::render(int x, int y, int frame, image *dest)
 
 int CHR::GetFrame(int d, int &framect)
 {
-	if (d<1 || d>4)
-		err("CHR::GetFrame() - invalid direction %d", d);
+	//if (d<1 || d>4)
+	//	err("CHR::GetFrame() - invalid direction %d", d);
 	framect %= animsize[d];
 	return anims[d][framect];
 }

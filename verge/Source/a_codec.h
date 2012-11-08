@@ -13,17 +13,17 @@ void cfwrite(void *inbuf, int size1, int size2, FILE *out);
 void cfread(void *ptr, int size1, int size2, FILE *f);
 #ifdef VFILE_H
 
-void cvread(byte *dest, int len, VFILE *f);
-void cvread(word *dest, int len, VFILE *f);
-void cvread(quad *dest, int len, VFILE *f);
-void cvread(unsigned long *dest, int len, VFILE *f);
-void cvread(double *dest, int len, VFILE *f);
-void cvread(float *dest, int len, VFILE *f);
-void cvread(char *dest, int len, VFILE *f);
-void cvread(short *dest, int len, VFILE *f);
-void cvread(int *dest, int len, VFILE *f);
-void cvread(long *dest, int len, VFILE *f);
+void cfread(byte *dest, int len,1,f);
+void cfread(word *dest, int len,1,f);
+void cfread(quad *dest, int len,1,f);
+void cfread(unsigned long *dest, int len,1,f);
+void cfread(double *dest, int len,1,f);
+void cfread(float *dest, int len,1,f);
+void cfread(char *dest, int len,1,f);
+void cfread(short *dest, int len,1,f);
+void cfread(int *dest, int len,1,f);
+void cfread(long *dest, int len,1,f);
 
-void _cvread(void *ptr, int size, VFILE *f);
+void _cfread(void *ptr, int size,1,f);
 #endif
 

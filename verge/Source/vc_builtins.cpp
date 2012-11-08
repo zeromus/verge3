@@ -11,14 +11,13 @@
 #include "xerxes.h"
 #include "opcodes.h"
 
-
 static VcFunctionDecl _libfuncs[NUM_LIBFUNCS] = {
 	{"5", "Exit", "3" },
 	{"5", "Log", "3" },
 	{"1", "NewImage", "11" },
 	{"1", "MakeColor", "111" },
 	{"5", "SetLucent", "1" },
-	{"5", "SetClip", "11111" },
+	{"5", "SetClip", "11111" }, 
 	{"1", "LoadImage", "3" },
 	{"1", "LoadImage0", "3" },
 	{"5", "ShowPage", "" },
@@ -111,9 +110,12 @@ static VcFunctionDecl _libfuncs[NUM_LIBFUNCS] = {
 	{"3", "strdup", "31" },
 	{"5", "HookTimer", "8" },
 	{"5", "HookRetrace", "8" },
+	{"5", "HookShowPage", "8" },
+	{"5", "HookZone", "8" },
 	{"5", "HookEntityRender", "13" },
 	{"5", "HookKey", "13" },
 	{"5", "HookButton", "13" },
+	{"5", "HookRender", "8"},
 	{"5", "BlitEntityFrame", "11111" },
 	{"5", "SetEntitiesPaused", "7" },
 	{"7", "GetObsPixel", "11" },
@@ -125,7 +127,6 @@ static VcFunctionDecl _libfuncs[NUM_LIBFUNCS] = {
 	{"1", "sin", "1" },
 	{"1", "cos", "1" },
 	{"1", "tan", "1" },
-	{"5", "SuperSecretThingy", "11111" },
 	{"5", "BlitWrap", "1111" },
 	{"5", "ColorFilter", "11" },
 	{"1", "ImageShell", "11111" },
@@ -136,20 +137,6 @@ static VcFunctionDecl _libfuncs[NUM_LIBFUNCS] = {
 	{"1", "acos", "1" },
 	{"1", "atan", "1" },
 	{"1", "AlphaBlit", "11111" },
-	{"1", "WindowCreate", "11113" },
-	{"1", "WindowGetImage", "1" },
-	{"5", "WindowClose", "1" },
-	{"5", "WindowSetSize", "111" },
-	{"5", "WindowSetResolution", "111" },
-	{"5", "WindowSetPosition", "111" },
-	{"5", "WindowSetTitle", "13" },
-	{"5", "WindowHide", "1" },
-	{"5", "WindowShow", "1" },
-	{"1", "WindowGetXRes", "1" },
-	{"1", "WindowGetYRes", "1" },
-	{"1", "WindowGetWidth", "1" },
-	{"1", "WindowGetHeight", "1" },
-	{"5", "WindowPositionCommand", "1111" },
 	{"5", "SetSongPaused", "17" },
 	{"5", "SetSongVolume", "11" },
 	{"1", "GetSongVolume", "1" },
@@ -163,16 +150,6 @@ static VcFunctionDecl _libfuncs[NUM_LIBFUNCS] = {
 	{"1", "FontHeight", "1" },
 	{"1", "MixColor", "111" },
 	{"3", "chr", "1" },
-	{"1", "PlayMovie", "3" },
-	{"1", "MovieLoad", "31" },
-	{"1", "MoviePlay", "11" },
-	{"1", "MovieGetImage", "1" },
-	{"5", "MovieRender", "1" },
-	{"5", "MovieClose", "1" },
-	{"1", "MovieGetCurrFrame", "1" },
-	{"1", "MovieGetFramerate", "1" },
-	{"5", "MovieNextFrame", "1" },
-	{"5", "MovieSetFrame", "11" },
 	{"5", "Render", "" },
 	{"1", "GetObs", "11" },
 	{"5", "SetObs", "111" },
@@ -180,6 +157,7 @@ static VcFunctionDecl _libfuncs[NUM_LIBFUNCS] = {
 	{"5", "SetPlayer", "1" },
 	{"5", "EntityStalk", "11" },
 	{"5", "EntityMove", "13" },
+	{"5", "EntityWarp", "111" },
 	{"5", "SetMusicVolume", "1" },
 	{"5", "PlayerMove", "3" },
 	{"5", "ChangeCHR", "13" },
@@ -193,7 +171,6 @@ static VcFunctionDecl _libfuncs[NUM_LIBFUNCS] = {
 	{"5", "RenderMap", "111" },
 	{"5", "SetButtonKey", "11" },
 	{"5", "SetButtonJB", "11" },
-	{}, // {"7", "FunctionExists", "3" }, was promoted to an opcode.
 	{"1", "atan2", "11" },
 	{"5", "CopyImageToClipboard", "1" },
 	{"1", "GetImageFromClipboard", "" },
@@ -206,23 +183,8 @@ static VcFunctionDecl _libfuncs[NUM_LIBFUNCS] = {
 	{"5", "SetStringArray", "313" },
 	{"3", "GetStringArray", "31" },
 	{"5", "FlipBlit", "117711" },
-	{"1", "Connect", "3" },
-	{"1", "GetConnection", "" },
-	{"7", "SocketConnected", "1" },
-	{"7", "SocketHasData", "1" },
-	{"3", "SocketGetString", "1" },
-	{"5", "SocketSendString", "13" },
-	{"5", "SocketClose", "1" },
 	{"5", "Sleep", "1" },
 	{"5", "SetCustomColorFilter", "11" },
-	{"5", "SocketSendInt", "11" },
-	{"1", "SocketGetInt", "1" },
-	{},
-	{},
-	{"3", "GetUrlText", "3" },
-	{"1", "GetUrlImage", "3" },
-	{"5", "SocketSendFile", "13" },
-	{"3", "SocketGetFile", "13" },
 	{"3", "ListFilePattern", "3" },
 	{"7", "ImageValid", "1"},
 	{"1", "asc", "3"},
@@ -263,12 +225,6 @@ static VcFunctionDecl _libfuncs[NUM_LIBFUNCS] = {
 	{"3", "ListStructMembers", "3"}, // Overkill (2006-08-16}: Lists the members of a struct.
 	{"1", "CopyArray", "33"}, // Overkill (2006-08-16}: Copies an array to another array.
 	{"7", "SoundIsPlaying", "1"}, // Overkill (2006-11-20}: Determines whether or not a given sound channel is in use.
-	{"1", "GetH", "1"}, // Overkill (2007-05-04}: Gets the hue of a color
-	{"1", "GetS", "1"}, // Overkill (2007-05-04}: Gets the saturation of a color
-	{"1", "GetV", "1"}, // Overkill (2007-05-04}: Gets the value/brightness of a color
-	{"1", "HSV", "111"}, // Overkill (2007-05-04}: Creates a color using the HSV color model.
-	{"5", "HueReplace", "1111"}, // Overkill (2007-05-04}: Finds a hue range and replaces it with another hue in an image
-	{"5", "ColorReplace", "111"}, // Overkill (2007-05-04}: Finds a color and replaces it with another color in an image
 	{"1", "fatan", "1"}, // Overkill (2006-09-18}: Fixed point angles for precision!
 	{"1", "fatan2", "11"},
 	{"1", "fasin", "1"},
@@ -284,10 +240,6 @@ static VcFunctionDecl _libfuncs[NUM_LIBFUNCS] = {
 	{"1", "GetPlayer", ""}, // Kildorf (2007-10-12}: Return the entity number of the player.
 	{"1", "GetUserSystemVcFunctionCount", ""},	// Grue
 	{"3", "GetUserSystemVcFunctionByIndex", "1"},	// Grue
-	{"5", "SetConnectionPort", "1"}, // Overkill (2008-04-17}: Socket port can be switched to something besides 45150.
-	{"3", "SocketGetRaw", "11"}, // Overkill (2008-04-17}: Sockets can send and receive raw length-delimited strings
-	{"5", "SocketSendRaw", "13"},
-	{"1", "SocketByteCount", "1"}, // Overkill (2008-04-20}: Peek at how many bytes are in buffer. Requested by ustor.
 	{"3", "GetSystemSaveDir", "3"},
 	{"1", "GetInputKillSwitch", ""},
 	{"5", "SetInputKillSwitch", "1"},
@@ -358,7 +310,7 @@ char* libvars[NUM_HVARS][3] = {
 	{"1", "entity.hotw", "1" },
 	{"1", "entity.hoth", "1" },// index 50
 	{"1", "transcolor", "" },
-	{"1", "_skewlines", "1" },
+	{}, //was the timeless skewlines
 	{"1", "dma.byte", "1" },
 	{"1", "dma.word", "1" },
 	{"1", "dma.quad", "1" },
@@ -434,6 +386,10 @@ char* libvars[NUM_HVARS][3] = {
 	{"3", "trigger.onEntityCollide", "" },// index 125
 	{"1", "event.entity_hit", "" }, //126
 	{"3", "trigger.after_playermove", "" }, //127
+	{"1", "entity.sortkey", "1"},
+	{"1", "zone.flags", "1"},
+	{"1", "cameraclamp", ""},
+	{"1", "entity.flags", "1"},
 
 }; //when adding, remember to increment NUM_HVARS
 
@@ -555,3 +511,4 @@ HdefDecl hdefs[NUM_HDEFS] = {
 	{"UNPRESS_ALL",	"9", Define::Type_Raw },
 
 };
+

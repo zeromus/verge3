@@ -36,14 +36,14 @@
 
 VSP::VSP(char *fname)
 {
-	VFILE *f = vopen(fname);
+	FILE *f = fopen(fname,"rb");
 	if (!f)
 		err("VSP::VSP() - couldn't find VSP file %s", fname);
 	LoadVSP(f);
-	vclose(f);
+	fclose(f);
 }
 
-VSP::VSP(VFILE *f)
+VSP::VSP(FILE *f)
 {
 	LoadVSP(f);
 }
@@ -60,32 +60,32 @@ VSP::~VSP()
 	delete obs;
 }
 
-void VSP::LoadVSP(VFILE *f)
+void VSP::LoadVSP(FILE *f)
 {
 	int signature;
-	vread(&signature, 4, f);
+	fread(&signature, 4,1,f);
 	if (signature != VSP_SIGNATURE)
 		err("VSP::LoadVSP() - Invalid VSP signature!");
 
 	int version;
-	vread(&version, 4, f);
+	fread(&version, 4,1,f);
 	if (version != VSP_VERSION)
 		err("VSP::LoadVSP() - Invalid version (%d)", version);
 
 	int tilesize;
-	vread(&tilesize, 4, f);
+	fread(&tilesize, 4,1,f);
 	if (tilesize != 16)
 		err("VSP::LoadVSP() - bzzzzzzzzttt. Try a 16x16 vsp! %d",tilesize);
 
 	int format;
-	vread(&format, 4, f);
-	vread(&numtiles, 4, f);
+	fread(&format, 4,1,f);
+	fread(&numtiles, 4,1,f);
 
 	int compression;
-	vread(&compression, 4, f);
+	fread(&compression, 4,1,f);
 	if (compression != VSP_ZLIB) err("huhhruhoeijfaoijrf..fdpok no compression? tell vecna!!!");
 	byte *tiledatabuf = new byte[16*16*3*numtiles];
-	cvread(tiledatabuf, 16*16*3*numtiles, f);
+	cfread(tiledatabuf, 16*16*3*numtiles,1,f);
 
 	container = new image(16, 16);
 	container->delete_data();
@@ -93,22 +93,23 @@ void VSP::LoadVSP(VFILE *f)
 	vspdata = ImageFrom24bpp(tiledatabuf, 16, 16*numtiles);
 	delete[] tiledatabuf;
 
-	vread(&numanims, 4, f);
+	fread(&numanims, 4,1,f);
 	anims = new vspanim_r[numanims];
 	for(int i = 0; i < numanims; i++)
 	{
-		vread(anims[i].name, 256, f);
-		vread(&anims[i].start, 4, f);
-		vread(&anims[i].finish, 4, f);
-		vread(&anims[i].delay, 4, f);
-		vread(&anims[i].mode, 4, f);
+		fread(anims[i].name, 256,1,f);
+		fread(&anims[i].start, 4,1,f);
+		fread(&anims[i].finish, 4,1,f);
+		fread(&anims[i].delay, 4,1,f);
+		fread(&anims[i].mode, 4,1,f);
 	}
 
 	ValidateAnimations();
 
-	vread(&numobs, 4, f);
+	fread(&numobs, 4,1,f);
 	obs = new char[numobs*256];
-	cvread(obs, numobs*256, f);
+	if(numobs != 0)
+		cfread(obs, numobs*256,1,f);
 
 	// initialize tile anim stuff
 	tileidx = new int[numtiles];
@@ -123,7 +124,7 @@ void VSP::LoadVSP(VFILE *f)
 		flipped[i] = 0;
 		tileidx[i] = i;
 	}
-	mytimer = systemtime;
+	//mytimer = systemtime;
 
 	// Overkill (2006-07-20): And added back in.
 	SetHandleImage(2, vspdata);
@@ -171,11 +172,13 @@ void VSP::save(FILE *f)
 
 void VSP::UpdateAnimations()
 {
-	while (mytimer < systemtime)
-	{
-		AnimateTiles();
-		mytimer++;
-	}
+	//while (mytimer < systemtime)
+	//{
+	//	AnimateTiles();
+	//	mytimer++;
+	//}
+
+	AnimateTiles();
 }
 
 void VSP::Blit(int x, int y, int index, image *dest)
@@ -192,11 +195,11 @@ void VSP::Blit(int x, int y, int index, image *dest)
 
 void VSP::TBlit(int x, int y, int index, image *dest)
 {
-	while (mytimer < systemtime)
-	{
-		AnimateTiles();
-		mytimer++;
-	}
+	//while (mytimer < systemtime)
+	//{
+	//	AnimateTiles();
+	//	mytimer++;
+	//}
 	//if (index >= numtiles) err("VSP::BlitTile(), tile %d exceeds %d", index, numtiles);
 	if (index >= numtiles) return;
 	index = tileidx[index];

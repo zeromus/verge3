@@ -28,6 +28,9 @@
 #define ENT_WANDERZONE		2
 #define ENT_WANDERBOX		3
 
+#define EFLAG_YBUMP 1
+#define EFLAG_PCANIM 2
+
 class Entity
 {
 public:
@@ -36,12 +39,15 @@ public:
 	int getx();
 	int gety();
 	void setxy(int x1, int y1);
+	void warp(int x1, int y1);
 	int getspeed();
 	void setspeed(int s);
 	int get_waypointx();
 	int get_waypointy();
 	void set_waypoint(int x1, int y1);
+	void set_waypoint_relative_player(int x1, int y1, bool changeface = true);
 	void set_waypoint_relative(int x1, int y1, bool changeface = true);
+	void setFaceFromDxDy(int dx, int dy);
 	void setface(int d);
 	bool ready();
 	bool leaderidle();
@@ -50,9 +56,9 @@ public:
 	void draw();
 	void stalk(Entity *e);
 	void clear_stalk(); // stop following people, if we are
-    int get_leader_framect();
-    void set_framect_follow(int f); // set our and our follower's framect
-	void set_chr(const std::string& fname);
+	int get_leader_framect();
+	void set_framect_follow(int f); // set our and our follower's framect
+	void set_chr(CStringRef fname);
 
 	void SetWanderZone();
 	void SetWanderBox(int x1, int y1, int x2, int y2);
@@ -73,14 +79,21 @@ public:
 	int x, y;
 	int waypointx, waypointy;
 	int hotw, hoth;
+	int last_tx, last_ty;
 	int speed, speedct, movecode, delay, wdelay;
 	int face, framect, specframe, frame;
+	int sortkey;
+	int custanim;
 	int wx1, wy1, wx2, wy2;
-    int movemult;
+	int movemult;
 	int index;
-	std::string description; // Overkill - 2006-05-21
-	std::string hookrender;
-	std::string script;
+	int flags;
+	int foot;
+	bool continuous;
+	bool facePending;
+	StringRef description; // Overkill - 2006-05-21
+	StringRef hookrender;
+	StringRef script;
 	char movestr[256];
 	int moveofs;
 	Entity *follow, *follower;

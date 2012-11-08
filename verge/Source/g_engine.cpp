@@ -18,7 +18,6 @@
 
 /****************************** data ******************************/
 
-bool engine_paused;
 Entity	*entity[256];
 Entity	*myself = 0;
 int		entities;
@@ -31,6 +30,7 @@ MAP		*current_map = 0;
 int		px, py;
 
 bool	done, inscroller=false;
+int		cameraclamp=1;
 int		cameratracking=1;
 int     cameratracker=0;
 int     lastplayerdir=0;
@@ -128,7 +128,14 @@ int AllocateEntity(int x, int y, const char *chr)
 
 static int CDECL cmpent(const void* a, const void* b)
 {
-	return entity[*(byte*)a]->gety() - entity[*(byte*)b]->gety();
+	int sa = entity[*(byte*)a]->sortkey;
+	int sb = entity[*(byte*)b]->sortkey;
+	int scmp = sa-sb;
+	if(scmp!=0) return scmp;
+	int ya = entity[*(byte*)a]->gety();
+	int yb = entity[*(byte*)b]->gety();
+	int ycmp = ya-yb;
+	return ycmp;
 }
 
 void RenderEntities()
@@ -191,6 +198,7 @@ int isEntityCollisionCapturing() {
 
 int __obstructionHappened = 0;
 
+extern int ignoreEntCollisionId;
 bool ObstructAt(int x, int y)
 {
 	if( current_map->obstructpixel(x, y) ) {
@@ -209,7 +217,7 @@ bool ObstructAt(int x, int y)
 
 	int ent_idx = EntityObsAt(x, y);
 
-	if( ent_idx > -1 ) {
+	if( ent_idx > -1 && ent_idx != ignoreEntCollisionId) {
 
 		if( isEntityCollisionCapturing() ) {
 			event_tx = x/16;
@@ -232,59 +240,89 @@ int MaxPlayerMove(int d, int max)
 {
 	__grue_actor_index = myself->index;
 
-	int x, y;
 	int ex = myself->getx();
 	int ey = myself->gety();
 
     // check to see if the player is obstructable at all
 	if (!myself->obstructable) return max;
 
-	for(int check = 1; check <= max+1; check++) {
-		switch (d)
-		{
-			case NORTH:
-				for (x=ex; x<ex+myself->hotw; x++)
-					if (ObstructAt(x, ey-check)) return check-1;
-				break;
-			case SOUTH:
-				for (x=ex; x<ex+myself->hotw; x++)
-					if (ObstructAt(x, ey+myself->hoth+check-1)) return check-1;
-				break;
-			case WEST:
-				for (y=ey; y<ey+myself->hoth; y++)
-					if (ObstructAt(ex-check, y)) return check-1;
-				break;
-			case EAST:
-				for (y=ey; y<ey+myself->hoth; y++)
-					if (ObstructAt(ex+myself->hotw+check-1, y)) return check-1;
-				break;
-			case NW:
-				for (x=ex; x<ex+myself->hotw; x++)
-					if (ObstructAt(x-check, ey-check)) return check-1;
-				for (y=ey; y<ey+myself->hoth; y++)
-					if (ObstructAt(ex-check, y-check)) return check-1;
-				break;
-			case SW:
-				for (x=ex; x<ex+myself->hotw; x++)
-					if (ObstructAt(x-check, ey+myself->hoth+check-1)) return check-1;
-				for (y=ey; y<ey+myself->hoth; y++)
-					if (ObstructAt(ex-check, y+check)) return check-1;
-				break;
-			case NE:
-				for (x=ex; x<ex+myself->hotw; x++)
-					if (ObstructAt(x+check, ey-check)) return check-1;
-				for (y=ey; y<ey+myself->hoth; y++)
-					if (ObstructAt(ex+myself->hotw+check-1, y-check)) return check-1;
-				break;
-			case SE:
-				for (x=ex; x<ex+myself->hoth; x++)
-					if (ObstructAt(x+check, ey+myself->hoth+check-1)) return check-1;
-				for (y=ey; y<ey+myself->hoth; y++)
-					if (ObstructAt(ex+myself->hotw+check-1, y+check)) return check-1;
-				break;
-		}
+	bool old_obs = myself->obstruction;
+	myself->obstruction = false;
+
+	int ret = max;
+
+	//mbg 03-dec-2011 - change to hardcoded ffmq motion
+	switch (d)
+	{
+	case NORTH:
+		if (ObstructAt(ex+8, ey-1)) ret = 0;
+		if (ObstructAt(ex+8, ey)) ret = 0;
+		break;
+	case SOUTH:
+		if (ObstructAt(ex+8, ey+16)) ret = 0;
+		if (ObstructAt(ex+8, ey+15)) ret = 0;
+		break;
+	case EAST:
+		if (ObstructAt(ex+16, ey+8)) ret = 0;
+		if (ObstructAt(ex+15, ey+8)) ret = 0;
+		break;
+	case WEST:
+		if (ObstructAt(ex-1, ey+8)) ret = 0;
+		if (ObstructAt(ex, ey+8)) ret = 0;
+		break;
 	}
-	return max;
+
+	myself->obstruction = old_obs;
+
+	return ret;
+
+
+	//for(int check = 1; check <= max+1; check++) {
+	//	switch (d)
+	//	{
+	//		case NORTH:
+	//			for (x=ex; x<ex+myself->hotw; x++)
+	//				if (ObstructAt(x, ey-check)) return check-1;
+	//			break;
+	//		case SOUTH:
+	//			for (x=ex; x<ex+myself->hotw; x++)
+	//				if (ObstructAt(x, ey+myself->hoth+check-1)) return check-1;
+	//			break;
+	//		case WEST:
+	//			for (y=ey; y<ey+myself->hoth; y++)
+	//				if (ObstructAt(ex-check, y)) return check-1;
+	//			break;
+	//		case EAST:
+	//			for (y=ey; y<ey+myself->hoth; y++)
+	//				if (ObstructAt(ex+myself->hotw+check-1, y)) return check-1;
+	//			break;
+	//		case NW:
+	//			for (x=ex; x<ex+myself->hotw; x++)
+	//				if (ObstructAt(x-check, ey-check)) return check-1;
+	//			for (y=ey; y<ey+myself->hoth; y++)
+	//				if (ObstructAt(ex-check, y-check)) return check-1;
+	//			break;
+	//		case SW:
+	//			for (x=ex; x<ex+myself->hotw; x++)
+	//				if (ObstructAt(x-check, ey+myself->hoth+check-1)) return check-1;
+	//			for (y=ey; y<ey+myself->hoth; y++)
+	//				if (ObstructAt(ex-check, y+check)) return check-1;
+	//			break;
+	//		case NE:
+	//			for (x=ex; x<ex+myself->hotw; x++)
+	//				if (ObstructAt(x+check, ey-check)) return check-1;
+	//			for (y=ey; y<ey+myself->hoth; y++)
+	//				if (ObstructAt(ex+myself->hotw+check-1, y-check)) return check-1;
+	//			break;
+	//		case SE:
+	//			for (x=ex; x<ex+myself->hoth; x++)
+	//				if (ObstructAt(x+check, ey+myself->hoth+check-1)) return check-1;
+	//			for (y=ey; y<ey+myself->hoth; y++)
+	//				if (ObstructAt(ex+myself->hotw+check-1, y+check)) return check-1;
+	//			break;
+	//	}
+	//}
+	//return max;
 }
 
 void onStep() {
@@ -331,9 +369,9 @@ void ProcessControls()
 		return;
 	}
 
-	if( myself->movecode == 3 ) {
-		ScriptEngine::PlayerEntityMoveCleanup();
-	}
+	//if( myself->movecode == 3 ) {
+	//	ScriptEngine::PlayerEntityMoveCleanup();
+	//}
 
 	// kill contradictory input
 	if (up && down) up = down = false;
@@ -365,48 +403,6 @@ void ProcessControls()
 		}
 	}
 
-	// check diagonals first
-	if (left && up)
-	{
-		myself->setface(WEST);
-		int dist = MaxPlayerMove(NW, playerstep);
-		if (dist)
-		{
-			myself->set_waypoint_relative(-1*dist, -1*dist);
-			return;
-		}
-	}
-	if (right && up)
-	{
-		myself->setface(EAST);
-		int dist = MaxPlayerMove(NE, playerstep);
-		if (dist)
-		{
-			myself->set_waypoint_relative(dist, -1*dist);
-			return;
-		}
-	}
-	if (left && down)
-	{
-		myself->setface(WEST);
-		int dist = MaxPlayerMove(SW, playerstep);
-		if (dist)
-		{
-			myself->set_waypoint_relative(-1*dist, dist);
-			return;
-		}
-	}
-	if (right && down)
-	{
-		myself->setface(EAST);
-		int dist = MaxPlayerMove(SE, playerstep);
-		if (dist)
-		{
-			myself->set_waypoint_relative(dist, dist);
-			return;
-		}
-	}
-
 	// check four cardinal directions last
 	if (up)
 	{
@@ -414,27 +410,8 @@ void ProcessControls()
 		int dist = MaxPlayerMove(NORTH, playerstep);
 		if (dist)
 		{
-			myself->set_waypoint_relative(0, -1*dist);
+			myself->set_waypoint_relative_player(0, -1*dist);
 			return;
-		}
-
-		if(playerdiagonals) {
-			// check for sliding along walls if we permit diagonals
-			dist = MaxPlayerMove(NW, playerstep);
-			if (dist)
-			{
-				myself->setface(WEST);
-				myself->set_waypoint_relative(-1*dist, -1*dist);
-				return;
-			}
-
-			dist = MaxPlayerMove(NE, playerstep);
-			if (dist)
-			{
-				myself->setface(EAST);
-				myself->set_waypoint_relative(dist, -1*dist);
-				return;
-			}
 		}
 	}
 	if (down)
@@ -443,27 +420,8 @@ void ProcessControls()
 		int dist = MaxPlayerMove(SOUTH, playerstep);
 		if (dist)
 		{
-			myself->set_waypoint_relative(0, dist);
+			myself->set_waypoint_relative_player(0, dist);
 			return;
-		}
-
-		if(playerdiagonals) {
-			// check for sliding along walls if we permit diagonals
-			dist = MaxPlayerMove(SW, playerstep);
-			if (dist)
-			{
-				myself->setface(WEST);
-				myself->set_waypoint_relative(-1*dist, 1*dist);
-				return;
-			}
-
-			dist = MaxPlayerMove(SE, playerstep);
-			if (dist)
-			{
-				myself->setface(EAST);
-				myself->set_waypoint_relative(dist, dist);
-				return;
-			}
 		}
 	}
 	if (left)
@@ -472,27 +430,8 @@ void ProcessControls()
 		int dist = MaxPlayerMove(WEST, playerstep);
 		if (dist)
 		{
-			myself->set_waypoint_relative(-1*dist, 0);
+			myself->set_waypoint_relative_player(-1*dist, 0);
 			return;
-		}
-
-		if(playerdiagonals) {
-			// check for sliding along walls if we permit diagonals
-			dist = MaxPlayerMove(NW, playerstep);
-			if (dist)
-			{
-				myself->setface(WEST);
-				myself->set_waypoint_relative(-1*dist, -1*dist);
-				return;
-			}
-
-			dist = MaxPlayerMove(SW, playerstep);
-			if (dist)
-			{
-				myself->setface(WEST);
-				myself->set_waypoint_relative(-1*dist, 1*dist);
-				return;
-			}
 		}
 	}
 	if (right)
@@ -501,29 +440,11 @@ void ProcessControls()
 		int dist = MaxPlayerMove(EAST, playerstep);
 		if (dist)
 		{
-			myself->set_waypoint_relative(dist, 0);
+			myself->set_waypoint_relative_player(dist, 0);
 			return;
 		}
-
-		if(playerdiagonals) {
-			// check for sliding along walls if we permit diagonals
-			dist = MaxPlayerMove(NE, playerstep);
-			if (dist)
-			{
-				myself->setface(EAST);
-				myself->set_waypoint_relative(dist, -1*dist);
-				return;
-			}
-
-			dist = MaxPlayerMove(SE, playerstep);
-			if (dist)
-			{
-				myself->setface(EAST);
-				myself->set_waypoint_relative(dist, dist);
-				return;
-			}
-		}
 	}
+	myself->continuous = false;
 
 	// Check for entity/zone activation
 	if( b1 )
@@ -576,7 +497,7 @@ void ProcessControls()
 		}
 
 		int cz = current_map->zone(ex/16, ey/16);
-		if (cz && strlen(current_map->zones[cz]->script) && current_map->zones[cz]->method)
+		if (cz && current_map->zones[cz]->method)
 		{
 			int cur_timer = timer;
 
@@ -585,7 +506,13 @@ void ProcessControls()
 			event_ty = ey/16;
 			event_entity = i;
 
-			se->ExecuteFunctionString(current_map->zones[cz]->script);
+			if(current_map->zones[cz]->script[0])
+				se->ExecuteFunctionString(current_map->zones[cz]->script);
+			else if(current_map->zones[cz]->name[0])
+				se->ExecuteFunctionString(current_map->zones[cz]->name);
+			else
+				se->ExecuteCallback(zonefunc,true);
+
 			timer = cur_timer;
 		}
 	}
@@ -625,19 +552,21 @@ void MapScroller()
 
 void Render()
 {
-	if( !current_map) return;
-	if( cheats && !inscroller && lastpressed == 41 )
-		MapScroller();
-
-	int rmap = (current_map->mapwidth * 16);
-	int dmap = (current_map->mapheight * 16);
-
-	switch (cameratracking)
+	if(current_map)
 	{
+		if( cheats && !inscroller && lastpressed == 41 )
+			MapScroller();
+
+		int rmap = (current_map->mapwidth * 16);
+		int dmap = (current_map->mapheight * 16);
+
+
+		switch (cameratracking)
+		{
 		case 0:
-			if( xwin + screen->width >= rmap )
-			 	xwin = rmap - screen->width;
-			if( ywin + screen->height >= dmap )
+			if( xwin + 200 >= rmap )
+				xwin = rmap - screen->width;
+			if( ywin + 120 >= dmap )
 				ywin = dmap - screen->height;
 			if( xwin < 0 ) xwin = 0;
 			if( ywin < 0 ) ywin = 0;
@@ -645,16 +574,21 @@ void Render()
 		case 1:
 			if( myself )
 			{
-				xwin = (myself->getx() + myself->hotw/2) - (screen->width / 2);
-				ywin = (myself->gety() + myself->hoth/2) - (screen->height / 2);
+				//xwin = (myself->getx() + myself->hotw/2) - (screen->width / 2);
+				//ywin = (myself->gety() + myself->hoth/2) - (screen->height / 2);
+				xwin = (myself->getx() + myself->hotw/2) - (200 / 2);
+				ywin = (myself->gety() + myself->hoth/2) - (120 / 2);
 			}
 			else xwin=0, ywin=0;
-			if (xwin + screen->width >= rmap)
-				xwin = rmap - screen->width;
-			if (ywin + screen->height >= dmap)
-				ywin = dmap - screen->height;
-			if (xwin < 0) xwin = 0;
-			if (ywin < 0) ywin = 0;
+			if(cameraclamp)
+			{
+				if (xwin + 200 >= rmap)
+					xwin = rmap - screen->width;
+				if (ywin + 120 >= dmap)
+					ywin = dmap - screen->height;
+				if (xwin < 0) xwin = 0;
+				if (ywin < 0) ywin = 0;
+			}
 			break;
 		case 2:
 			if (cameratracker>=entities || cameratracker<0)
@@ -664,18 +598,29 @@ void Render()
 			}
 			else
 			{
-				xwin = (entity[cameratracker]->getx() + 8) - (screen->width/2);
-				ywin = (entity[cameratracker]->gety() + 8) - (screen->height/2);
+				Entity* target = entity[cameratracker];
+				xwin = (target->getx() + target->hotw/2) - (200 / 2);
+				ywin = (target->gety() + target->hoth/2) - (120 / 2);
 			}
-			if (xwin + screen->width >= rmap)
+			if (xwin + 200 >= rmap)
 				xwin = rmap - screen->width;
-			if (ywin + screen->height >= dmap)
+			if (ywin + 120 >= dmap)
 				ywin = dmap - screen->height;
 			if (xwin < 0) xwin = 0;
 			if (ywin < 0) ywin = 0;
 			break;
+		}
 	}
-	current_map->render(xwin, ywin, screen);
+
+	if(realRenderFunc.IsValid())
+	{
+		se->ExecuteCallback(realRenderFunc,true);
+	}
+	else
+	{
+		if(current_map)
+			current_map->render(xwin, ywin, screen);
+	}
 }
 
 void CheckZone()
@@ -689,7 +634,12 @@ void CheckZone()
 	if (rnd(0,254) < current_map->zones[cz]->percent)
 	{
 		event_zone = cz;
-		se->ExecuteFunctionString(current_map->zones[cz]->script);
+		if(current_map->zones[cz]->script[0])
+			se->ExecuteFunctionString(current_map->zones[cz]->script);
+		else if(current_map->zones[cz]->name[0])
+			se->ExecuteFunctionString(current_map->zones[cz]->name);
+		else
+			se->ExecuteCallback(zonefunc,true);
 	}
 	timer = cur_timer;
 }
@@ -701,31 +651,80 @@ void TimedProcessEntities()
 
 	while (lastentitythink < systemtime)
 	{
+		lastentitythink++;
 		if (done) break;
 		if (myself)
 		{
-			px = (myself->getx()+(myself->hotw/2)) / 16;
-			py = (myself->gety()+(myself->hoth/2)) / 16;
+			//px = (myself->getx()+15) / 16;
+			//py = (myself->gety()+15) / 16;
 		}
 		ProcessEntities();
-		if (!invc) ProcessControls();
 		if (myself && !invc)
 		{
-			if ((px != (myself->getx()+(myself->hotw/2)) / 16) || (py != (myself->gety()+(myself->hoth/2)) / 16))
+			int tx = myself->getx()/16;
+			int ty = myself->gety()/16;
+			int px = myself->getx() & 15;
+			int py = myself->gety() & 15;
+			bool ignore_x = myself->last_tx==-1;
+			bool ignore_y = myself->last_ty==-1;
+			bool xd = myself->last_tx != tx;
+			bool yd = myself->last_ty != ty;
+			bool ignore = ignore_x && xd || ignore_y && yd;
+			
+			if((xd || yd) && px==0 && py == 0)
+			//if ((px != (myself->getx()+15) / 16) || (py != (myself->gety()+15) / 16))
 			{
-				px = (myself->getx()+(myself->hotw/2)) / 16;
-				py = (myself->gety()+(myself->hoth/2)) / 16;
-				
+			/*	px = (myself->getx()+15) / 16;
+				py = (myself->gety()+15) / 16;
 				event_tx = px;
-				event_ty = py;
-
-				onStep();
-				CheckZone();
-				afterStep();
+				event_ty = py;*/
+				::px = myself->last_tx = tx;
+				::py = myself->last_ty = ty;
+				
+				if(!ignore)
+				{
+					//onStep();
+					CheckZone();
+					afterStep();
+				}
 			}
 		}
-		lastentitythink++;
+
+		//mbg 27-dec-2011 - moved this down below the other code to keep one step from happening in 
+		//the same frame as a zone event
+		if (!invc) ProcessControls();
 	}
+	//UGH
+	//if (entitiespaused)
+	//	return;
+
+	//while (lastentitythink < systemtime)
+	//{
+	//	if (done) break;
+	//	if (myself)
+	//	{
+	//		px = (myself->getx()+15) / 16;
+	//		py = (myself->gety()+15) / 16;
+	//	}
+	//	ProcessEntities();
+	//	if (!invc) ProcessControls();
+	//	if (myself && !invc)
+	//	{
+	//		if ((px != (myself->getx()+15) / 16) || (py != (myself->gety()+15) / 16))
+	//		{
+	//			px = (myself->getx()+15) / 16;
+	//			py = (myself->gety()+15) / 16;
+	//			
+	//			event_tx = px;
+	//			event_ty = py;
+
+	//			onStep();
+	//			CheckZone();
+	//			afterStep();
+	//		}
+	//	}
+	//	lastentitythink++;
+	//}
 }
 
 void TimedProcessSprites()

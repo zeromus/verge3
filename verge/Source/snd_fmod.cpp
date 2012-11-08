@@ -20,7 +20,6 @@
 #include "xerxes.h"
 #include "snd_fmod.h"
 #include "../fmod/fmod.h"
-#include "garlick.h"
 
 #ifdef SND_USE_FMOD
 
@@ -78,22 +77,22 @@ public:
 };
 
 static void *dumb_open(const char *filename) {
-	return GarlickOpen((char*)filename,"library");
+	return fopen((char*)filename,"rb");
 }
 static int dumb_skip(void *f, long n) {
-	return GarlickSeek((GarlickFile*)f,n,SEEK_CUR);
+	return fseek((FILE*)f,n,SEEK_CUR);
 }
 static int dumb_getc(void *f) {
 	unsigned char buf;
-	if(GarlickRead(&buf,1,1,(GarlickFile*)f) != 1)
+	if(fread(&buf,1,1,(FILE*)f) != 1)
 		return -1;
 	else return buf;
 }
 static long dumb_getnc(char *ptr, long n, void *f) {
-	return GarlickRead(ptr,1,n,(GarlickFile*)f);
+	return fread(ptr,1,n,(FILE*)f);
 }
 static void dumb_close(void *f) {
-	GarlickClose((GarlickFile*)f);
+	fclose((FILE*)f);
 }
 
 static DUMBFILE_SYSTEM dumb_filesystem = {
@@ -137,27 +136,27 @@ struct advsong songs[MAX_SONGS];
 
 unsigned int F_CALLBACKAPI myopen(const char *name)
 {
-	return (unsigned int)GarlickOpen((char *)name,"library");
+	return (unsigned int)fopen((char *)name,"rb");
 }
 
 void F_CALLBACKAPI myclose(unsigned int handle)
 {
-	GarlickClose((GarlickFile *)handle);
+	fclose((FILE*)handle);
 }
 
 int F_CALLBACKAPI myread(void *buffer, int size, unsigned int handle)
 {
-	return GarlickRead(buffer,1,size,(GarlickFile*)handle);
+	return fread(buffer,1,size,(FILE*)handle);
 }
 
 int F_CALLBACKAPI myseek(unsigned int handle, int pos, signed char mode)
 {
-	return GarlickSeek((GarlickFile*)handle,pos,mode);
+	return fseek((FILE*)handle,pos,mode);
 }
 
 int F_CALLBACKAPI mytell(unsigned int handle)
 {
-	return (int)GarlickTell((GarlickFile*)handle);
+	return (int)ftell((FILE*)handle);
 }
 
 bool SoundEngine_Fmod::init()
@@ -232,23 +231,6 @@ void SoundEngine_Fmod::PlayMusic(const std::string &ssng)
 			else err("DUMB Couldnt load specified song: %s",sng);
 		}
 	#endif
-
-	// Fail checks pass, now lets check the file extension to see if its a midi or a mp3/ogg
-	if (ExtensionIs(sng, "mid") || ExtensionIs(sng, "midi") || ExtensionIs(sng, "rmi"))
-	{
-		// MIDI wont load through the File I/O callbacks, so we need to load it into memory ourselves.
-		VFILE *f = vopen(sng);
-		int len = filesize(f);
-		char *buf = (char *) malloc(len);
-		vread(buf, len, f);
-		vclose(f);
-		curmod = FMUSIC_LoadSongEx(buf, 0,  len, FSOUND_LOADMEMORY, 0, 0);
-		free(buf);
-		if (curmod)
-			FMUSIC_PlaySong(curmod);
-		FMUSIC_SetLooping(curmod, true);
-		return;
-	}
 
 	if (ExtensionIs(sng, "mp3") || ExtensionIs(sng, "mpeg3") || ExtensionIs(sng, "ogg"))
 	{
@@ -336,10 +318,10 @@ int SoundEngine_Fmod::LoadSong(const std::string &xfn)
 		return -1;
 	if (!strlen(fn))
 		return -1;
-	VFILE *f = vopen(fn);
+	FILE *f = fopen(fn,"rb");
 	if (!f)
 		return -1;
-	vclose(f);
+	fclose(f);
 
 	songs[si].mod = 0;
 	songs[si].str = 0;
@@ -362,24 +344,6 @@ int SoundEngine_Fmod::LoadSong(const std::string &xfn)
 		}
 	#endif
 
-	// Fail checks pass, now lets check the file extension to see if its a midi or a mp3/ogg
-	if (ExtensionIs(fn, "mid") || ExtensionIs(fn, "midi") || ExtensionIs(fn, "rmi"))
-	{
-		// MIDI wont load through the File I/O callbacks, so we need to load it into memory ourselves.
-		f = vopen(fn);
-		int len = filesize(f);
-		char *buf = (char *) malloc(len);
-		vread(buf, len, f);
-		vclose(f);
-		songs[si].mod = FMUSIC_LoadSongEx(buf, 0,  len, FSOUND_LOADMEMORY, 0, 0);
-		free(buf);
-		if (songs[si].mod)
-		{
-			songs[si].active = true;
-			return si;
-		}
-		return -1;
-	}
 
 	if (ExtensionIs(fn, "mp3") || ExtensionIs(fn, "mpeg3") || ExtensionIs(fn, "ogg"))
 	{

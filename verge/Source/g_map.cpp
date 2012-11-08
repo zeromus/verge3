@@ -24,18 +24,18 @@
 char maptag[] = { 'V','3','M','A','P','\0' };
 
 /****************************** code ******************************/
-Layer::Layer(VFILE *f)
+Layer::Layer(FILE *f)
 {
 	lucent = 0; width = height = 0;
-	vread(layername, 256, f);
-	vread(&parallax_x, 8, f);
-	vread(&parallax_y, 8, f);
-	vread(&width, 2, f);
-	vread(&height, 2, f);
-	vread(&lucent, 1, f);
+	fread(layername, 256,1,f);
+	fread(&parallax_x, 8,1,f);
+	fread(&parallax_y, 8,1,f);
+	fread(&width, 2,1,f);
+	fread(&height, 2,1,f);
+	fread(&lucent, 1,1,f);
 
 	tiledata = new word[width*height];
-	cvread(tiledata, width*height*2, f);
+	cfread(tiledata, width*height*2,1,f);
     x_offset = y_offset = 0; // no offset until parallax has changed
 }
 
@@ -105,7 +105,11 @@ MAP::MAP() {
 
 MAP::MAP(char *fname)
 {
-	VFILE *f = vopen(fname);
+	std::string fixed_fname = normalize_path(fname);
+	fixed_fname = "./" + fixed_fname;
+	fname = (char*)fixed_fname.c_str();
+
+	FILE *f = fopen(fname,"rb");
 	if (!f)
 		err("MAP::MAP() - could not load map %s", fname);
 
@@ -113,28 +117,43 @@ MAP::MAP(char *fname)
 	strlwr(mapfname);
 
 	char signature[8];
-	vread(signature, 6, f);
+	fread(signature, 6,1,f);
 	if (strcmp(signature, maptag))
 		err("MAP::MAP() - %s is not a valid mapfile!", fname);
 
 	int version;
-	vread(&version, 4, f);
-	if (version != MAP_VERSION)
-		err("MAP::MAP() - %s is not the correct MAP format version!", fname);
-	vread(&version, 4, f); // skip vc offset
+	fread(&version, 4,1,f);
+	//if (version != MAP_VERSION) err("MAP::MAP() - %s is not the correct MAP format version!", fname);
 
-	vread(mapname, 256, f);
-	vread(vspname, 256, f);
+	int vcoffset;
+	fread(&vcoffset, 4,1,f); // skip vc offset
+
+	//skip notes
+	if(version>=3)
+	{
+		int numNotes;
+		fread(&numNotes,4,1,f);
+		for(int i=0;i<numNotes;i++)
+		{
+			int len;
+			fseek(f,4,SEEK_CUR); fseek(f,4,SEEK_CUR); //skip tx and ty
+			fread(&len,4,1,f);
+			fseek(f,len,SEEK_CUR);
+		}
+	}
+
+	fread(mapname, 256,1,f);
+	fread(vspname, 256,1,f);
 	strcpy(savevspname, vspname); // Overkill 2006-05-21
-	vread(musicname, 256, f);
-	vread(renderstring, 256, f);
-	vread(startupscript, 256, f);
+	fread(musicname, 256,1,f);
+	fread(renderstring, 256,1,f);
+	fread(startupscript, 256,1,f);
 
 	PlayMusic(musicname);
 
 	startx = starty = 0;
-	vread(&startx, 2, f);
-	vread(&starty, 2, f);
+	fread(&startx, 2,1,f);
+	fread(&starty, 2,1,f);
 
 	std::string s = std::string(fname);
 	int offs = s.rfind('\\');
@@ -155,7 +174,7 @@ MAP::MAP(char *fname)
 			tileset = new VSP(vspname);
 	}
 
-	vread(&numlayers, 4, f);
+	fread(&numlayers, 4,1,f);
 
 	//layers = new Layer*[numlayers];
 	layers.resize(numlayers);
@@ -168,62 +187,62 @@ MAP::MAP(char *fname)
 
 	obslayer = new byte[mapwidth*mapheight];
 	zonelayer = new word[mapwidth*mapheight];
-	cvread(obslayer, mapwidth*mapheight, f);
-	cvread(zonelayer, mapwidth*mapheight*2, f);
+	cfread(obslayer, mapwidth*mapheight,1,f);
+	cfread(zonelayer, mapwidth*mapheight*2,1,f);
 
-	vread(&numzones, 4, f);
+	fread(&numzones, 4,1,f);
 	zones.resize(numzones);
 	for (i=0; i<numzones; i++)
 	{
 		zones[i] = new Zone;
 		zones[i]->percent = zones[i]->method = zones[i]->delay = 0;
-		vread(zones[i]->name, 256, f);
-		vread(zones[i]->script, 256, f);
-		vread(&zones[i]->percent, 1, f);
-		vread(&zones[i]->delay, 1, f);
-		vread(&zones[i]->method, 1, f);
+		fread(zones[i]->name, 256,1,f);
+		fread(zones[i]->script, 256,1,f);
+		fread(&zones[i]->percent, 1,1,f);
+		fread(&zones[i]->delay, 1,1,f);
+		fread(&zones[i]->flags, 1,1,f);
 	}
 
-	vread(&mapentities, 4, f);
+	fread(&mapentities, 4,1,f);
 
 	for (i=0; i<mapentities; i++)
 	{
 		int t=0, x1=0, y1=0, x2=0, y2=0;
 		char movescript[256], chrname[256], script[256], description[256];
 
-		vread(&x1, 2, f);
-		vread(&y1, 2, f);
+		fread(&x1, 2,1,f);
+		fread(&y1, 2,1,f);
 		int o1 = vtell(f);
 		vseek(f, 22, 1);
-		vread(movescript, 256, f);
-		vread(chrname, 256, f);
-		vread(description, 256, f); // this is actually the description which we dont care about
-		vread(script, 256, f); // this is the actual script
+		fread(movescript, 256,1,f);
+		fread(chrname, 256,1,f);
+		fread(description, 256,1,f); // this is actually the description which we dont care about
+		fread(script, 256,1,f); // this is the actual script
 		vseek(f, o1, 0);
 
 		int i = AllocateEntity(x1*16, y1*16, chrname);
 
 		entity[i]->description = description;
 		entity[i]->script = script;
-		vread(&t, 1, f);
+		fread(&t, 1,1,f);
 		if (!t) t = SOUTH;
 		entity[i]->setface(t); t=0;
-		vread(&t, 1, f);
+		fread(&t, 1,1,f);
 		entity[i]->obstructable = t ? true : false; t=0;
-		vread(&t, 1, f);
+		fread(&t, 1,1,f);
 		entity[i]->obstruction = t ? true : false; t=0;
-		vread(&t, 1, f);
+		fread(&t, 1,1,f);
 		entity[i]->autoface = (t!=0); t=0;
-		vread(&t, 2, f);
+		fread(&t, 2,1,f);
 		entity[i]->setspeed(t); t=0;
-		vread(&t, 1, f);
+		fread(&t, 1,1,f);
 		// activation mode FIXME
-		vread(&t, 1, f);
+		fread(&t, 1,1,f);
 
-		vread(&x1, 2, f);
-		vread(&y1, 2, f);
-		vread(&x2, 2, f);
-		vread(&y2, 2, f);
+		fread(&x1, 2,1,f);
+		fread(&y1, 2,1,f);
+		fread(&x2, 2,1,f);
+		fread(&y2, 2,1,f);
 		switch(t)
 		{
 			case 0: entity[i]->SetMotionless(); break;
@@ -231,35 +250,35 @@ MAP::MAP(char *fname)
 			case 2: entity[i]->SetWanderBox(x1, y1, x2, y2); break; //FIXME
 			case 3: entity[i]->SetMoveScript(movescript); break;
 		}
-		t=0; vread(&t, 2, f);
+		t=0; fread(&t, 2,1,f);
 		entity[i]->SetWanderDelay(t);
-		vread(&t, 4, f);
+		fread(&t, 4,1,f);
 		vseek(f, 1024, 1);
 		/*
-		vread(&tlen, 4, f);
-		vread(ename, tlen+1, f);
+		fread(&tlen, 4,1,f);
+		fread(ename, tlen+1,1,f);
 		// chr filename
-		vread(&tlen, 4, f);
-		vread(chrfn, tlen+1, f);
+		fread(&tlen, 4,1,f);
+		fread(chrfn, tlen+1,1,f);
 		// script
-		vread(&tlen, 4, f);
-		vread(escript, tlen+1, f);
+		fread(&tlen, 4,1,f);
+		fread(escript, tlen+1,1,f);
 		// movescript
-		vread(&tlen, 4, f);
-		vread(emovescript, tlen+1, f);
+		fread(&tlen, 4,1,f);
+		fread(emovescript, tlen+1,1,f);
 
-		vread(&tlen, 4, f);
-		vread(&tlen, 4, f);
+		fread(&tlen, 4,1,f);
+		fread(&tlen, 4,1,f);
 		int eface, speed, tx, ty;
-		vread(&eface, 4, f);
-		vread(&speed, 4, f);
-		vread(&tx, 4, f);
-		vread(&ty, 4, f);
+		fread(&eface, 4,1,f);
+		fread(&speed, 4,1,f);
+		fread(&tx, 4,1,f);
+		fread(&ty, 4,1,f);
 
-		vread(&x1, 4, f);
-		vread(&y1, 4, f);
-		vread(&x2, 4, f);
-		vread(&y2, 4, f);
+		fread(&x1, 4,1,f);
+		fread(&y1, 4,1,f);
+		fread(&x2, 4,1,f);
+		fread(&y2, 4,1,f);
 
 		int idx = AllocateEntity(tx*16, ty*16, chrfn);
 		entity[idx]->setface(eface);
@@ -273,10 +292,24 @@ MAP::MAP(char *fname)
 		if (method == ENT_WANDERZONE) entity[idx]->SetWanderZone();
 		if (method == ENT_WANDERBOX) entity[idx]->SetWanderBox(x1, y1, x2, y2);*/
 	}
+	
+	fclose(f);
 	current_map = this;
-	se->LoadMapScript(f, mapfname);
-	vclose(f);
-	se->ExecuteFunctionString(startupscript);
+
+//	std::string tmpstr = mapfname;
+//#ifdef __WIN32__
+//	boost::algorithm::replace_all(tmpstr, "/", "\\");
+//#endif
+//	FILE* vcf = fopen(tmpstr.c_str(),"rb");
+
+	{
+		std::string script_id = fname;
+		boost::algorithm::to_lower(script_id);
+		boost::algorithm::replace_all(script_id, "\\", "/");
+		EMUFILE_MEMORY memf(&g_ScriptDatabase.scripts[script_id]->data);
+		se->LoadMapScript(&memf, mapfname);
+		se->ExecuteFunctionString(startupscript);
+	}
 }
 
 MAP::~MAP()
@@ -291,8 +324,10 @@ MAP::~MAP()
 	delete[] zonelayer;
 
 	for (i=0; i<entities; i++)
-		delete entity[i],
+	{
+		delete entity[i];
 		entity[i]=0;
+	}
 	entities = 0;
 }
 
@@ -347,7 +382,7 @@ void MAP::save(FILE *f)
 		fwrite(zones[i]->script, 1, 256, out);
 		fwrite(&zones[i]->percent, 1, 1, out);
 		fwrite(&zones[i]->delay, 1, 1, out);
-		fwrite(&zones[i]->method, 1, 1, out);
+		fwrite(&zones[i]->flags, 1, 1, out);
 	}
 
 	// ENTITIES! <3.
@@ -400,12 +435,12 @@ void MAP::save(FILE *f)
 	// Now that we've finished the buffer though, we can
 	// use this to fill in the unknown map information.
 	
-	VFILE *tmp = vopen(tempfn);
+	FILE *tmp = fopen(tempfn,"rb");
 	if (!tmp) err("Could not open %s for reading!", tempfn);
 	int bufferlength = filesize(tmp);
 	byte* buf = new byte[bufferlength];
 	vread(buf, bufferlength, tmp);
-	vclose(tmp);
+	fclose(tmp);
 	// Delete the temporary buffer, we've gotten what we wanted.
 	remove(tempfn);
 
@@ -461,19 +496,33 @@ void MAP::BlitLayer(int l, int tx, int ty, int xwin, int ywin, image *dest)
 		if (layer.lucent)
 			SetLucent(layer.lucent);
 
-	tileset->UpdateAnimations();
+	//tileset->UpdateAnimations();
 
     for (int y=0; y<ty; y++)
 	{
 		for (int x=0; x<tx; x++)
 		{
 			int c = layer.GetTile(xtc+x,ytc+y);
+			if(!cameraclamp)
+			{
+				int x1 = xtc+x;
+				int y1 = ytc+y;
+				if(x1<0||y1<0||x1>=layer.width||y1>=layer.height)
+				{
+					if(TRANSPARENT)
+						continue;
+					else
+						c=1;
+				}
+			}
 			if(TRANSPARENT) {
 				if(c)
 					tileset->TBlit((x*16)+xofs, (y*16)+yofs, c, dest);
 			}
 			else
+			{
 				tileset->Blit((x*16)+xofs, (y*16)+yofs, c, dest);
+			}
 		}
 	}
 	if (dest == screen)
@@ -561,7 +610,9 @@ void MAP::render(int x, int y, image *dest)
 
 		if (token[0] == 'E')
 		{
+			rtarget = dest;
 			RenderEntities();
+			rtarget = screen;
 			continue;
 		}
 		if (token[0] == 'R')

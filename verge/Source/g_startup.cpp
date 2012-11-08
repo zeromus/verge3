@@ -15,8 +15,6 @@
  ******************************************************************/
 
 #include "xerxes.h"
-#include "garlick.h"
-#include "lua_main.h"
 #include "opcodes.h"
 
 #include <memory>
@@ -29,18 +27,24 @@ int v3_window_xres=0, v3_window_yres = 0;
 // Overkill (2010-04-29): Aspect ratio enforcing.
 ScaleFormat v3_scale_win = SCALE_FORMAT_ASPECT, v3_scale_full = SCALE_FORMAT_STRETCH;
 
-bool windowmode = true;
-bool sound = true;
-bool cheats = false;
+bool windowmode=true;
+bool sound=true;
+bool cheats=false;
 char mapname[255];
+bool releasemode=false;
 bool automax = true;
+bool decompile = false;
 bool editcode = false;
 int gamerate = 100;
 int soundengine = 0;
+bool use_lua = false;
+bool vc_oldstring = false;
 
-int cf_r1, cf_g1, cf_b1;
-int cf_r2, cf_g2, cf_b2;
-int cf_rr, cf_gr, cf_br;
+VCCore *vc;
+
+#ifdef ALLOW_SCRIPT_COMPILATION
+VCCompiler *vcc = 0;
+#endif
 
 /****************************** code ******************************/
 
@@ -70,6 +74,9 @@ void LoadConfig()
             v3_scale_full = (ScaleFormat) value;
         }
     }
+	if (cfg_KeyPresent("bpp"))
+		v3_bpp = cfg_GetIntKeyValue("bpp");
+
 	if (cfg_KeyPresent("window_x_res"))
 		v3_window_xres = cfg_GetIntKeyValue("window_x_res");
 	if (cfg_KeyPresent("window_y_res"))
@@ -85,12 +92,22 @@ void LoadConfig()
 		automax = cfg_GetIntKeyValue("automax") ? true : false;
 	if (cfg_KeyPresent("startmap"))
 		strcpy(mapname, cfg_GetKeyValue("startmap"));
+	if (cfg_KeyPresent("vcverbose"))
+		verbose = cfg_GetIntKeyValue("vcverbose");
+//	if (cfg_KeyPresent("paranoid"))                FIXME
+//		vc_paranoid = cfg_GetIntKeyValue("paranoid");
+	if (cfg_KeyPresent("arraycheck"))
+		vc_arraycheck = cfg_GetIntKeyValue("arraycheck");
 	if (cfg_KeyPresent("appname"))
 		setWindowTitle(cfg_GetKeyValue("appname"));
+	if (cfg_KeyPresent("releasemode"))
+		releasemode = cfg_GetIntKeyValue("releasemode") ? true : false;
 	if (cfg_KeyPresent("gamerate"))
 		gamerate = cfg_GetIntKeyValue("gamerate");
 	if (cfg_KeyPresent("v3isuberlikethetens"))
 		cheats = true;
+	if (cfg_KeyPresent("decompile"))
+		decompile = true;
 	if (cfg_KeyPresent("editcode"))
 		editcode = cfg_GetIntKeyValue("editcode") ? true : false;
 	if (cfg_KeyPresent("logconsole"))
@@ -100,9 +117,16 @@ void LoadConfig()
 	} else if (cfg_KeyPresent("logconsole-normalstdout")) {
 		logconsole = true;
 	}
+    if (cfg_KeyPresent("oldstring"))
+        vc_oldstring = true;
 
 	void platform_ProcessConfig();
 	platform_ProcessConfig();
+
+	#ifndef ALLOW_SCRIPT_COMPILATION
+	releasemode = true;
+	editcode = false;
+	#endif
 }
 
 int getInitialWindowXres() {
@@ -137,60 +161,47 @@ void InitVideo()
 	}
 }
 
+extern int g_timer;
 void ShowPage()
 {
+	int snap = g_timer;
 	HookTimer();
 	TimedProcessSprites();
 	RenderSprites();
+	HookShowPage();
 	Flip();
+	//Sleep(100);
+
+	//wait for the time to advance.
+	//geh
+	while(snap==g_timer) Sleep(0);
+
+	int todo=0;
+	systemtime++;
+	todo=1;
+	//if (!engine_paused)
+	{
+		timer++;
+		vctimer++;
+		hooktimer++;
+	}
+
+	if(GetAsyncKeyState(VK_TAB))
+	{
+		todo = 8;
+		for(int i=0;i<7;i++)
+		{
+			systemtime++;
+			timer++;
+			vctimer++;
+			hooktimer++;
+		}
+	}
+
+	if(current_map != NULL)
+		current_map->tileset->UpdateAnimations();
 }
 
-#ifndef NOSPLASHSCREEN
-#ifdef __APPLE__
-#include "macsplash.h"
-#endif
-#ifdef __LINUX__
-#include "vcsplash.h"
-#endif
-#ifdef __WIN32__
-#include "vcsplash.h"
-#endif
-#endif
-
-#ifdef ALLOW_SCRIPT_COMPILATION
-void DisplayCompileImage()
-{
-#ifndef NOSPLASHSCREEN
-	FILE *f = fopen("__temp__img$$$.gif","wb");
-	if (!f) return; // oh well, we tried
-	fwrite(compileimg, 1, COMPILEIMG_LEN, f);
-	fclose(f);
-	image *splash = xLoadImage("__temp__img$$$.gif");
-	remove("__temp__img$$$.gif");
-	DrawRect(0, 0, screen->width, screen->height, 0, screen);
-	Blit((screen->width/2)-(splash->width/2), (screen->height/2)-(splash->height/2), splash, screen);
-	delete splash;
-	ShowPage();
-#endif
-}
-#endif
-
-//---
-//setup garlick to use vfile
-void *Garlick_vf_open(const char *fname) { return vopen(fname); }
-void Garlick_vf_close(void *handle) { vclose((VFILE*)handle); }
-size_t Garlick_vf_read(void *ptr, size_t elemsize, size_t amt, void *handle) { return vread((char *)ptr, elemsize*amt,(VFILE*)handle); }
-long Garlick_vf_tell(void *handle) { return vtell((VFILE*)handle); }
-int Garlick_vf_seek(void *handle, long offset, int origin) { vseek((VFILE*)handle,offset,origin); return 0; }
-void Garlick_error(const char *msg) { err(msg); }
-void InitGarlick() {
-	Garlick_cb_open = Garlick_vf_open;
-	Garlick_cb_close = Garlick_vf_close;
-	Garlick_cb_read = Garlick_vf_read;
-	Garlick_cb_tell = Garlick_vf_tell;
-	Garlick_cb_seek = Garlick_vf_seek;
-	Garlick_cb_error = Garlick_error;
-}
 
 #ifdef ALLOW_SCRIPT_COMPILATION
 bool CompileMaps(const char *ext, MapScriptCompiler *compiler, char *directory = NULL)
@@ -241,7 +252,6 @@ void xmain(int argc, char *argv[])
 	vc_initBuiltins();
 	vc_initLibrary();
 
-	InitGarlick();
 	Handle::init();
 
 	strcpy(mapname,"");
@@ -261,22 +271,45 @@ void xmain(int argc, char *argv[])
 	joy_Init();
 	InitScriptEngine();
 
-	gameWindow->setTitle(APPNAME);
+	//---cross-platform plugins initialization
+//	extern void p_datastructs();
+	//p_datastructs();
+	//---------
 
 	if (sound) snd_Init(soundengine);
 
-	win_movie_init();
 	ResetSprites();
 	timer_Init(gamerate);
 
-	LUA *lua;
-	se = lua = new LUA();
-	
 	#ifdef ALLOW_SCRIPT_COMPILATION
-	DisplayCompileImage();
-	lua->compileSystem();
-	CompileMaps("lua", lua);
+	if(!releasemode)
+		vcc = new VCCompiler();
 	#endif
+
+	#ifdef ALLOW_SCRIPT_COMPILATION
+	#endif
+
+	#ifdef ALLOW_SCRIPT_COMPILATION
+	if (!releasemode)
+	{
+		bool result = vcc->CompileAll();
+		if (!result) err(vcc->errmsg);
+		vcc->ExportSystemXVC();
+		result = CompileMaps("vc",vcc);
+		{
+			EMUFILE_FILE mapf("maps.xvc","wb");
+			g_ScriptDatabase.Save(&mapf);
+		}
+		if (!result) err(vcc->errmsg);
+	}
+	#endif
+
+	se = vc = new VCCore();
+	if(releasemode)
+	{
+			EMUFILE_FILE mapf("maps.xvc","rb");
+			g_ScriptDatabase.Load(&mapf);
+	}
 	
 	se->ExecAutoexec();
 

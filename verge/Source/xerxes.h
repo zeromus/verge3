@@ -12,7 +12,6 @@
 #define XERXES_H
 
 #define ALLOW_SCRIPT_COMPILATION
-#define ENABLE_LUA
 
 #ifdef __APPLE__
 #include "TargetConditionals.h"
@@ -26,24 +25,10 @@
 //version info macros
 #define DEF_VERSION "Verge 3.2 2009.08.01"
 #define DEF_BUILD "20090801"
-#if defined(__IPHONE__)
-#define DEF_OS "iphone"
-#elif defined(__OSX__)
-#define DEF_OS "osx"
-#elif defined(__LINUX__)
-#define DEF_OS "linux"
-#elif defined(__PSP__)
-#define DEF_OS "psp"
-#elif defined(__WII__)
-#define DEF_OS "wii"
-#else
 #define DEF_OS "win"
-#endif
 
 #include <math.h>
 #include <vector>
-#include <map>
-#include <string>
 
 #ifdef WIN32
 #define __WIN32__ 1
@@ -52,20 +37,7 @@
 //sound configurations
 #ifdef __WIN32__
 #define SND_USE_FMOD
-//#define SND_USE_OAKRA
-#define SND_USE_AUDIERE
-#define GARLICK_USE_FLAC
 #endif
-
-#ifdef __OSX__
-#include "../fmod/fmod.h"
-#define SND_USE_FMOD
-#endif
-
-#ifdef __LINUX__
-#define SND_USE_FMOD
-#endif
-
 
 //mbg 9/5/05 determine whether to use asm in ddblit
 //and other configs too
@@ -80,13 +52,11 @@
 #define BLITTER_32BPP
 #define BLITTER_16BPP
 #define BLITTER_15BPP
-#define ENABLE_2XSAI
 #elif __LINUX__
 #define CDECL
 #define BLITTER_32BPP
 #define BLITTER_16BPP
 #define BLITTER_15BPP
-#define ENABLE_2XSAI
 #elif __PSP__
 #define CDECL
 #define NOSPLASHSCREEN
@@ -99,14 +69,12 @@
 #define BLITTER_32BPP
 //#define BLITTER_16BPP
 //#define BLITTER_15BPP
-//#define ENABLE_2XSAI
 #else
 #define DDBLIT_ASM
 #define CDECL _cdecl
 #define BLITTER_32BPP
 #define BLITTER_16BPP
 #define BLITTER_15BPP
-#define ENABLE_2XSAI
 //nominmax prevents windows.h from including lame min/max macros
 #define NOMINMAX
 #endif
@@ -197,8 +165,9 @@ typedef unsigned char  byte;
 #include "vid_sysfont.h"
 #include "a_common.h"
 #include "a_config.h"
-#include "a_vfile.h"
+#include "a_string.h"
 #include "a_codec.h"
+#include "a_dict.h"
 
 #ifdef __IPHONE__
 #include "vid_ddbase.h"
@@ -249,9 +218,7 @@ typedef unsigned char  byte;
 #include "win_keyboard.h"
 #include "win_mouse.h"
 #include "win_system.h"
-#include "win_editcode.h"
 #include "win_timer.h"
-#include "win_movie.h"
 
 #endif
 
@@ -264,10 +231,11 @@ typedef unsigned char  byte;
 #include "g_map.h"
 #include "g_sprites.h"
 #include "g_engine.h"
-#include "g_editcode.h"
 #include "g_sound.h"
+#include "vc_compiler.h"
+#include "vc_core.h"
 #include "g_startup.h"
-
+#include "emufile.h"
 
 //prototypes
 
@@ -278,4 +246,40 @@ void HandleMessages();
 int getInitialWindowXres();
 int getInitialWindowYres();
 
+#define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
+#ifndef CTASSERT
+#define	CTASSERT(x)		typedef char __assert ## y[(x) ? 1 : -1]
+#endif
+
+inline void fread_le(int* dest, FILE *fp) { fread(dest,1,sizeof(int),fp); }
+inline void fread_le(int* dest, EMUFILE *fp) { fp->fread(dest,sizeof(int)); }
+inline void vread(void* dst, int size, FILE* inf) { fread(dst,1,size,inf); }
+inline void vseek(FILE* inf, int offset, int origin) { fseek(inf,offset,origin); }
+inline char* vgets(char* buf, int maxcount, FILE*inf) { return fgets(buf,maxcount,inf); }
+inline int veof(FILE* inf) { return feof(inf); }
+inline int vtell(FILE* inf) { return ftell(inf); }
+inline int filesize(FILE* inf) {
+	int temp = ftell(inf);
+	fseek(inf,0,SEEK_END);
+	int len = ftell(inf);
+	fseek(inf,0,SEEK_SET);
+	return len;
+}
+
+inline bool Exist(char* fname) {
+	FILE* inf = fopen(fname,"rb");
+	if(!inf) return false;
+	fclose(inf);
+	return true;
+}
+
+inline std::string normalize_path(const std::string& str)
+{
+#ifdef __WIN32__
+	std::string temp = str;
+	boost::algorithm::replace_all(temp, "/", "\\");
+	return temp;
+#endif
+	return str;
+}
 #endif

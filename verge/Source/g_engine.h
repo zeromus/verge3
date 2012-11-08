@@ -8,12 +8,12 @@
 /// If you have altered this source file, please log your name, date, and what
 /// changes you made below this line.
 
-extern bool engine_paused;
+
 extern Entity *entity[256];
 extern Entity *myself;
 extern int entities, player;
 extern int xwin, ywin;
-extern int cameratracking, cameratracker, entitiespaused, lastentitythink;
+extern int cameratracking, cameratracker, entitiespaused, lastentitythink, cameraclamp;
 extern bool done;
 extern int playerstep, playerdiagonals;
 extern MAP *current_map;

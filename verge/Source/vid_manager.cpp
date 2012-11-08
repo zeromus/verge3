@@ -24,8 +24,7 @@ bool vid_window = true;
 int vid_bpp, vid_xres, vid_yres;
 int vid_bytesperpixel;
 int transColor;
-image *screen = 0;
-AuxWindow *gameWindow;
+image *screen = 0, *rtarget = 0;
 
 /****************************************************************/
 
@@ -61,8 +60,6 @@ void   (*ColorFilter) (int filter, image *img);
 void   (*Triangle) (int x1, int y1, int x2, int y2, int x3, int y3, int c, image *dest);
 void   (*FlipBlit) (int x, int y, int fx, int fy, image *src, image *dest);
 image* (*ImageFrom8bpp) (byte *src, int width, int height, byte *pal);
-image* (*ImageFrom15bpp) (byte *src, int width, int height);
-image* (*ImageFrom16bpp) (byte *src, int width, int height);
 image* (*ImageFrom24bpp) (byte *src, int width, int height);
 image* (*ImageFrom32bpp) (byte *src, int width, int height);
 void   (*vid_Close) (void);
@@ -74,17 +71,6 @@ void   (*RectHGrad) (int x, int y, int xe, int ye, int color, int color2, image 
 void   (*RectRGrad) (int x1, int y1, int x2, int y2, int color1, int color2, image *dest);
 // janus 2006-07-22
 void   (*Rect4Grad) (int x1, int y1, int x2, int y2, int color1, int color2, int color3, int color4, image *dest);
-// Overkill (2007-05-04)
-int    (*HSVtoColor) (int h, int s, int v);
-// Overkill (2007-05-04)
-void    (*GetHSV) (int color, int &h, int &s, int &v);
-// Overkill (2007-05-04)
-void    (*HueReplace) (int hue_find, int hue_tolerance, int hue_replace, image *img);
-// Overkill (2007-05-04)
-void	(*ColorReplace) (int color_find, int color_replace, image *img);
-
-AuxWindow * (*vid_createAuxWindow)(void);
-AuxWindow * (*vid_findAuxWindow)(int handle);
 
 /***************************** code *****************************/
 

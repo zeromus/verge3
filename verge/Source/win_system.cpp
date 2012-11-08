@@ -46,9 +46,11 @@ void platform_ProcessConfig()
 {
 }
 
-int APIENTRY WinMain(HINSTANCE hCurrentInst, HINSTANCE zwhocares, LPSTR szCommandline, int nCmdShow)
+//int APIENTRY WinMain(HINSTANCE hCurrentInst, HINSTANCE zwhocares, LPSTR szCommandline, int nCmdShow)
+//{
+//	hMainInst = hCurrentInst;
+int main()
 {
-	hMainInst = hCurrentInst;
 	DesktopBPP = GetDeviceCaps(GetDC(NULL), BITSPIXEL);
 	v3_bpp = DesktopBPP;
 	//dd_init();
@@ -66,11 +68,11 @@ void setWindowTitle(const char *str) {
 	SetWindowText(hMainWnd, str);
 }
 
-std::string clipboard_getText()
+StringRef clipboard_getText()
 {
 	static char buf[4096];
 	if(!IsClipboardFormatAvailable(CF_TEXT))
-		return "";
+		return empty_string;
 
 	OpenClipboard(0);
 	HANDLE h = GetClipboardData(CF_TEXT);
@@ -80,7 +82,7 @@ std::string clipboard_getText()
 		GlobalUnlock(h);
 	} else buf[0] = 0;
 	CloseClipboard();
-	if(!buf[0]) return "";
+	if(!buf[0]) return empty_string;
 	else return buf;
 }
 
@@ -228,86 +230,9 @@ void win_removeWindow(HWND window)
 
 }
 
-LRESULT APIENTRY win_auxWindowProc(HWND hWnd, UINT message,WPARAM wParam, LPARAM lParam)
-{
-	AuxWindow *auxwin = (AuxWindow *)GetWindowLong(hWnd,GWL_USERDATA);
-	switch (message)
-	{
-		case WM_MOUSEMOVE:
-			{
-				if(!auxwin->bMouseInside)
-				{
-					auxwin->bMouseInside = true;
-					ShowCursor(0);
-					TRACKMOUSEEVENT tme = { sizeof(tme) };
-					tme.dwFlags = TME_LEAVE;
-					tme.hwndTrack = hWnd;
-					TrackMouseEvent(&tme);
-				}
-			}
-
-			break;
-		case WM_MOUSELEAVE:
-			{
-				auxwin->bMouseInside = false;
-				ShowCursor(1);
-			}
-			break;
-		case WM_SIZING:
-			{
-				if(!vid_window)
-					return false;
-
-				const int snap = 16;
-				RECT *dr = (RECT*)lParam;
-				RECT r;
-				RECT wndr;
-				GetClientRect(hWnd,&r);
-				GetWindowRect(hWnd,&wndr);
-				int framew = (wndr.right-wndr.left)-(r.right-r.left);
-				int frameh = (wndr.bottom-wndr.top)-(r.bottom-r.top);
-
-				int xres = auxwin->getImage()->width;
-				int yres = auxwin->getImage()->height;
-
-				int w = dr->right-dr->left;
-				int h = dr->bottom-dr->top;
-				w += snap;
-				h += snap;
-				w -= framew;
-				h -= frameh;
-				int wf = w/xres;
-				int hf = h/yres;
-				if(wf==0 || hf == 0)
-					return 0;
-
-				w -= snap;
-				h -= snap;
-				if(abs(w-xres*wf)<=snap)
-				{
-					if(wParam==WMSZ_LEFT || wParam==WMSZ_TOPLEFT || wParam==WMSZ_BOTTOMLEFT)
-						dr->left = dr->right - wf*xres - framew;
-					else
-						dr->right = dr->left + wf*xres + framew;
-				}
-				if(abs(h-yres*wf)<=snap)
-				{
-					if(wParam==WMSZ_TOP || wParam==WMSZ_TOPLEFT || wParam==WMSZ_TOPRIGHT)
-						dr->top = dr->bottom - hf*yres - frameh;
-					else
-						dr->bottom = dr->top + hf*yres + frameh;
-				}
-
-				return true;
-			}
-	}
-
-	return DefWindowProc(hWnd, message, wParam, lParam);
-}
-
 LRESULT APIENTRY win_gameWindowProc(HWND hWnd, UINT message,WPARAM wParam, LPARAM lParam)
 {
-	AuxWindow *auxwin = (AuxWindow *)GetWindowLong(hWnd,GWL_USERDATA);
+	gdi_Window *auxwin = (gdi_Window *)GetWindowLong(hWnd,GWL_USERDATA);
 	switch (message)
 	{
 
@@ -434,7 +359,6 @@ void err(const char *str, ...)
 	vsprintf(msg, str, argptr);
 	va_end(argptr);
 
-	win_movie_shutdown();
 	snd_Shutdown();
 
 
@@ -503,7 +427,7 @@ int getSecond()
 	return time.wSecond	;
 }
 
-void listFilePattern(std::vector<std::string> &res, const std::string& pattern)
+void listFilePattern(std::vector<std::string> &res, CStringRef pattern)
 {
 	_finddata_t rec;
 	int handle = _findfirst(pattern.c_str(), &rec);
@@ -517,13 +441,13 @@ void listFilePattern(std::vector<std::string> &res, const std::string& pattern)
 }
 
 
-void showMessageBox(const std::string& message)
+void showMessageBox(CStringRef message)
 {
 	MessageBoxA(GetDesktopWindow(), message.c_str(), APPNAME, MB_OK | MB_TASKMODAL);
 }
 
-std::string GetSystemSaveDirectory(const std::string& name)
+StringRef GetSystemSaveDirectory(CStringRef name)
 {
-  static const std::string dotSlash = "./";
+  static const StringRef dotSlash = "./";
   return dotSlash;
 }

@@ -21,7 +21,7 @@ struct LucentBlendMode
 {
     FORCEINLINE PT operator() (PT source, PT dest) const
     {
-#if BPP == 32
+				quad sourceA = (source >> 24) & 0xff;
         quad sourceR = (source >> 16) & 0xff;
         quad sourceG = (source >> 8) & 0xff;
         quad sourceB = (source & 0xff);
@@ -29,19 +29,14 @@ struct LucentBlendMode
         quad destR = (dest >> 16) & 0xff;
         quad destG = (dest >> 8) & 0xff;
         quad destB = (dest & 0xff);
+
+				int xalpha = 100-alpha;
+				int myalpha = (xalpha * sourceA) / 100;
+				int myialpha = 255-myalpha;
         
-        return ((((sourceR * ialpha) + (destR * alpha)) / 100) << 16) |
-                ((((sourceG * ialpha) + (destG * alpha)) / 100) << 8) |
-                ((((sourceB * ialpha) + (destB * alpha)) / 100));
-#elif BPP == 16
-		//TODO
-		bpperr();
-		return 0;
-#elif BPP == 15
-		//TODO
-		bpperr();
-		return 0;
-#endif
+        return (0xFF000000) | ((((sourceR * myalpha) + (destR * myialpha)) / 255) << 16) |
+                ((((sourceG * myalpha) + (destG * myialpha)) / 255) << 8) |
+                ((((sourceB * myalpha) + (destB * myialpha)) / 255));
     }
 };
 
@@ -148,37 +143,23 @@ FORCEINLINE void _UnpackColor(int c, int &r, int &g, int &b) {
 
 FORCEINLINE void BLEND_PIXELS(PT* dst, PT* src, byte* sa, const int num) {
 	for(int i=0;i<num;i++) {
-		if(BPP==32) {
-			const Color& sc = ((Color*)src)[i];
-			Color& dc = ((Color*)dst)[i];
+		const Color& sc = ((Color*)src)[i];
+		Color& dc = ((Color*)dst)[i];
 
-			if(sc.a == 0) continue;
-			if (sc.a == 255)
-			{
-				dc = sc;
-				continue;
-			}
-
-			int pa = sc.a;
-			int ipa = 255-pa;
-
-			dc.r = ((sc.r*pa)+(dc.r*ipa))>>8;
-			dc.g = ((sc.g*pa)+(dc.g*ipa))>>8;
-			dc.b = ((sc.b*pa)+(dc.b*ipa))>>8;
-		} else if(BPP==16 || BPP==15) {
-			//todo - use lookup table
-			byte pa = sa[i];
-			if(pa == 0) continue;
-			if(pa == 255) { dst[i] = src[i]; continue; }
-			int sr,sg,sb,dr,dg,db;
-			_UnpackColor(src[i],sr,sg,sb);
-			_UnpackColor(dst[i],dr,dg,db);
-			dr = _tbl_blendcolor_15bpp[pa][sr][dr];
-			dg = _tbl_blendcolor_15bpp[pa][sg][dg];
-			db = _tbl_blendcolor_15bpp[pa][sb][db];
-			dst[i] = _PackColor(dr,dg,db);
+		if(sc.a == 0) continue;
+		if (sc.a == 255)
+		{
+			dc = sc;
+			continue;
 		}
-	}
+
+		int pa = sc.a;
+		int ipa = 255-pa;
+
+		dc.r = ((sc.r*pa)+(dc.r*ipa))>>8;
+		dc.g = ((sc.g*pa)+(dc.g*ipa))>>8;
+		dc.b = ((sc.b*pa)+(dc.b*ipa))>>8;
+	} 
 }
 
 inline void COPY_PIXELS_320_480(PT * dst, PT* src) {
@@ -681,7 +662,7 @@ void ImageBlit(int x, int y, image *src, image *dest, const BlendCallback& blend
     {
         for (x = 0; x < xlen; x++)
 		{
-            if (TRANSPARENT && s[x] == transColor)
+            if (TRANSPARENT && (s[x]&0x00FFFFFF) == transColor)
             {
                 continue;
             }
@@ -695,16 +676,7 @@ void ImageBlit(int x, int y, image *src, image *dest, const BlendCallback& blend
 template<LUCENT_TYPE LT, bool TRANSPARENT>
 void T_Blit(int x, int y, image *src, image *dest)
 {
-	switch(LT)
-	{
-		case NONE:
-			ImageBlit<OpaqueBlendMode, TRANSPARENT>(x, y, src, dest, OpaqueBlendMode());
-			break;
-		case HALF:
-		case ANY:
-			ImageBlit<LucentBlendMode, TRANSPARENT>(x, y, src, dest, LucentBlendMode());
-			break;
-	}
+	ImageBlit<LucentBlendMode, TRANSPARENT>(x, y, src, dest, LucentBlendMode());
 }
 
 template<LUCENT_TYPE LT, bool TRANSPARENT>

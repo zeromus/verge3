@@ -22,13 +22,15 @@
 
 Entity::Entity(int x1, int y1, const char *chrfn)
 {
+	flags = 0;
+	sortkey = 0;
 	follower = 0;
 	follow = 0;
 	delay = 0;
 	lucent = 0;
 	wdelay = 75;
 	setxy(x1, y1);
-	setspeed(100);
+	setspeed(256);
 	speedct = 0;
 	chr = RequestCHR(chrfn);
 	hotw = chr->hw;
@@ -36,21 +38,29 @@ Entity::Entity(int x1, int y1, const char *chrfn)
 	visible = true;
 	active = true;
 	specframe = 0;
+	custanim = -1;
 	movecode = 0;
 	moveofs = 0;
+	foot = 0;
+	continuous = false;
 	framect = 0;
 	frame = 0;
 	face = SOUTH;
-	hookrender = "";
-	script = "";
-	description = "";
+	hookrender = empty_string;
+	script = empty_string;
+	description = empty_string;
 	memset(movestr, 0, 256);
 	obstructable = 0;
 	obstruction = 0;
+	last_tx = -1;
+	last_ty = -1;
 	for (int i=0; i<FOLLOWDISTANCE; i++)
-		pathx[i] = x,
-		pathy[i] = y,
+	{
+		pathx[i] = x;
+		pathy[i] = y;
 		pathf[i] = SOUTH;
+	}
+	facePending = false;
 }
 
 Entity::~Entity() { } // dont delete chr anymore due to chr cacher/garbage collection
@@ -64,6 +74,14 @@ void Entity::setface(int d) {
   } else {
     err("Entity::setface(%d), facing values must be within the range [1, 4]", d);
   }
+}
+
+void Entity::warp(int x1, int y1)
+{
+	setxy(x1,y1);
+	//suppress zones
+	last_tx = x1/16;
+	last_ty = y1/16;
 }
 
 void Entity::setxy(int x1, int y1)
@@ -113,24 +131,43 @@ void Entity::set_waypoint(int x1, int y1)
 	}
 }
 
+void onStep();
+void Entity::set_waypoint_relative_player(int x1, int y1, bool changeface)
+{
+	//if((flags&EFLAG_PCANIM) && !foot && !continuous)
+	//{
+	//	framect = 16;
+	//}
+	set_waypoint_relative(x1, y1, changeface);
+	event_tx = waypointx/16;
+	event_ty = waypointy/16;
+	event_entity = myself->index;
+	event_zone = current_map->zone(event_tx,event_ty);
+	foot ^= 1;
+	myself->continuous = true;
+	onStep();
+}
+
 void Entity::set_waypoint_relative(int x1, int y1, bool changeface)
 {
 	waypointx += x1;
 	waypointy += y1;
+	if(changeface) setFaceFromDxDy(x1,y1);
+}
 
-	if(changeface) {
-		switch (sgn(y1))
-		{
-			case -1: face = NORTH; break;
-			case 0:  break;
-			case 1:  face = SOUTH; break;
-		}
-		switch (sgn(x1))
-		{
-			case -1: face = WEST; break;
-			case 0:  break;
-			case 1:  face = EAST; break;
-		}
+void Entity::setFaceFromDxDy(int dx, int dy)
+{
+	switch (sgn(dy))
+	{
+		case -1: face = NORTH; break;
+		case 0:  break;
+		case 1:  face = SOUTH; break;
+	}
+	switch (sgn(dx))
+	{
+		case -1: face = WEST; break;
+		case 0:  break;
+		case 1:  face = EAST; break;
 	}
 }
 
@@ -199,6 +236,12 @@ void Entity::move_tick()
 	int dx = waypointx - getx();
 	int dy = waypointy - gety();
 
+	if(facePending)
+	{
+		setFaceFromDxDy(dx,dy);
+		facePending = false;
+	}
+
 	if (this != myself && !follow && obstructable)
 	{
 		// do obstruction checking */
@@ -241,11 +284,12 @@ void Entity::move_tick()
 	}
 
 	// else move
+	//mbg 21-jan-2012 - changed to add * speed / 256 to delink move speed from anim speed
 	if (dx)
-		x += sgn(dx) * 65536;
+		x += sgn(dx) * 65536 * speed / 256;
 
 	if (dy)
-		y += sgn(dy) * 65536;
+		y += sgn(dy) * 65536 * speed / 256;
 
 /*
 	if (dx &&!dy)
@@ -263,20 +307,31 @@ void Entity::move_tick()
 		follower->move_tick();
 }
 
+static bool stop_point(int framect)
+{
+	return (framect%12!=9 &&framect%12!=0);
+	//return (framect%12!=0);
+}
+
 void Entity::think()
 {
-	int num_ticks;
 	if (!active) return;
 
-	if (delay>systemtime)
+	bool postAnim = ready() && (flags&EFLAG_PCANIM) && stop_point(framect);
+	bool ticktime = delay>systemtime;
+
+	if (ticktime || postAnim)
 	{
-		framect = 0;
-		return;
+		if(custanim != -1 || postAnim)
+			framect++;
+		else framect = 0;
+		if(ticktime) return;
 	}
 
-	speedct += speed;
-	num_ticks = speedct / 100;
-	speedct %= 100;
+	//speedct += speed;
+	speedct += 256; //mbg 21-jan-2012 for now, anim speed is always 1x. this should not be related to their move speed
+	int num_ticks = speedct / 256;
+	speedct -= num_ticks*256;
 
 	while (num_ticks)
 	{
@@ -286,18 +341,22 @@ void Entity::think()
 		{
 			switch (movecode)
 			{
-				case 0: if (this == myself && !invc) ProcessControls(); break;
-				case 1: do_wanderzone(); break;
-				case 2: do_wanderbox(); break;
-				case 3: do_movescript(); break;
-				default: err("Entity::think(), unknown movecode value");
+			case 0: if (this == myself && !invc) ProcessControls(); break;
+			case 1: case 4: do_wanderzone(); break;
+			case 2: do_wanderbox(); break;
+			case 3: do_movescript(); break;
+			default: err("Entity::think(), unknown movecode value");
 			}
 		}
-		if (!ready())
+
+		//mbg 06-jan-2012 - added delay <= systemtime to fix a glitch with wandering entities where they would move a pixel in their next direction
+		//wandering still sucks the big donkey dick (the direction is decided and if you get in the way then the npc will be stuck)
+		if (!ready() && delay <= systemtime)
 			move_tick();
 	}
 }
 
+int ignoreEntCollisionId = -1;
 bool Entity::ObstructDirTick(int d)
 {
 	__grue_actor_index = this->index;
@@ -307,25 +366,28 @@ bool Entity::ObstructDirTick(int d)
 	int ey = gety();
 
 	if (!obstructable) return false;
+
+	ignoreEntCollisionId = index;
 	switch (d)
 	{
 		case NORTH:
 			for (x=ex; x<ex+hotw; x++)
-				if (ObstructAt(x, ey-1)) return true;
+				if (ObstructAt(x, ey-1)) { ignoreEntCollisionId=-1; return true; }
 			break;
 		case SOUTH:
 			for (x=ex; x<ex+hotw; x++)
-				if (ObstructAt(x, ey+hoth)) return true;
+				if (ObstructAt(x, ey+hoth)) { ignoreEntCollisionId=-1;  return true; }
 			break;
 		case WEST:
 			for (y=ey; y<ey+hoth; y++)
-				if (ObstructAt(ex-1, y)) return true;
+				if (ObstructAt(ex-1, y)) { ignoreEntCollisionId=-1;  return true; }
 			break;
 		case EAST:
 			for (y=ey; y<ey+hoth; y++)
-				if (ObstructAt(ex+hotw, y)) return true;
+				if (ObstructAt(ex+hotw, y))  { ignoreEntCollisionId=-1; return true; }
 			break;
 	}
+	ignoreEntCollisionId=-1;
 	return false;
 }
 
@@ -371,10 +433,12 @@ void Entity::do_wanderzone()
 	int ey = gety()/16;
 	int myzone = current_map->zone(ex, ey);
 
-	if (ObstructDir(EAST) || current_map->zone(ex+1, ey) != myzone) rb=true;
-	if (ObstructDir(WEST) || current_map->zone(ex-1, ey) != myzone) lb=true;
-	if (ObstructDir(SOUTH) || current_map->zone(ex, ey+1) != myzone) db=true;
-	if (ObstructDir(NORTH) || current_map->zone(ex, ey-1) != myzone) ub=true;
+	//movecode 1 - wanderzone
+	//movecode 4 - antiwanderzone
+	if (ObstructDir(EAST)  || (movecode==1 && current_map->zone(ex+1, ey) != myzone) || (movecode==4 && current_map->zone(ex+1, ey) == myzone)) rb=true;
+	if (ObstructDir(WEST)  || (movecode==1 && current_map->zone(ex-1, ey) != myzone) || (movecode==4 && current_map->zone(ex-1, ey) == myzone)) lb=true;
+	if (ObstructDir(SOUTH) || (movecode==1 && current_map->zone(ex, ey+1) != myzone) || (movecode==4 && current_map->zone(ex, ey+1) == myzone)) db=true;
+	if (ObstructDir(NORTH) || (movecode==1 && current_map->zone(ex, ey-1) != myzone) || (movecode==4 && current_map->zone(ex, ey-1) == myzone)) ub=true;
 
 	if (rb && lb && db && ub) return; // Can't move in any direction
 
@@ -386,22 +450,27 @@ void Entity::do_wanderzone()
 		{
 			case 0:
 				if (rb) break;
-				set_waypoint_relative(16, 0);
+				set_waypoint_relative(16, 0, false);
+				facePending = true;
 				return;
 			case 1:
 				if (lb) break;
-				set_waypoint_relative(-16, 0);
+				set_waypoint_relative(-16, 0, false);
+				facePending = true;
 				return;
 			case 2:
 				if (db) break;
-				set_waypoint_relative(0, 16);
+				set_waypoint_relative(0, 16, false);
+				facePending = true;
 				return;
 			case 3:
 				if (ub) break;
-				set_waypoint_relative(0, -16);
+				set_waypoint_relative(0, -16, false);
+				facePending = true;
 				return;
 		}
 	}
+
 }
 
 void Entity::do_wanderbox()
@@ -462,11 +531,17 @@ void Entity::do_movescript()
 	while ((movestr[moveofs] >= '0' && movestr[moveofs] <= '9') || movestr[moveofs] == ' ' || movestr[moveofs] == '-')
 		moveofs++;
 
+REPEAT:
 	int done = 0;
 	int found_move = 0; // number of LRUD letters we found
 	while(!done && found_move < 2) {
 		switch(toupper(movestr[moveofs]))
 		{
+			case 'C':
+				//moveofs++;
+				done = 1;
+				break;
+
 			case 'L':
 				if(!found_move && face != WEST) setface(WEST);
 				moveofs++;
@@ -497,72 +572,116 @@ void Entity::do_movescript()
 	}
 
 	if(found_move) {
+		custanim = -1;
 		arg = atoi(&movestr[moveofs]);
 		// we've already set facing, don't do it again
 		set_waypoint_relative(horizfac*arg*movemult, vertfac*arg*movemult, false);
 	} else {
+NEXT:
 		// no directions, check other possible letters:
-		switch(toupper(movestr[moveofs])) {
-			case 'S': moveofs++;
+		char code = toupper(movestr[moveofs]);
+		switch(code) {
+			case 'S': 
+				moveofs++;
 				setspeed(atoi(&movestr[moveofs]));
 				break;
-			case 'W': moveofs++;
+			case 'W': 
+				moveofs++;
 				delay = systemtime + atoi(&movestr[moveofs]);
 				break;
-			case 'F': moveofs++;
+			case 'F': 
+				moveofs++;
 				setface(vc2me[atoi(&movestr[moveofs])]);
+				custanim = -1;
 				break;
-			case 'B': moveofs = 0; break;
-			case 'X': moveofs++;
+			case 'B': 
+				moveofs = 0; 
+				custanim = -1;
+				goto REPEAT;
+			case 'X': 
+				moveofs++;
 				arg = atoi(&movestr[moveofs]);
 				set_waypoint(arg*16, gety());
+				custanim = -1;
 				break;
-			case 'Y': moveofs++;
+			case 'Y': 
+				moveofs++;
 				arg = atoi(&movestr[moveofs]);
 				set_waypoint(getx(), arg*16);
+				custanim = -1;
 				break;
-			case 'Z': moveofs++;
+			case 'Z': 
+				moveofs++;
 				specframe = atoi(&movestr[moveofs]);
+				custanim = -1;
 				break;
-			case 'P': movemult = 1;
+			case 'P': 
+				movemult = 1;
 				moveofs++;
 				break;
-			case 'T': movemult = 16;
+			case 'C':
+			case 'A':
+				{
+					int temp = atoi(&movestr[moveofs+1]);
+					if(code == 'C') temp += 9; //custom
+					if(temp != custanim) { /*reset anim*/ }
+					custanim = temp;
+				}
+				moveofs+=2;
+				goto NEXT;
+			case 'T': 
+				movemult = 16;
 				moveofs++;
 				break;
 			case 'H':
 			case 0:  
 				movemult = 0; moveofs = 0; movecode = 0; framect = 0; 
+				//switch back to player control if we just ended a custom movescript and we're the player (not sure if we like this though)
+				//if(myself == this) movecode = 0;
 				return;
 			default: err("Entity::do_movescript(), unidentify movescript command");
 		}
 	}
 }
 
-void Entity::set_chr(const std::string& fname)
+void Entity::set_chr(CStringRef fname)
 {
     chr = RequestCHR(fname.c_str());
 	specframe = 0;
 	framect = 0;
 	frame = 0;
+	custanim = -1;
 }
 
 void Entity::draw()
 {
 	if (!visible) return;
 
+	bool idle = ready();
+	if(idle && (flags&EFLAG_PCANIM) && stop_point(framect))
+			idle = false;
+
     // if we're idle, reset the framect
-	if ((!follow && ready()) || (follow && leaderidle()))
-		framect = 0;
+	if ((!follow && idle) || (follow && leaderidle()))
+	{
+		if(custanim == -1)
+			framect = 0;
+	}
 
 	if (specframe)
 		frame = specframe;
+	else if(custanim != -1)
+		frame = chr->GetFrame(custanim, framect);
 	else
 	{
 		if (!follow)
 		{
-			if (ready()) frame = chr->idle[face];
-			else frame = chr->GetFrame(face, framect);
+			if (idle) frame = chr->idle[face];
+			else
+			{
+
+					frame = chr->GetFrame(face, framect);
+			}
 		}
 		else
 		{
@@ -571,8 +690,8 @@ void Entity::draw()
 		}
 	}
 
-	int zx = getx() - xwin,
-		zy = gety() - ywin;
+	int zx = getx() - xwin;
+	int zy = gety() - ywin;
 
 	if (hookrender.length())
 	{
@@ -582,21 +701,25 @@ void Entity::draw()
 	}
 
 	if (chr)
-		chr->render(zx, zy, frame, screen);
+	{
+		if(flags&EFLAG_YBUMP)
+			zy -= 2;
+		chr->render(zx, zy, frame, rtarget);
+	}
 	else
 		DrawRect(zx, zy, zx + 15, zy + 15, MakeColor(255,255,255), screen);
 }
 
 void Entity::SetWanderZone()
 {
-    clear_stalk();
+	clear_stalk();
 	set_waypoint(getx(), gety());
 	movecode = 1;
 }
 
 void Entity::SetWanderBox(int x1, int y1, int x2, int y2)
 {
-    clear_stalk();
+	clear_stalk();
 	set_waypoint(getx(), gety());
 	wx1 = x1;
 	wy1 = y1;
@@ -607,11 +730,12 @@ void Entity::SetWanderBox(int x1, int y1, int x2, int y2)
 
 void Entity::SetMoveScript(const char *s)
 {
-    clear_stalk();
+	clear_stalk();
 	set_waypoint(getx(), gety());
 	strcpy(movestr, s);
 	moveofs = 0;
 	movecode = 3;
+	delay = 0;
 }
 
 void Entity::SetWanderDelay(int n)
@@ -621,8 +745,13 @@ void Entity::SetWanderDelay(int n)
 
 void Entity::SetMotionless()
 {
-    clear_stalk();
+	clear_stalk();
 	set_waypoint(getx(), gety());
 	movecode = 0;
 	delay = 0;
+	//mbg 04-dec-2012 - added this to make animations reset when the entity is stopped.
+	//this was for the overworld arrows
+	//was this a good idea?
+	framect = 0;
+	frame = 0;
 }

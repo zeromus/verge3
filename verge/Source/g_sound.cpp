@@ -90,14 +90,6 @@ void PlayMusic(const std::string &ssng) {
 
 	if (!strlen(sng)) return;
 	if(!strcasecmp(sng, playingsng)) return;
-	VFILE *f = vopen(sng);
-	if (!f) {
-		GarlickFile *gf = GarlickOpen(sng,"library");
-		if(!gf) return;
-		GarlickClose(gf);
-	}
-	else vclose(f);
-
 	snd_engine->PlayMusic(sng);
 }
 void StopMusic() { if(snd_engine) snd_engine->StopMusic(); }

@@ -75,26 +75,26 @@ void RenderSprite(int i)
 		if (sprites[i].alphamap)
 		{
 			image *alphamap = ImageForHandle(sprites[i].alphamap);
-			AlphaBlit(zx, zy, spr, alphamap, screen);
+			AlphaBlit(zx, zy, spr, alphamap, rtarget);
 			return;
 		}
 		if (sprites[i].addsub)
 		{
 			SetLucent(sprites[i].lucent);
 			if (sprites[i].addsub<0)
-				TSubtractiveBlit(zx, zy, spr, screen);
+				TSubtractiveBlit(zx, zy, spr, rtarget);
 			else
-				TAdditiveBlit(zx, zy, spr, screen);
+				TAdditiveBlit(zx, zy, spr, rtarget);
 			return;
 		}
 		if (sprites[i].silhouette)
 		{
 			SetLucent(sprites[i].lucent);
-			Silhouette(zx, zy, sprites[i].color, spr, screen);
+			Silhouette(zx, zy, sprites[i].color, spr, rtarget);
 			return;
 		}
 		SetLucent(sprites[i].lucent);
-		TBlit(zx, zy, spr, screen);
+		TBlit(zx, zy, spr, rtarget);
 }
 
 void RenderSprites()

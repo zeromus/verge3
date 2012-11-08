@@ -24,15 +24,12 @@ extern bool windowmode;
 extern bool sound;
 extern bool cheats;
 extern bool automax;
+extern bool releasemode;
 extern char mapname[255];
 extern int gamerate;
-
-extern int cf_r1, cf_g1, cf_b1;
-extern int cf_r2, cf_g2, cf_b2;
-extern int cf_rr, cf_gr, cf_br;
-
+extern bool vc_oldstring;
 void ShowPage();
 
 #ifdef ALLOW_SCRIPT_COMPILATION
-//extern VCCompiler *vcc;
+extern VCCompiler *vcc;
 #endif

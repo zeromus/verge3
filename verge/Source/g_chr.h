@@ -20,10 +20,10 @@ public:
 	int totalframes;					// total # of frames.
     int idle[5];						// idle frames
 
-	int animsize[9];
-	int *anims[9];
+	int animsize[9+10]; //10 more for custom
+	int *anims[9+10]; //10 more for custom
 
-	std::string name;                        // the filename this was loaded from
+	StringRef name;                        // the filename this was loaded from
 
 	CHR(const char *fname);
 	~CHR();

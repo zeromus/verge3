@@ -21,31 +21,31 @@
 quad systemtime = 0, timer = 0, vctimer = 0, hooktimer = 0;
 quad key_timer, key_repeater, repeatedkey;
 xTimer *systimer;
+int g_timer = 0;
 
 /***************************** code *****************************/
 
 void CALLBACK DefaultTimer(UINT uID,UINT uMsg,DWORD dwUser,DWORD dw1,DWORD dw2)
 {
-	win_movie_update();
+	g_timer++;
 
-	systemtime++;
-	if (engine_paused) return;
-	timer++;
-	vctimer++;
-	hooktimer++;
+	//systemtime++;
+	//if (engine_paused) return;
+	//timer++;
+	//vctimer++;
+	//hooktimer++;
 
-	//tilde fast-forward
-	if(GetAsyncKeyState(0xC0))
-	{
-		for(int i=0;i<7;i++)
-		{
-			systemtime++;
-			timer++;
-			vctimer++;
-			hooktimer++;
-		}
-	}
-
+	////tilde fast-forward
+	//if(GetAsyncKeyState(VK_TAB))
+	//{
+	//	for(int i=0;i<7;i++)
+	//	{
+	//		systemtime++;
+	//		timer++;
+	//		vctimer++;
+	//		hooktimer++;
+	//	}
+	//}
 }
 
 void timer_Init(int hz)
