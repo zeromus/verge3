@@ -164,7 +164,7 @@ namespace winmaped2
 			// vspController
 			// 
 			this.vspController.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-			this.vspController.Location = new System.Drawing.Point(8, 160);
+			this.vspController.Location = new System.Drawing.Point(8, 192);
 			this.vspController.Name = "vspController";
 			this.vspController.Size = new System.Drawing.Size(340, 436);
 			this.vspController.TabIndex = 1;

@@ -18,7 +18,24 @@ namespace winmaped2 {
         public SourceType TileSourceType;
         public Vsp24Tile ActiveTile { get { return active_tile; } set { active_tile = value; repaint(); } }
         public int ActiveTileIndex { get { return atx; } set { atx = value; if (Global.ActiveMap != null) active_tile = (Vsp24Tile)Global.ActiveMap.vsp.Tiles[atx]; } }
-        public VspObstructionTile ActiveObsTile { get { return active_obstile; } set { active_obstile = value; repaint(); } }
+				public int ActiveObsTileIndex
+				{
+					set
+					{
+						if (this.Name == "tv_obs")
+						{
+							int tile = value;
+							Global.mainWindow.checkObsLeft.Checked = (tile & 1) != 0;
+							Global.mainWindow.checkObsRight.Checked = (tile & 2) != 0;
+							Global.mainWindow.checkObsUp.Checked = (tile & 4) != 0;
+							Global.mainWindow.checkObsDown.Checked = (tile & 8) != 0;
+						}
+					}
+				}
+        public VspObstructionTile ActiveObsTile { get { return active_obstile; } set {
+					
+					active_obstile = value; repaint();
+				} }
         public TileViewer() {
             SetStyle(ControlStyles.AllPaintingInWmPaint, true);
             SetStyle(ControlStyles.UserPaint, true);
@@ -31,7 +48,7 @@ namespace winmaped2 {
 
             g.PixelOffsetMode = PixelOffsetMode.Half;
             g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;
-            Bitmap bmp = Render.createBitmap(16, 16);
+						Bitmap bmp = Render.createBitmap(Global.TILE_SIZE, Global.TILE_SIZE);
 
             using (pr2.IRenderImage img = pr2.RenderImage.LockBitmap(bmp)) {
                 if (TileSourceType == SourceType.Vsp) {

@@ -33,11 +33,11 @@ namespace winmaped2
 			//Size = new System.Drawing.Size(340,164);
 
 			c_VspView = new vspView(c_ScrollBar,controller_mode,controller_type);
-			c_VspView.Size = new System.Drawing.Size(320,Height-4);
+			c_VspView.Size = new System.Drawing.Size(Global.VSP_SIZE_PIXELS,Height-4);
 			c_VspView.Location = new System.Drawing.Point(0,0);
 			
 			c_ScrollBar.Size = new System.Drawing.Size(16,Height-4);
-			c_ScrollBar.Location = new System.Drawing.Point(320,0);
+			c_ScrollBar.Location = new System.Drawing.Point(Global.VSP_SIZE_PIXELS,0);
 			c_ScrollBar.ValueChanged += new EventHandler(c_VspView.OnScroll);
 
 			Controls.Add(c_VspView);
@@ -47,10 +47,10 @@ namespace winmaped2
 		protected override void OnSizeChanged(EventArgs e)
 		{
 			base.OnSizeChanged (e);
-			c_VspView.Size = new System.Drawing.Size(320,Height-4);
+			c_VspView.Size = new System.Drawing.Size(Global.VSP_SIZE_PIXELS,Height-4);
 			c_VspView.Location = new System.Drawing.Point(0,0);
 			c_ScrollBar.Size = new System.Drawing.Size(16,Height-4);
-			c_ScrollBar.Location = new System.Drawing.Point(320,0);
+			c_ScrollBar.Location = new System.Drawing.Point(Global.VSP_SIZE_PIXELS,0);
 			c_VspView.CalculateScrollValues();
 		}
 

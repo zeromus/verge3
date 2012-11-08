@@ -1,7 +1,7 @@
 ﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
   <PropertyGroup>
     <ProjectType>Local</ProjectType>
-    <ProductVersion>9.0.21022</ProductVersion>
+    <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{F646E122-D28B-4DB6-BB43-5FEB0B469C9D}</ProjectGuid>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -42,7 +42,7 @@
     <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <OutputPath>..\bin\Debug\</OutputPath>
+    <OutputPath>.\</OutputPath>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <BaseAddress>285212672</BaseAddress>
     <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
@@ -64,6 +64,7 @@
     <DebugType>full</DebugType>
     <ErrorReport>prompt</ErrorReport>
     <PlatformTarget>x86</PlatformTarget>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <OutputPath>..\bin\Release\</OutputPath>
@@ -88,15 +89,12 @@
     <DebugType>none</DebugType>
     <ErrorReport>prompt</ErrorReport>
     <PlatformTarget>x86</PlatformTarget>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="MRU">
       <Name>MRU</Name>
       <HintPath>..\components\MRU.dll</HintPath>
-    </Reference>
-    <Reference Include="nunit.framework, Version=2.2.9.0, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\NUnit\nunit.framework.dll</HintPath>
     </Reference>
     <Reference Include="RegisterFileType">
       <Name>RegisterFileType</Name>
@@ -246,6 +244,9 @@
     <Compile Include="dialogs\ImportDialog.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="dialogs\InputBox.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="dialogs\LayerPropertiesWnd.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -288,10 +289,11 @@
     <Compile Include="pr2\LockedBitmap.cs" />
     <Compile Include="pr2\Render.cs" />
     <Compile Include="pr2\RenderImage.cs" />
-    <Compile Include="Tests\FormatTests.cs" />
-    <Compile Include="Tests\RendererTests.cs" />
-    <Compile Include="Tests\RenderFixture.cs" />
-    <Compile Include="Tests\VspTest.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
     <EmbeddedResource Include="controls\ColorPicker.resx">
       <DependentUpon>ColorPicker.cs</DependentUpon>
     </EmbeddedResource>
@@ -381,6 +383,10 @@
     <EmbeddedResource Include="HardcodedPluginControlPanels\ResizerForm.resx">
       <DependentUpon>ResizerForm.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
     <EmbeddedResource Include="resources\bitmaps\render.bmp" />
     <EmbeddedResource Include="resources\bitmaps\write.bmp" />
     <EmbeddedResource Include="resources\map.ico" />
@@ -410,13 +416,13 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Properties\" />
     <Folder Include="resources\cursors\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PreBuildEvent>
     </PreBuildEvent>
-    <PostBuildEvent>REM $(SolutionDir)NUnit\nunit-console.exe $(TargetPath)</PostBuildEvent>
+    <PostBuildEvent>
+    </PostBuildEvent>
   </PropertyGroup>
 </Project>

@@ -46,7 +46,8 @@ namespace winmaped2
 		private winmaped2.VSPController vspc;
 		private winmaped2.TileViewer tv_preview;
 		private System.Windows.Forms.Label fpslabel;
-	
+		private Button b_dupanim;
+
 		public ArrayList Anims { get { return anims; } }
 		private VspAnimation currAnim;
 		public AnimationEditor()
@@ -55,11 +56,11 @@ namespace winmaped2
 			// Required for Windows Form Designer support
 			//
 			InitializeComponent();
-			
-			c_mode.SelectedIndex=0;
+
+			c_mode.SelectedIndex = 0;
 
 			vspc.VspView.SelectionChanged += new SEventHandler(VspView_SelectionChanged);
-			tv_preview.bAnimate=true;
+			tv_preview.bAnimate = true;
 
 		}
 
@@ -71,16 +72,16 @@ namespace winmaped2
 			vspc.SetActiveVsp(currVsp);
 			vspc.SetControllerMode(VSPController.ControllerMode.SelectorDual);
 
-//			n_start.Maximum = m.vsp.tileCount-1;
-//			n_end.Maximum = m.vsp.tileCount-1;
+			//			n_start.Maximum = m.vsp.tileCount-1;
+			//			n_end.Maximum = m.vsp.tileCount-1;
 
-			foreach(VspAnimation va in currVsp.Animations)
+			foreach (VspAnimation va in currVsp.Animations)
 			{
-				anims.Add( va.Clone() );
+				anims.Add(va.Clone());
 			}
-			foreach(VspAnimation va in anims)
+			foreach (VspAnimation va in anims)
 			{
-				ListViewItem lvi = new ListViewItem( new string[] { va.ID.ToString(), va.Name } );
+				ListViewItem lvi = new ListViewItem(new string[] { va.ID.ToString(), va.Name });
 				lvi.Tag = va;
 				lv_anims.Items.Add(lvi);
 			}
@@ -89,17 +90,17 @@ namespace winmaped2
 
 		private void DisableEditor()
 		{
-			editpanel.Enabled=false;
-			b_delanim.Enabled=false;
+			editpanel.Enabled = false;
+			b_delanim.Enabled = false;
 		}
 		private void EnableEditor()
 		{
-			editpanel.Enabled=true;
+			editpanel.Enabled = true;
 			//b_delanim.Enabled=true;
 		}
 		private void GrabData()
 		{
-            currAnim.Name = t_name.Text;
+			currAnim.Name = t_name.Text;
 			currAnim.Start = (int)n_start.Value;
 			currAnim.End = (int)n_end.Value;
 			currAnim.Delay = (int)n_delay.Value;
@@ -117,16 +118,16 @@ namespace winmaped2
 		/// <summary>
 		/// Clean up any resources being used.
 		/// </summary>
-		protected override void Dispose( bool disposing )
+		protected override void Dispose(bool disposing)
 		{
-			if( disposing )
+			if (disposing)
 			{
-				if(components != null)
+				if (components != null)
 				{
 					components.Dispose();
 				}
 			}
-			base.Dispose( disposing );
+			base.Dispose(disposing);
 		}
 
 		#region Windows Form Designer generated code
@@ -143,8 +144,6 @@ namespace winmaped2
 			this.editpanel = new System.Windows.Forms.Panel();
 			this.groupBox1 = new System.Windows.Forms.GroupBox();
 			this.fpslabel = new System.Windows.Forms.Label();
-			this.vspc = new winmaped2.VSPController();
-			this.tv_start = new winmaped2.TileViewer();
 			this.label1 = new System.Windows.Forms.Label();
 			this.c_mode = new System.Windows.Forms.ComboBox();
 			this.t_name = new System.Windows.Forms.TextBox();
@@ -155,8 +154,6 @@ namespace winmaped2
 			this.label3 = new System.Windows.Forms.Label();
 			this.label4 = new System.Windows.Forms.Label();
 			this.label5 = new System.Windows.Forms.Label();
-			this.tv_end = new winmaped2.TileViewer();
-			this.tv_preview = new winmaped2.TileViewer();
 			this.panel3 = new System.Windows.Forms.Panel();
 			this.lv_anims = new System.Windows.Forms.ListView();
 			this.chID = new System.Windows.Forms.ColumnHeader();
@@ -164,6 +161,11 @@ namespace winmaped2
 			this.panel2 = new System.Windows.Forms.Panel();
 			this.b_newanim = new System.Windows.Forms.Button();
 			this.b_delanim = new System.Windows.Forms.Button();
+			this.b_dupanim = new System.Windows.Forms.Button();
+			this.vspc = new winmaped2.VSPController();
+			this.tv_start = new winmaped2.TileViewer();
+			this.tv_end = new winmaped2.TileViewer();
+			this.tv_preview = new winmaped2.TileViewer();
 			this.panel1.SuspendLayout();
 			this.editpanel.SuspendLayout();
 			this.groupBox1.SuspendLayout();
@@ -243,24 +245,6 @@ namespace winmaped2
 			this.fpslabel.Size = new System.Drawing.Size(96, 16);
 			this.fpslabel.TabIndex = 11;
 			this.fpslabel.Text = "0.0 frames/sec";
-			// 
-			// vspc
-			// 
-			this.vspc.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-			this.vspc.Location = new System.Drawing.Point(6, 176);
-			this.vspc.Name = "vspc";
-			this.vspc.Size = new System.Drawing.Size(340, 164);
-			this.vspc.TabIndex = 10;
-			// 
-			// tv_start
-			// 
-			this.tv_start.ActiveObsTile = null;
-			this.tv_start.ActiveTile = null;
-			this.tv_start.ActiveTileIndex = 0;
-			this.tv_start.Location = new System.Drawing.Point(248, 56);
-			this.tv_start.Name = "tv_start";
-			this.tv_start.Size = new System.Drawing.Size(48, 48);
-			this.tv_start.TabIndex = 7;
 			// 
 			// label1
 			// 
@@ -367,26 +351,6 @@ namespace winmaped2
 			this.label5.Text = "Animation Mode:";
 			this.label5.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
 			// 
-			// tv_end
-			// 
-			this.tv_end.ActiveObsTile = null;
-			this.tv_end.ActiveTile = null;
-			this.tv_end.ActiveTileIndex = 0;
-			this.tv_end.Location = new System.Drawing.Point(248, 120);
-			this.tv_end.Name = "tv_end";
-			this.tv_end.Size = new System.Drawing.Size(48, 48);
-			this.tv_end.TabIndex = 7;
-			// 
-			// tv_preview
-			// 
-			this.tv_preview.ActiveObsTile = null;
-			this.tv_preview.ActiveTile = null;
-			this.tv_preview.ActiveTileIndex = 0;
-			this.tv_preview.Location = new System.Drawing.Point(248, 384);
-			this.tv_preview.Name = "tv_preview";
-			this.tv_preview.Size = new System.Drawing.Size(64, 64);
-			this.tv_preview.TabIndex = 7;
-			// 
 			// panel3
 			// 
 			this.panel3.Controls.Add(this.lv_anims);
@@ -409,7 +373,7 @@ namespace winmaped2
 			this.lv_anims.Location = new System.Drawing.Point(0, 0);
 			this.lv_anims.MultiSelect = false;
 			this.lv_anims.Name = "lv_anims";
-			this.lv_anims.Size = new System.Drawing.Size(232, 437);
+			this.lv_anims.Size = new System.Drawing.Size(232, 392);
 			this.lv_anims.TabIndex = 0;
 			this.lv_anims.UseCompatibleStateImageBehavior = false;
 			this.lv_anims.View = System.Windows.Forms.View.Details;
@@ -428,12 +392,13 @@ namespace winmaped2
 			// panel2
 			// 
 			this.panel2.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+			this.panel2.Controls.Add(this.b_dupanim);
 			this.panel2.Controls.Add(this.b_newanim);
 			this.panel2.Controls.Add(this.b_delanim);
 			this.panel2.Dock = System.Windows.Forms.DockStyle.Bottom;
-			this.panel2.Location = new System.Drawing.Point(0, 437);
+			this.panel2.Location = new System.Drawing.Point(0, 392);
 			this.panel2.Name = "panel2";
-			this.panel2.Size = new System.Drawing.Size(232, 48);
+			this.panel2.Size = new System.Drawing.Size(232, 93);
 			this.panel2.TabIndex = 1;
 			// 
 			// b_newanim
@@ -447,12 +412,59 @@ namespace winmaped2
 			// 
 			// b_delanim
 			// 
-			this.b_delanim.Enabled = false;
 			this.b_delanim.Location = new System.Drawing.Point(120, 8);
 			this.b_delanim.Name = "b_delanim";
 			this.b_delanim.Size = new System.Drawing.Size(104, 32);
 			this.b_delanim.TabIndex = 1;
 			this.b_delanim.Text = "Delete Selected";
+			this.b_delanim.Click += new System.EventHandler(this.b_delanim_Click);
+			// 
+			// b_dupanim
+			// 
+			this.b_dupanim.Location = new System.Drawing.Point(8, 47);
+			this.b_dupanim.Name = "b_dupanim";
+			this.b_dupanim.Size = new System.Drawing.Size(104, 32);
+			this.b_dupanim.TabIndex = 3;
+			this.b_dupanim.Text = "Dupe Selected";
+			this.b_dupanim.Click += new System.EventHandler(this.b_dupanim_Click);
+			// 
+			// vspc
+			// 
+			this.vspc.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+			this.vspc.Location = new System.Drawing.Point(6, 176);
+			this.vspc.Name = "vspc";
+			this.vspc.Size = new System.Drawing.Size(340, 164);
+			this.vspc.TabIndex = 10;
+			// 
+			// tv_start
+			// 
+			this.tv_start.ActiveObsTile = null;
+			this.tv_start.ActiveTile = null;
+			this.tv_start.ActiveTileIndex = 0;
+			this.tv_start.Location = new System.Drawing.Point(248, 56);
+			this.tv_start.Name = "tv_start";
+			this.tv_start.Size = new System.Drawing.Size(48, 48);
+			this.tv_start.TabIndex = 7;
+			// 
+			// tv_end
+			// 
+			this.tv_end.ActiveObsTile = null;
+			this.tv_end.ActiveTile = null;
+			this.tv_end.ActiveTileIndex = 0;
+			this.tv_end.Location = new System.Drawing.Point(248, 120);
+			this.tv_end.Name = "tv_end";
+			this.tv_end.Size = new System.Drawing.Size(48, 48);
+			this.tv_end.TabIndex = 7;
+			// 
+			// tv_preview
+			// 
+			this.tv_preview.ActiveObsTile = null;
+			this.tv_preview.ActiveTile = null;
+			this.tv_preview.ActiveTileIndex = 0;
+			this.tv_preview.Location = new System.Drawing.Point(248, 384);
+			this.tv_preview.Name = "tv_preview";
+			this.tv_preview.Size = new System.Drawing.Size(64, 64);
+			this.tv_preview.TabIndex = 7;
 			// 
 			// AnimationEditor
 			// 
@@ -485,43 +497,33 @@ namespace winmaped2
 
 		private void lv_anims_SelectedIndexChanged(object sender, System.EventArgs e)
 		{
-			if(currAnim!=null) GrabData();
-			if(lv_anims.SelectedItems.Count==0)
+			if (currAnim != null) GrabData();
+			if (lv_anims.SelectedItems.Count == 0)
 			{
+				b_delanim.Enabled = false;
+				b_dupanim.Enabled = false;
 				DisableEditor();
 				return;
 			}
+			b_delanim.Enabled = true;
+			b_dupanim.Enabled = true;
 			ListViewItem lvi = lv_anims.SelectedItems[0];
 			currAnim = (VspAnimation)lvi.Tag;
 			PutData();
 			EnableEditor();
 		}
 
-		private void b_newanim_Click(object sender, System.EventArgs e)
-		{
-			VspAnimation va = new VspAnimation();
-			va.ID = anims.Count;
-			anims.Add(va);
-
-			ListViewItem lvi = new ListViewItem( new string[] { va.ID.ToString(), va.Name } );
-			lvi.Tag = va;
-			lv_anims.Items.Add(lvi);
-
-			lvi.Selected=true;
-			lvi.EnsureVisible();
-		}
-
 		private void b_OK_Click(object sender, System.EventArgs e)
 		{
-			if(currAnim!=null) GrabData();
+			if (currAnim != null) GrabData();
 			DialogResult = DialogResult.OK;
 			Close();
 		}
 		private void updatefps()
 		{
-			if(currAnim!=null)
+			if (currAnim != null)
 			{
-				if(n_delay.Value!=0)
+				if (n_delay.Value != 0)
 				{
 					double d = 100.0 / (double)n_delay.Value;
 					fpslabel.Text = d.ToString(".###") + " frames/sec";
@@ -532,22 +534,22 @@ namespace winmaped2
 
 		private void n_start_ValueChanged(object sender, System.EventArgs e)
 		{
-			if(n_start.Value != vspc.VspView.SelectedTileF)
+			if (n_start.Value != vspc.VspView.SelectedTileF)
 				vspc.VspView.SelectedTileF = (int)n_start.Value;
 			int t = (int)n_start.Value;
-			if(t>=currVsp.tileCount)
+			if (t >= currVsp.tileCount)
 				return;
 			Vsp24Tile vt = (Vsp24Tile)currVsp.Tiles[t];
 			tv_start.ActiveTile = vt;
-			tv_preview.ActiveTileIndex =(int)n_start.Value;
+			tv_preview.ActiveTileIndex = (int)n_start.Value;
 		}
 
 		private void n_end_ValueChanged(object sender, System.EventArgs e)
 		{
-			if(n_end.Value != vspc.VspView.SelectedTileB)
+			if (n_end.Value != vspc.VspView.SelectedTileB)
 				vspc.VspView.SelectedTileB = (int)n_end.Value;
 			int t = (int)n_end.Value;
-			if(t>=currVsp.tileCount)
+			if (t >= currVsp.tileCount)
 				return;
 			Vsp24Tile vt = (Vsp24Tile)currVsp.Tiles[t];
 			tv_end.ActiveTile = vt;
@@ -561,10 +563,10 @@ namespace winmaped2
 
 		private void t_name_TextChanged(object sender, System.EventArgs e)
 		{
-			if(currAnim==null) return;
-			foreach(ListViewItem lvi in lv_anims.Items)
+			if (currAnim == null) return;
+			foreach (ListViewItem lvi in lv_anims.Items)
 			{
-				if(lvi.Tag == currAnim)
+				if (lvi.Tag == currAnim)
 					lvi.SubItems[1].Text = t_name.Text;
 			}
 		}
@@ -572,6 +574,52 @@ namespace winmaped2
 		private void n_delay_ValueChanged(object sender, System.EventArgs e)
 		{
 			updatefps();
+		}
+
+		private void b_dupanim_Click(object sender, EventArgs e)
+		{
+			int index = lv_anims.SelectedIndices[0];
+			VspAnimation vaSel = anims[index] as VspAnimation;
+			VspAnimation vaNew = vaSel.Clone();
+			vaNew.ID = anims.Count;
+			anims.Add(vaNew);
+
+			ListViewItem lvi = new ListViewItem(new string[] { vaNew.ID.ToString(), vaNew.Name });
+			lvi.Tag = vaNew;
+			lv_anims.Items.Add(lvi);
+
+			lvi.Selected = true;
+			lvi.EnsureVisible();
+		}
+
+		private void b_delanim_Click(object sender, EventArgs e)
+		{
+			int index = lv_anims.SelectedIndices[0];
+			lv_anims.Items.RemoveAt(index);
+			anims.RemoveAt(index);
+			for (int i = index; i < lv_anims.Items.Count; i++)
+			{
+				var lvi = lv_anims.Items[i];
+				var va = lvi.Tag as VspAnimation;
+				va.ID--;
+				lvi.Text = va.ID.ToString();
+
+			}
+
+		}
+
+		private void b_newanim_Click(object sender, System.EventArgs e)
+		{
+			VspAnimation va = new VspAnimation();
+			va.ID = anims.Count;
+			anims.Add(va);
+
+			ListViewItem lvi = new ListViewItem(new string[] { va.ID.ToString(), va.Name });
+			lvi.Tag = va;
+			lv_anims.Items.Add(lvi);
+
+			lvi.Selected = true;
+			lvi.EnsureVisible();
 		}
 	}
 }

@@ -28,7 +28,25 @@ namespace winmaped2
 
         #region Attributes and properties
         Size expandedSize;
-        Rectangle collapseArea, hideArea, titleArea;
+		Rectangle largeifyArea, collapseArea, hideArea, titleArea;
+
+		private bool largeified;
+
+		bool canLargeify;
+		public bool CanLargeify { get { return canLargeify; } set { canLargeify = value; } }
+
+		public bool Largeified
+		{
+			get { return largeified; }
+			set
+			{
+				largeified = value;
+				if (OnLargeified != null) OnLargeified(null);
+				Invalidate();
+			}
+		}
+
+		public Action<object> OnLargeified = null;
 
         private bool collapsed;
         [DefaultValue(false)]
@@ -81,6 +99,7 @@ namespace winmaped2
 
             expandedSize = this.ClientSize;
 
+			largeifyArea = new Rectangle(ClientRectangle.Width - 3 * SystemInformation.ToolWindowCaptionHeight, 0, SystemInformation.ToolWindowCaptionHeight, SystemInformation.ToolWindowCaptionHeight);
             collapseArea = new Rectangle(ClientRectangle.Width - 2 * SystemInformation.ToolWindowCaptionHeight, 0, SystemInformation.ToolWindowCaptionHeight, SystemInformation.ToolWindowCaptionHeight);
             hideArea = new Rectangle(ClientRectangle.Width - SystemInformation.ToolWindowCaptionHeight, 0, SystemInformation.ToolWindowCaptionHeight, SystemInformation.ToolWindowCaptionHeight);
             titleArea = new Rectangle(0, 0, ClientRectangle.Width, SystemInformation.ToolWindowCaptionHeight);
@@ -119,6 +138,7 @@ namespace winmaped2
 
         private void UpdateAreas()
         {
+			largeifyArea = new Rectangle(ClientRectangle.Width - 3 * SystemInformation.ToolWindowCaptionHeight, 0, SystemInformation.ToolWindowCaptionHeight, SystemInformation.ToolWindowCaptionHeight);
             collapseArea = new Rectangle(ClientRectangle.Width - 2 * SystemInformation.ToolWindowCaptionHeight, 0, SystemInformation.ToolWindowCaptionHeight, SystemInformation.ToolWindowCaptionHeight);
             hideArea = new Rectangle(ClientRectangle.Width - SystemInformation.ToolWindowCaptionHeight, 0, SystemInformation.ToolWindowCaptionHeight, SystemInformation.ToolWindowCaptionHeight);
             titleArea = new Rectangle(0, 0, ClientRectangle.Width, SystemInformation.ToolWindowCaptionHeight);
@@ -149,6 +169,7 @@ namespace winmaped2
 
             g.DrawString("X", buttonFont, textBrush, hideArea);
             g.DrawString(collapsed ? "v" : "^", buttonFont, textBrush, collapseArea);
+			if(CanLargeify) g.DrawString(largeified ? "2" : "1", buttonFont, textBrush, largeifyArea);
             
             base.OnPaint(e);
         }
@@ -157,14 +178,18 @@ namespace winmaped2
         {
             if (e.Button == MouseButtons.Left)
             {
-                if (hideArea.Contains(e.Location))
-                {
-                    this.Visible = false;
-                }
-                else
-                {
-                    Collapsed = !Collapsed;
-                }
+				if (hideArea.Contains(e.Location))
+				{
+					this.Visible = false;
+				}
+				else if (collapseArea.Contains(e.Location))
+				{
+					Collapsed = !Collapsed;
+				}
+				else if (largeifyArea.Contains(e.Location) && CanLargeify)
+				{
+					Largeified = !Largeified;
+				}
             }
             base.OnMouseClick(e);
         }

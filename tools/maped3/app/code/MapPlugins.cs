@@ -47,7 +47,7 @@ namespace winmaped2
 		public interface IMapPlugin : IPlugin
 		{
 			//string name { get; }
-			IMapTool getTool(bool lb, bool rb, bool shift, bool ctrl, bool alt);
+			IMapTool getTool(bool lb, bool mb, bool rb, bool shift, bool ctrl, bool alt);
 		}
 
 		public interface IMapPluginCursor
@@ -98,6 +98,10 @@ namespace winmaped2
 		public interface IMapTweaker
 		{
 			void tweakMap(MapEventInfo mei);
+		}
+
+		public interface IMapPluginNoTileCursorFlag
+		{
 		}
 
 		public struct MapCursorLocation
@@ -173,6 +177,7 @@ namespace winmaped2
 			public int editedLayerIndex;
 			public Operations.OperationManager opManager;
 			public bool lb,rb;
+			public int clicks;
 			//public bool recordSetTileOperations = true;
 			public int xScroll { get { return Global.MainMapController.hScrollBar.Value; } }
 			public int yScroll { get { return Global.MainMapController.vScrollBar.Value; } }
@@ -210,6 +215,7 @@ namespace winmaped2
 				}
 			}
 
+
 			public void setTile(int x, int y, int val)
 			{
 				if(x>=0&&x<editedLayer.Width&&y>=0&&y<editedLayer.Height)
@@ -226,6 +232,20 @@ namespace winmaped2
 				}
 			}
 
+			public int getTileDropthrough(int x, int y)
+			{
+				for (int i = this.editedLayerIndex; i >= 0; i--)
+				{
+					MapLayer ml = (MapLayer)editedMap.Layers[i];
+					if (x >= 0 && x < ml.Width && y >= 0 && y < ml.Height)
+					{
+						int tile = ml.getTile(x, y);
+						if (tile != 0) return tile;
+					}
+				}
+				return 0;
+			}
+
 			public int getTile(int x, int y)
 			{
 				if(x>=0&&x<editedLayer.Width&&y>=0&&y<editedLayer.Height)
@@ -233,6 +253,7 @@ namespace winmaped2
 				else
 					return -1;
 			}
+
 
 			//public void invalidate() { if(invalidateEvent != null) invalidateEvent(null,null); }
 			//public event EventHandler invalidateEvent;

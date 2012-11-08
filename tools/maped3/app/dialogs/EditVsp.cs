@@ -108,13 +108,13 @@ namespace winmaped2 {
             this.tilesetViewer.Dock = System.Windows.Forms.DockStyle.Left;
             this.tilesetViewer.Location = new System.Drawing.Point(0, 0);
             this.tilesetViewer.Name = "tilesetViewer";
-            this.tilesetViewer.Size = new System.Drawing.Size(320, 379);
+						this.tilesetViewer.Size = new System.Drawing.Size(Global.VSP_SIZE_PIXELS, 379);
             this.tilesetViewer.TabIndex = 0;
             // 
             // vScrollBar1
             // 
             this.vScrollBar1.Dock = System.Windows.Forms.DockStyle.Left;
-            this.vScrollBar1.Location = new System.Drawing.Point(320, 0);
+						this.vScrollBar1.Location = new System.Drawing.Point(Global.VSP_SIZE_PIXELS, 0);
             this.vScrollBar1.Name = "vScrollBar1";
             this.vScrollBar1.Size = new System.Drawing.Size(16, 379);
             this.vScrollBar1.TabIndex = 0;
@@ -368,10 +368,10 @@ namespace winmaped2 {
         }
 
         public int TilesWide {
-            get { return Width / 16; }
+					get { return Width / Global.TILE_SIZE; }
         }
         public int TilesHigh {
-            get { return Height / 16; }
+					get { return Height / Global.TILE_SIZE; }
         }
 
         public int scrollOffset { get { return parent.vScrollBar1.Value * TilesWide; } }
@@ -483,8 +483,9 @@ namespace winmaped2 {
                 for (int y = 0; y < s.height; y++) {
                     for (int x = 0; x < s.width; x++) {
                         int t = (s.y + y) * TilesWide + s.x + x;
-                        int[] newData = new int[16 * 16];
-                        for (int i = 0; i < 256; i++) {
+												int[] newData = new int[Global.TILE_SIZE * Global.TILE_SIZE];
+												for (int i = 0; i < Global.TILE_SIZE * Global.TILE_SIZE; i++)
+												{
                             newData[i] = magenta;
                         }
                         stdg.addRecord(t, newData);
@@ -505,7 +506,8 @@ namespace winmaped2 {
             Selection s = originalSelection;
 
             if (s.height > 0 && s.width > 0) {
-                using (pr2.IRenderImage img = pr2.RenderImage.Create(s.width * 16, s.height * 16)) {
+							using (pr2.IRenderImage img = pr2.RenderImage.Create(s.width * Global.TILE_SIZE, s.height * Global.TILE_SIZE))
+							{
                     int y0 = s.y;
                     int x0 = s.x;
                     for (int y = 0; y < s.height; y++) {
@@ -514,7 +516,7 @@ namespace winmaped2 {
                                 continue;
                             }
                             int tileIndex = (y0 + y) * TilesWide + x + x0;
-                            Render.render(img, x * 16, y * 16, Global.ActiveVsp.GetTile(tileIndex).Image, true);
+														Render.render(img, x * Global.TILE_SIZE, y * Global.TILE_SIZE, Global.ActiveVsp.GetTile(tileIndex).Image, true);
                         }
                     }
 
@@ -532,8 +534,8 @@ namespace winmaped2 {
 
             pr2.IRenderImage img = WindowsClipboard.getImage();
 
-            int tx = img.Width / 16;
-            int ty = img.Height / 16;
+						int tx = img.Width / Global.TILE_SIZE;
+						int ty = img.Height / Global.TILE_SIZE;
 
             Selection s = originalSelection;
             this.selection = originalSelection.copy();
@@ -554,7 +556,7 @@ namespace winmaped2 {
             for (int y = 0; y < s.height; y++)
                 for (int x = 0; x < s.width; x++) {
                     int t = (s.y + y) * TilesWide + s.x + x;
-                    stdg.addRecord(t, Global.Misc.sliceIntArrayImage(arrImg, img.Width, x * 16, y * 16, 16, 16));
+										stdg.addRecord(t, Global.Misc.sliceIntArrayImage(arrImg, img.Width, x * Global.TILE_SIZE, y * Global.TILE_SIZE, Global.TILE_SIZE, Global.TILE_SIZE));
                 }
 
             om.add(stdg);
@@ -576,7 +578,8 @@ namespace winmaped2 {
                         executeMove();
                         Invalidate();
                     } else {
-                        if (selection.getPoint(e.X / 16, e.Y / 16 + logicalRow)) {
+											if (selection.getPoint(e.X / Global.TILE_SIZE, e.Y / Global.TILE_SIZE + logicalRow))
+											{
                             bDraggingTiles = true;
                             srcSelection = selection.copy();
                         } else
@@ -591,10 +594,10 @@ namespace winmaped2 {
                 my1 = my = e.Y;
                 clip(ref mx1, ref my1);
                 clip(ref mx, ref my);
-                mtx = (mx + 8) / 16;
-                mty = (my + 8) / 16 + logicalRow;
-                bmtx0 = mx / 16;
-                bmty0 = my / 16 + logicalRow;
+								mtx = (mx + Global.TILE_SIZE/2) / Global.TILE_SIZE;
+								mty = (my + Global.TILE_SIZE/2) / Global.TILE_SIZE + logicalRow;
+								bmtx0 = mx / Global.TILE_SIZE;
+								bmty0 = my / Global.TILE_SIZE + logicalRow;
 
                 xDrag = 0;
                 yDrag = 0;
@@ -655,10 +658,10 @@ namespace winmaped2 {
             if (bSelectingRect) {
                 clip(ref mx1, ref my1);
             }
-            mtx1 = (mx1 + 8) / 16;
-            mty1 = (my1 + 8) / 16 + logicalRow;
-            bmtx1 = mx1 / 16;
-            bmty1 = my1 / 16 + logicalRow;
+						mtx1 = (mx1 + Global.TILE_SIZE/2) / Global.TILE_SIZE;
+						mty1 = (my1 + Global.TILE_SIZE/2) / Global.TILE_SIZE + logicalRow;
+						bmtx1 = mx1 / Global.TILE_SIZE;
+						bmty1 = my1 / Global.TILE_SIZE + logicalRow;
             if (bSelectingRect) {
                 Invalidate();
             }
@@ -684,12 +687,12 @@ namespace winmaped2 {
             e.Graphics.PixelOffsetMode = PixelOffsetMode.Half;
             e.Graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;
 
-            Bitmap bmp = new Bitmap(TilesWide * 16, (TilesHigh + 1) * 16, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+						Bitmap bmp = new Bitmap(TilesWide * Global.TILE_SIZE, (TilesHigh + 1) * Global.TILE_SIZE, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
             pr2.IRenderImage qimg = pr2.RenderImage.LockBitmap(bmp);
 
             int row = 0, col = 0;
             for (int i = scrollOffset; i < parent.vsp.Tiles.Count; i++) {
-                Render.render(qimg, col * 16, row * 16, parent.vsp.GetTile(i).Image, true);
+							Render.render(qimg, col * Global.TILE_SIZE, row * Global.TILE_SIZE, parent.vsp.GetTile(i).Image, true);
 
                 if (bSelection) {
                     int xx = col;
@@ -697,7 +700,7 @@ namespace winmaped2 {
                     if (selection.getPoint(xx, yy)) {
                         int tile = originalSelection.getPointIntegerValue(xx - selection.x + originalSelection.x, yy - selection.y + originalSelection.y, this);
                         if (tile != -1) {
-                            Render.render(qimg, col * 16, row * 16, parent.vsp.GetTile(tile).Image, true);
+													Render.render(qimg, col * Global.TILE_SIZE, row * Global.TILE_SIZE, parent.vsp.GetTile(tile).Image, true);
                         }
                     }
                 }
@@ -714,7 +717,7 @@ namespace winmaped2 {
             //render the empty area
             while (row != TilesHigh + 1) {
                 while (col != TilesWide) {
-                    Render.renderColoredStippleTile(qimg, col * 16, row * 16, Render.makeColor(0, 0, 0), Render.makeColor(192, 192, 192));
+									Render.renderColoredStippleTile(qimg, col * Global.TILE_SIZE, row * Global.TILE_SIZE, Render.makeColor(0, 0, 0), Render.makeColor(192, 192, 192));
                     col++;
                 }
                 col = 0;
@@ -722,7 +725,7 @@ namespace winmaped2 {
             }
 
             qimg.Dispose();
-            e.Graphics.DrawImage(bmp, 0, 0, TilesWide * 16, (TilesHigh + 1) * 16);
+						e.Graphics.DrawImage(bmp, 0, 0, TilesWide * Global.TILE_SIZE, (TilesHigh + 1) * Global.TILE_SIZE);
             bmp.Dispose();
 
 
@@ -734,13 +737,13 @@ namespace winmaped2 {
                 Pen pen = new Pen(Color.White);
                 pen.DashStyle = DashStyle.Dash;
                 pen.Width = 1;
-                e.Graphics.DrawRectangle(pen, p0.X * 16, (p0.Y - logicalRow) * 16, (p1.X - p0.X) * 16, (p1.Y - p0.Y) * 16);
+								e.Graphics.DrawRectangle(pen, p0.X * Global.TILE_SIZE, (p0.Y - logicalRow) * Global.TILE_SIZE, (p1.X - p0.X) * Global.TILE_SIZE, (p1.Y - p0.Y) * Global.TILE_SIZE);
                 pen.Dispose();
             }
             if (bSelection) {
                 GraphicsPath gp = new GraphicsPath();
 
-                selection.updateGraphicsPath(gp, 16, 0, -logicalRow * 16);
+								selection.updateGraphicsPath(gp, Global.TILE_SIZE, 0, -logicalRow * Global.TILE_SIZE);
                 Pen pen = new Pen(Color.FromArgb(128, 0, 0, 0));
                 pen.Width = 5;
                 pen.DashStyle = DashStyle.Solid;

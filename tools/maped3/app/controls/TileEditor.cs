@@ -31,8 +31,8 @@ namespace winmaped2 {
         protected Point TranslateToTileCoords(Point controlPoint) {
             int x = 0, y = 0;
 
-            x = (int)((controlPoint.X / (float)Width) * 16);
-            y = (int)((controlPoint.Y / (float)Height) * 16);
+						x = (int)((controlPoint.X / (float)Width) * Global.TILE_SIZE);
+						y = (int)((controlPoint.Y / (float)Height) * Global.TILE_SIZE);
 
             if (x < 0) x = 0;
             if (y < 0) y = 0;

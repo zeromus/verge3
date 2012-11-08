@@ -37,8 +37,8 @@ namespace winmaped2
 			InitializeComponent();
 
 			c_dest.SelectedIndex = 0;
-			c_method.SelectedIndex = 0;
-			c_source.SelectedIndex = 0;
+			c_method.SelectedIndex = 1;
+			c_source.SelectedIndex = 1;
 		}
 		public void init()
 		{
@@ -69,6 +69,7 @@ namespace winmaped2
 		private void InitializeComponent()
 		{
 			this.groupBox1 = new System.Windows.Forms.GroupBox();
+			this.cbAddLayer = new System.Windows.Forms.CheckBox();
 			this.c_padding = new System.Windows.Forms.CheckBox();
 			this.c_dest = new System.Windows.Forms.ComboBox();
 			this.label3 = new System.Windows.Forms.Label();
@@ -80,7 +81,6 @@ namespace winmaped2
 			this.b_cancel = new System.Windows.Forms.Button();
 			this.openVspDialog = new System.Windows.Forms.OpenFileDialog();
 			this.openImageDialog = new System.Windows.Forms.OpenFileDialog();
-			this.cbAddLayer = new System.Windows.Forms.CheckBox();
 			this.groupBox1.SuspendLayout();
 			this.SuspendLayout();
 			// 
@@ -100,6 +100,16 @@ namespace winmaped2
 			this.groupBox1.TabIndex = 0;
 			this.groupBox1.TabStop = false;
 			this.groupBox1.Text = "Import Options";
+			// 
+			// cbAddLayer
+			// 
+			this.cbAddLayer.AutoSize = true;
+			this.cbAddLayer.Location = new System.Drawing.Point(160, 142);
+			this.cbAddLayer.Name = "cbAddLayer";
+			this.cbAddLayer.Size = new System.Drawing.Size(144, 17);
+			this.cbAddLayer.TabIndex = 5;
+			this.cbAddLayer.Text = "Create Layer From Image";
+			this.cbAddLayer.UseVisualStyleBackColor = true;
 			// 
 			// c_padding
 			// 
@@ -201,18 +211,8 @@ namespace winmaped2
 			// openImageDialog
 			// 
 			this.openImageDialog.Filter = "Image Files (*.png,*.jpg,*.jpeg,*.pcx,*.bmp,*.tga,*.gif)|*.png;*.jpg;*.jpeg;*.pcx" +
-				";*.bmp;*.tga;*.gif";
+					";*.bmp;*.tga;*.gif";
 			this.openImageDialog.RestoreDirectory = true;
-			// 
-			// cbAddLayer
-			// 
-			this.cbAddLayer.AutoSize = true;
-			this.cbAddLayer.Location = new System.Drawing.Point(160, 142);
-			this.cbAddLayer.Name = "cbAddLayer";
-			this.cbAddLayer.Size = new System.Drawing.Size(144, 17);
-			this.cbAddLayer.TabIndex = 5;
-			this.cbAddLayer.Text = "Create Layer From Image";
-			this.cbAddLayer.UseVisualStyleBackColor = true;
 			// 
 			// ImportDialog
 			// 

@@ -127,6 +127,14 @@
     <value>242, 17</value>
   </metadata>
   <assembly alias="System.Drawing" name="System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+  <data name="radioButton7.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+    <value>
+        iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8
+        YQUAAAAgY0hSTQAAeiYAAICEAAD6AAAAgOgAAHUwAADqYAAAOpgAABdwnLpRPAAAAD9JREFUKFNjZGBg
+        +A/EOMH///8ZkSWBfOwAahBIkgGEQQCvYrBKiBrCimGmw5yL02RkiVHFlIcGWsCDYwwbBgCbAZ1zzWaM
+        2gAAAABJRU5ErkJggg==
+</value>
+  </data>
   <data name="radioButton6.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
         Qk0mBQAAAAAAADYEAAAoAAAAEAAAAA8AAAABAAgAAAAAAAAAAADEDgAAxA4AAAABAAAAAQAAAAAA/wAA

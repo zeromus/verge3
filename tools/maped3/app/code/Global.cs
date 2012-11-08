@@ -14,12 +14,17 @@ namespace winmaped2 {
     /// not gonna happen, brother.
     /// </summary>
     public class Global {
+			public static int TILE_SIZE = 16;
+			public static int VSP_SIZE_TILES = 16;
+			public static int VSP_SIZE_PIXELS = VSP_SIZE_TILES * TILE_SIZE;
+			public static int VSP_SIZE_PIXELS_HEIGHT = 192;
+
         public class Misc {
             public static int[] sliceIntArrayImage(int[] arr, int sw, int x, int y, int w, int h) {
                 int[] ret = new int[w * h];
                 for (int yy = 0; yy < h; yy++)
                     for (int xx = 0; xx < w; xx++)
-                        ret[yy * 16 + xx] = arr[(yy + y) * sw + xx + x];
+											ret[yy * TILE_SIZE + xx] = arr[(yy + y) * sw + xx + x];
                 return ret;
             }
         }
@@ -51,11 +56,11 @@ namespace winmaped2 {
         public delegate void SimpleEventHandler();
 
         public class VERSIONINFO {
-            public const string VERSIONSTRING_LONG = "VERGE MapEd 3.0.1";
-            public const string VERSIONSTRING = "3.0.1";
+					public const string VERSIONSTRING_LONG = "VERGE MapEd 3.0.astral";
+					public const string VERSIONSTRING = "3.0.astral";
             public const double VERSIONNUMBER = 3.0001;
 
-            public const int MAPVERSION = 2;
+            public const int MAPVERSION = 3;
         }
 
         static Map _ActiveMap;
@@ -268,14 +273,12 @@ namespace winmaped2 {
         public static LPanel lpSelection;
 
         public static void RedrawMinimap() {
-            MiniMap.bNeedsRedraw = true;
             MiniMap.Invalidate();
         }
 
         public static void ForceRedraws() {
             Global.VspViewer.ForceRedraw();
             Global.layerTool.Invalidate();
-            MiniMap.bNeedsRedraw = true;
             MiniMap.Invalidate();
             MainMapController.Invalidate(true);
             if (mainWindow != null) mainWindow.ui_update(false);

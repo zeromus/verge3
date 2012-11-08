@@ -8,331 +8,371 @@ using RegisterFileType;
 using System.Threading;
 using System.Diagnostics;
 
-namespace winmaped2 {
-    /// <summary>
-    /// Summary description for mainWindow.
-    /// </summary>
-    public partial class MainWindow : System.Windows.Forms.Form {
-        
-        private System.ComponentModel.IContainer components;
-        private System.Windows.Forms.MainMenu mainMenu;
-        private System.Windows.Forms.MenuItem miExit;
-        private System.Windows.Forms.MenuItem miOpenMap;
-        private System.Windows.Forms.SaveFileDialog saveFileDialog;
-        private System.Windows.Forms.OpenFileDialog openFileDialog;
-        private System.Windows.Forms.StatusBar statusBar;
-        private System.Windows.Forms.Panel toolPanel;
-        private System.Windows.Forms.Panel mapPanel;
-        private System.Windows.Forms.Button button1;
-        private System.Windows.Forms.MenuItem miHelp;
-        private System.Windows.Forms.MenuItem miAbout;
-        private System.Windows.Forms.MenuItem miView;
-        private System.Windows.Forms.ImageList toolbarImages;
-        private System.Windows.Forms.MenuItem miEditZones;
-        private System.Windows.Forms.MenuItem miMapProperties;
-        private System.Windows.Forms.StatusBarPanel sbpCursorInfo;
-        private System.Windows.Forms.StatusBarPanel sbpLoadInfo;
-        private winmaped2.SizeGrip sizeGrip;
-        private System.Windows.Forms.MenuItem Zoom1x;
-        private System.Windows.Forms.MenuItem miZoom2x;
-        private System.Windows.Forms.MenuItem miZoom4x;
-        private System.Windows.Forms.MenuItem miEdit;
-        private System.Windows.Forms.MenuItem miUndo;
-        private System.Windows.Forms.MenuItem menuItem7;
-        private System.Windows.Forms.MenuItem menuItem8;
-        private System.Windows.Forms.MenuItem miNewMap;
-        private System.Windows.Forms.MenuItem miFile;
-        private System.Windows.Forms.MenuItem mruSeparator;
-        public ArrayList lwLayers = new ArrayList();
-        private System.Windows.Forms.MenuItem miSave;
-        private System.Windows.Forms.MenuItem miSaveAs;
-        private System.Windows.Forms.MenuItem misSave;
-        private System.Windows.Forms.MenuItem miClose;
-        private System.Windows.Forms.Panel mainpanel;
-        private System.Windows.Forms.MenuItem miMap;
-        private System.Windows.Forms.MenuItem miEditEntities;
-        private System.Windows.Forms.MenuItem menuItem15;
-        private System.Windows.Forms.MenuItem miVsp;
-        private System.Windows.Forms.MenuItem miEditTiles;
-        private System.Windows.Forms.MenuItem miEditAnims;
-        private System.Windows.Forms.MenuItem miExportTiles;
-        private System.Windows.Forms.OpenFileDialog openVspDialog;
-        private System.Windows.Forms.OpenFileDialog openImageDialog;
-        private System.Windows.Forms.MenuItem mi_rft;
-        public MRU mru = new MRU(4, "SOFTWARE\\VERGE\\Maped3\\RecentlyUsed");
-        private winmaped2.ToolPalette toolPalette;
-        private winmaped2.ToolPalette.ToolButton radioButton5;
-        private winmaped2.ToolPalette.ToolButton radioButton3;
-        private winmaped2.ToolPalette.ToolButton radioButton2;
-        private winmaped2.ToolPalette.ToolButton radioButton1;
-        private winmaped2.ToolPalette.ToolButton radioButton4;
-        private winmaped2.LayerPanel lPanel;
-        private winmaped2.VSPController vspController;
-        private System.Windows.Forms.Panel p_ents;
-        private System.Windows.Forms.Label l_sent;
-        private System.Windows.Forms.Button b_editents;
-        private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.ListView lv_ents;
-        private System.Windows.Forms.ColumnHeader columnHeader1;
-        private System.Windows.Forms.ColumnHeader columnHeader2;
-        private System.Windows.Forms.Panel p_zones;
-        private System.Windows.Forms.Label l_szone;
-        private System.Windows.Forms.Button button2;
-        private System.Windows.Forms.Label label1;
-        private winmaped2.ListViewIndexed lv_zonelist;
-        private System.Windows.Forms.ColumnHeader ch_zoneid;
-        private System.Windows.Forms.ColumnHeader ch_zonename;
-        private winmaped2.TileViewer TileViewA;
-        private winmaped2.TileViewer TileViewB;
-        private System.Windows.Forms.Panel panel2;
-        private winmaped2.MiniMapControl miniMap;
-        private winmaped2.VSPController vspc_obs;
-        private System.Windows.Forms.GroupBox g_tiles;
-        private System.Windows.Forms.MenuItem miPreferences;
-        private System.Windows.Forms.MenuItem menuItem11;
-        private System.Windows.Forms.GroupBox g_obs;
-        private winmaped2.TileViewer tv_obs;
-        private System.Windows.Forms.Button b_gotoent;
-        private System.Windows.Forms.MenuItem miExportTilesToImageGrid;
-        private System.Windows.Forms.SaveFileDialog saveImageDialog;
-        private System.Windows.Forms.MenuItem miChangeVSP;
-        private System.Windows.Forms.MenuItem menuItem13;
-        private System.Windows.Forms.MenuItem miChangeVspExisting;
-        private System.Windows.Forms.MenuItem miChangeVspBlank;
-        private System.Windows.Forms.Panel panel4;
-        private System.Windows.Forms.Button b_layeradd;
-        private System.Windows.Forms.Button b_layerdown;
-        private System.Windows.Forms.Button b_layerup;
-        private System.Windows.Forms.Button b_layerdel;
-        private System.Windows.Forms.Button b_layerproperties;
-        private System.Windows.Forms.MenuItem miShowHelp;
-        private System.Windows.Forms.MenuItem menuItem16;
-        private System.Windows.Forms.MenuItem miExportTilesToClipboardGrid;
-        private System.Windows.Forms.MenuItem miRedo;
-        private winmaped2.ToolPalette.ToolButton radioButton6;
-        private System.Windows.Forms.SaveFileDialog saveVspDialog;
-        private winmaped2.MapController mcClipboard;
-        private System.Windows.Forms.MenuItem miImportTiles;
-        private System.Windows.Forms.MenuItem miImportAgain;
-        private System.Windows.Forms.MenuItem menuItem9;
-        private System.Windows.Forms.StatusBarPanel sbpSelection;
-        private MapController mapController;
-        private System.Windows.Forms.CheckBox checkBox1;
-        private System.Windows.Forms.GroupBox groupBox1;
-        private System.Windows.Forms.CheckBox cb_transeffects;
-        private System.Windows.Forms.Label l_rstring;
-        private System.Windows.Forms.StatusBarPanel sbpZoom;
-        private System.Windows.Forms.Button b_runmap;
-        private System.Windows.Forms.MenuItem miArrangeTiles;
-        private System.Windows.Forms.Panel ctTilesP;
-        System.Timers.Timer animTimer = new System.Timers.Timer(100);
-        private System.Windows.Forms.Button button3;
-        private System.Windows.Forms.Button button4;
-        private System.Windows.Forms.GroupBox groupBox2;
-        private System.Windows.Forms.Panel ctMinimapP;
-        private System.Windows.Forms.Button button5;
-        private System.Windows.Forms.GroupBox groupBox3;
-        private System.Windows.Forms.TrackBar tb_zoom;
-        private MenuItem miExportTilesToImage;
-        private MenuItem miExportTilesToClipboard;
-        private FlowLayoutPanel sidebarPanel;
-        private CollapsiblePanel toolPalletePanel;
-        private CollapsiblePanel clipboardPanel;
-        private CollapsiblePanel tilesPanel;
-        private CollapsiblePanel minimapPanel;
-        private MenuItem miViewToolbars;
-        private MenuItem menuItem2;
-        private CollapsiblePanel layerPanel;
+namespace winmaped2
+{
+	/// <summary>
+	/// Summary description for mainWindow.
+	/// </summary>
+	public partial class MainWindow : System.Windows.Forms.Form
+	{
 
-		ContextMenu sidebarContextMenu;
-
-        public MainWindow() {
-            //
-            // Required for Windows Form Designer support
-            //
-            InitializeComponent();
-
-            Global.toolPalette = toolPalette;
-            Global.MainMapController = mapController;
-            Global.ClipboardMapController = mcClipboard;
-            Global.zoomChanged += new winmaped2.Global.SimpleEventHandler(Global_zoomChanged);
-            Global.zoomChanged += new winmaped2.Global.SimpleEventHandler(zoomchanged);
+		private System.ComponentModel.IContainer components;
+		private System.Windows.Forms.MainMenu mainMenu;
+		private System.Windows.Forms.MenuItem miExit;
+		private System.Windows.Forms.MenuItem miOpenMap;
+		private System.Windows.Forms.SaveFileDialog saveFileDialog;
+		private System.Windows.Forms.OpenFileDialog openFileDialog;
+		private System.Windows.Forms.StatusBar statusBar;
+		private System.Windows.Forms.Panel toolPanel;
+		private System.Windows.Forms.Panel mapPanel;
+		private System.Windows.Forms.Button button1;
+		private System.Windows.Forms.MenuItem miHelp;
+		private System.Windows.Forms.MenuItem miAbout;
+		private System.Windows.Forms.MenuItem miView;
+		private System.Windows.Forms.ImageList toolbarImages;
+		private System.Windows.Forms.MenuItem miEditZones;
+		private System.Windows.Forms.MenuItem miMapProperties;
+		private System.Windows.Forms.StatusBarPanel sbpCursorInfo;
+		private System.Windows.Forms.StatusBarPanel sbpLoadInfo;
+		private winmaped2.SizeGrip sizeGrip;
+		private System.Windows.Forms.MenuItem Zoom1x;
+		private System.Windows.Forms.MenuItem miZoom2x;
+		private System.Windows.Forms.MenuItem miZoom4x;
+		private System.Windows.Forms.MenuItem miEdit;
+		private System.Windows.Forms.MenuItem miUndo;
+		private System.Windows.Forms.MenuItem menuItem7;
+		private System.Windows.Forms.MenuItem menuItem8;
+		private System.Windows.Forms.MenuItem miNewMap;
+		private System.Windows.Forms.MenuItem miFile;
+		private System.Windows.Forms.MenuItem mruSeparator;
+		public ArrayList lwLayers = new ArrayList();
+		private System.Windows.Forms.MenuItem miSave;
+		private System.Windows.Forms.MenuItem miSaveAs;
+		private System.Windows.Forms.MenuItem misSave;
+		private System.Windows.Forms.MenuItem miClose;
+		private System.Windows.Forms.Panel mainpanel;
+		private System.Windows.Forms.MenuItem miMap;
+		private System.Windows.Forms.MenuItem miEditEntities;
+		private System.Windows.Forms.MenuItem menuItem15;
+		private System.Windows.Forms.MenuItem miVsp;
+		private System.Windows.Forms.MenuItem miEditTiles;
+		private System.Windows.Forms.MenuItem miEditAnims;
+		private System.Windows.Forms.MenuItem miExportTiles;
+		private System.Windows.Forms.OpenFileDialog openVspDialog;
+		private System.Windows.Forms.OpenFileDialog openImageDialog;
+		private System.Windows.Forms.MenuItem mi_rft;
+		public MRU mru = new MRU(4, "SOFTWARE\\VERGE\\Maped3\\RecentlyUsed");
+		private winmaped2.ToolPalette toolPalette;
+		private winmaped2.ToolPalette.ToolButton radioButton5;
+		private winmaped2.ToolPalette.ToolButton radioButton3;
+		private winmaped2.ToolPalette.ToolButton radioButton2;
+		private winmaped2.ToolPalette.ToolButton radioButton1;
+		private winmaped2.ToolPalette.ToolButton radioButton4;
+		private winmaped2.LayerPanel lPanel;
+		private winmaped2.VSPController vspController;
+		private System.Windows.Forms.Panel p_ents;
+		private System.Windows.Forms.Label l_sent;
+		private System.Windows.Forms.Button b_editents;
+		private System.Windows.Forms.Label label3;
+		private System.Windows.Forms.ListView lv_ents;
+		private System.Windows.Forms.ColumnHeader columnHeader1;
+		private System.Windows.Forms.ColumnHeader columnHeader2;
+		private System.Windows.Forms.Panel p_zones;
+		private System.Windows.Forms.Label l_szone;
+		private System.Windows.Forms.Button button2;
+		private System.Windows.Forms.Label label1;
+		private winmaped2.ListViewIndexed lv_zonelist;
+		private System.Windows.Forms.ColumnHeader ch_zoneid;
+		private System.Windows.Forms.ColumnHeader ch_zonename;
+		private System.Windows.Forms.Panel panel2;
+		private winmaped2.MiniMapControl miniMap;
+		private winmaped2.VSPController vspc_obs;
+		private System.Windows.Forms.MenuItem miPreferences;
+		private System.Windows.Forms.MenuItem menuItem11;
+		private System.Windows.Forms.GroupBox g_obs;
+		private winmaped2.TileViewer tv_obs;
+		private System.Windows.Forms.Button b_gotoent;
+		private System.Windows.Forms.MenuItem miExportTilesToImageGrid;
+		private System.Windows.Forms.SaveFileDialog saveImageDialog;
+		private System.Windows.Forms.MenuItem miChangeVSP;
+		private System.Windows.Forms.MenuItem menuItem13;
+		private System.Windows.Forms.MenuItem miChangeVspExisting;
+		private System.Windows.Forms.MenuItem miChangeVspBlank;
+		private System.Windows.Forms.Panel panel4;
+		private System.Windows.Forms.Button b_layeradd;
+		private System.Windows.Forms.Button b_layerdown;
+		private System.Windows.Forms.Button b_layerup;
+		private System.Windows.Forms.Button b_layerdel;
+		private System.Windows.Forms.Button b_layerproperties;
+		private System.Windows.Forms.MenuItem miShowHelp;
+		private System.Windows.Forms.MenuItem menuItem16;
+		private System.Windows.Forms.MenuItem miExportTilesToClipboardGrid;
+		private System.Windows.Forms.MenuItem miRedo;
+		private winmaped2.ToolPalette.ToolButton radioButton6;
+		private System.Windows.Forms.SaveFileDialog saveVspDialog;
+		private winmaped2.MapController mcClipboard;
+		private System.Windows.Forms.MenuItem miImportTiles;
+		private System.Windows.Forms.MenuItem miImportAgain;
+		private System.Windows.Forms.MenuItem menuItem9;
+		private System.Windows.Forms.StatusBarPanel sbpSelection;
+		private MapController mapController;
+		private System.Windows.Forms.CheckBox checkBox1;
+		private System.Windows.Forms.GroupBox groupBox1;
+		private System.Windows.Forms.CheckBox cb_transeffects;
+		private System.Windows.Forms.Label l_rstring;
+		private System.Windows.Forms.StatusBarPanel sbpZoom;
+		private System.Windows.Forms.Button b_runmap;
+		private System.Windows.Forms.MenuItem miArrangeTiles;
+		private System.Windows.Forms.Panel ctTilesP;
+		System.Timers.Timer animTimer = new System.Timers.Timer(100);
+		private System.Windows.Forms.Button button3;
+		private System.Windows.Forms.Button button4;
+		private System.Windows.Forms.GroupBox groupBox2;
+		private System.Windows.Forms.Panel ctMinimapP;
+		private System.Windows.Forms.Button button5;
+		private System.Windows.Forms.GroupBox groupBox3;
+		private System.Windows.Forms.TrackBar tb_zoom;
+		private MenuItem miExportTilesToImage;
+		private MenuItem miExportTilesToClipboard;
+		private FlowLayoutPanel sidebarPanel;
+		private CollapsiblePanel toolPalletePanel;
+		private CollapsiblePanel clipboardPanel;
+		private CollapsiblePanel tilesPanel;
+		private CollapsiblePanel minimapPanel;
+		private MenuItem miViewToolbars;
+		private MenuItem menuItem2;
+		private Button btnObsAll;
+		public CheckBox checkObsRight;
+		public CheckBox checkObsDown;
+		public CheckBox checkObsLeft;
+		public CheckBox checkObsUp;
+		private GroupBox g_tiles;
+		private TileViewer TileViewA;
+		private TileViewer TileViewB;
+		private ToolPalette.ToolButton radioButton7;
+		private MenuItem menuItem1;
+		public MenuItem miViewNotes;
+		private CollapsiblePanel layerPanel;
 
 
-            Global.FrameCalc.init();
+		public MainWindow()
+		{
+			//
+			// Required for Windows Form Designer support
+			//
+			InitializeComponent();
 
-            Preferences.LoadAsCurrent();
-
-            Plugins.IMapPlugin brush, rectfill, line, rectangle, floodfill, clipboard;
-            Global.pluginManager.addPlugin(brush = new winmaped2.map_plugins.BrushTool());
-            Global.pluginManager.addPlugin(rectfill = new winmaped2.map_plugins.RectFill());
-            Global.pluginManager.addPlugin(line = new winmaped2.map_plugins.Line());
-            Global.pluginManager.addPlugin(rectangle = new winmaped2.map_plugins.Rectangle());
-            Global.pluginManager.addPlugin(floodfill = new winmaped2.map_plugins.FloodFillTool());
-            Global.pluginManager.addPlugin(clipboard = new winmaped2.map_plugins.ClipboardPlugin());
-
-            toolPalette.registerButton(radioButton1, brush);
-            toolPalette.registerButton(radioButton2, rectfill);
-            toolPalette.registerButton(radioButton3, line);
-            toolPalette.registerButton(radioButton4, rectangle);
-            toolPalette.registerButton(radioButton5, floodfill);
-            toolPalette.registerButton(radioButton6, clipboard);
-
-            ((Bitmap)radioButton1.Image).MakeTransparent(Color.Magenta);
-            ((Bitmap)radioButton2.Image).MakeTransparent(Color.Magenta);
-            ((Bitmap)radioButton3.Image).MakeTransparent(Color.Magenta);
-            ((Bitmap)radioButton4.Image).MakeTransparent(Color.Magenta);
-            ((Bitmap)radioButton5.Image).MakeTransparent(Color.Magenta);
-            ((Bitmap)b_runmap.Image).MakeTransparent(Color.Magenta);
-            ((Bitmap)b_layeradd.Image).MakeTransparent(Color.Magenta);
-            ((Bitmap)b_layerdel.Image).MakeTransparent(Color.Magenta);
-            ((Bitmap)b_layerup.Image).MakeTransparent(Color.Magenta);
-            ((Bitmap)b_layerdown.Image).MakeTransparent(Color.Magenta);
-            ((Bitmap)b_layerproperties.Image).MakeTransparent(Color.Magenta);
+			Global.toolPalette = toolPalette;
+			Global.MainMapController = mapController;
+			Global.ClipboardMapController = mcClipboard;
+			Global.zoomChanged += new winmaped2.Global.SimpleEventHandler(Global_zoomChanged);
+			Global.zoomChanged += new winmaped2.Global.SimpleEventHandler(zoomchanged);
 
 
+			Global.FrameCalc.init();
 
-            Images.ImagesInit();
+			Preferences.LoadAsCurrent();
 
-            vspController.SetControllerMode(VSPController.ControllerMode.SelectorDual);
-            vspController.SetControllerType(VSPController.ControllerType.VSP);
-            vspController.SetTileViewers(TileViewA, TileViewB);
-            vspController.VspView.SelectionChanged += new SEventHandler(VspView_SelectionChanged);
+			Plugins.IMapPlugin brush, rectfill, line, rectangle, floodfill, clipboard, noteTool;
+			Global.pluginManager.addPlugin(brush = new winmaped2.map_plugins.BrushTool());
+			Global.pluginManager.addPlugin(rectfill = new winmaped2.map_plugins.RectFill());
+			Global.pluginManager.addPlugin(line = new winmaped2.map_plugins.Line());
+			Global.pluginManager.addPlugin(rectangle = new winmaped2.map_plugins.Rectangle());
+			Global.pluginManager.addPlugin(floodfill = new winmaped2.map_plugins.FloodFillTool());
+			Global.pluginManager.addPlugin(clipboard = new winmaped2.map_plugins.ClipboardPlugin());
+			Global.pluginManager.addPlugin(noteTool = winmaped2.map_plugins.NoteTool.noteTool);
 
-            vspc_obs.SetControllerMode(VSPController.ControllerMode.SelectorSingle);
-            vspc_obs.SetControllerType(VSPController.ControllerType.Obstruction);
-            vspc_obs.SetTileViewers(tv_obs);
-            tv_obs.TileSourceType = TileViewer.SourceType.Obstruction;
+			toolPalette.registerButton(radioButton1, brush);
+			toolPalette.registerButton(radioButton2, rectfill);
+			toolPalette.registerButton(radioButton3, line);
+			toolPalette.registerButton(radioButton4, rectangle);
+			toolPalette.registerButton(radioButton5, floodfill);
+			toolPalette.registerButton(radioButton6, clipboard);
+			toolPalette.registerButton(radioButton7, noteTool);
 
-            Global.SelectedZoneChanged += new winmaped2.Global.SimpleEventHandler(Global_SelectedZoneChanged);
-            Global.vspController = vspController;
-            Global.obsVspController = vspc_obs;
-            Global.MiniMap = miniMap;
-            Global.mainWindow = this;
-            Global.TileViewerA = TileViewA;
-            Global.TileViewerB = TileViewB;
-            Global.layerTool = lPanel;
-
-            if (Global.VspViewer != null) {
-                Global.VspViewer.CalculateScrollValues();
-            }
-
-            Global.WriteDestChanged += new winmaped2.Global.LEventHandler(WriteDestChanged);
-            Global.CursorLocationChanged += new winmaped2.Global.xyEventHandler(Global_CursorLocationChanged);
-            Global.ActiveMapChanged += new winmaped2.Global.SimpleEventHandler(Global_ActiveMapChanged);
-            Global.ClipboardChanged += new winmaped2.Global.SimpleEventHandler(Global_ClipboardChanged);
-
-
-            miniMap.Controller = mapController;
-            mapController.AssociateMinimap(miniMap);
-            mcClipboard.ZoomLevel = 1;
-
-            Global.zoom = Preferences.Current.DefaultZoomLevel;
-            Global.FrameCalc.OnTick += new winmaped2.Global.SimpleEventHandler(FrameCalc_OnTick);
+			((Bitmap)radioButton1.Image).MakeTransparent(Color.Magenta);
+			((Bitmap)radioButton2.Image).MakeTransparent(Color.Magenta);
+			((Bitmap)radioButton3.Image).MakeTransparent(Color.Magenta);
+			((Bitmap)radioButton4.Image).MakeTransparent(Color.Magenta);
+			((Bitmap)radioButton5.Image).MakeTransparent(Color.Magenta);
+			((Bitmap)b_runmap.Image).MakeTransparent(Color.Magenta);
+			((Bitmap)b_layeradd.Image).MakeTransparent(Color.Magenta);
+			((Bitmap)b_layerdel.Image).MakeTransparent(Color.Magenta);
+			((Bitmap)b_layerup.Image).MakeTransparent(Color.Magenta);
+			((Bitmap)b_layerdown.Image).MakeTransparent(Color.Magenta);
+			((Bitmap)b_layerproperties.Image).MakeTransparent(Color.Magenta);
 
 
-            ui_update();
 
-            animTimer.Elapsed += new System.Timers.ElapsedEventHandler(animTimer_Elapsed);
-            animTimer.Start();
-            animTimer.Enabled = false;
+			Images.ImagesInit();
 
-            Global_zoomChanged();
+			vspController.SetControllerMode(VSPController.ControllerMode.SelectorDual);
+			vspController.SetControllerType(VSPController.ControllerType.VSP);
+			vspController.SetTileViewers(TileViewA, TileViewB);
+			vspController.VspView.SelectionChanged += new SEventHandler(VspView_SelectionChanged);
 
-            throttleDisplay = new ThrottleBuffer(500, new EventHandler(postRedisplay));
+			vspc_obs.SetControllerMode(VSPController.ControllerMode.SelectorSingle);
+			vspc_obs.SetControllerType(VSPController.ControllerType.Obstruction);
+			vspc_obs.SetTileViewers(tv_obs);
+			tv_obs.TileSourceType = TileViewer.SourceType.Obstruction;
+
+			Global.SelectedZoneChanged += new winmaped2.Global.SimpleEventHandler(Global_SelectedZoneChanged);
+			Global.vspController = vspController;
+			Global.obsVspController = vspc_obs;
+			Global.MiniMap = miniMap;
+			Global.mainWindow = this;
+			Global.TileViewerA = TileViewA;
+			Global.TileViewerB = TileViewB;
+			Global.layerTool = lPanel;
+
+			if (Global.VspViewer != null)
+			{
+				Global.VspViewer.CalculateScrollValues();
+			}
+
+			Global.WriteDestChanged += new winmaped2.Global.LEventHandler(WriteDestChanged);
+			Global.CursorLocationChanged += new winmaped2.Global.xyEventHandler(Global_CursorLocationChanged);
+			Global.ActiveMapChanged += new winmaped2.Global.SimpleEventHandler(Global_ActiveMapChanged);
+			Global.ClipboardChanged += new winmaped2.Global.SimpleEventHandler(Global_ClipboardChanged);
 
 
-			sidebarContextMenu = new ContextMenu();
-            foreach (Control ctrl in sidebarPanel.Controls)
-            {
-                if (ctrl is CollapsiblePanel)
-                {
-                    CollapsiblePanel panel = (ctrl as CollapsiblePanel);
-                    MenuItem toolbarItem = panel.MenuItem.CloneMenu();
-                    
-                    panel.VisibleChanged += delegate(object sender, EventArgs e)
-                    {
-                        toolbarItem.Checked = panel.Visible;
-                    };
-                    miViewToolbars.MenuItems.Add(toolbarItem);
-					sidebarContextMenu.MenuItems.Add(panel.MenuItem);
-                }
-            }
+			miniMap.Controller = mapController;
+			mapController.AssociateMinimap(miniMap);
+			mcClipboard.ZoomLevel = 1;
 
-            // test
-            //Preferences.Current.Save();
+			Global.zoom = Preferences.Current.DefaultZoomLevel;
+			Global.FrameCalc.OnTick += new winmaped2.Global.SimpleEventHandler(FrameCalc_OnTick);
 
-            radioButton1.Checked = true;
-        }
 
-        public void lpAddLayer(MapLayer ml, bool IsRendered, bool IsWrite, int layer) {
-            LPanel lw = new LPanel(lPanel, ml, IsRendered, IsWrite, layer);
-            lwLayers.Add(lw);
-            lPanel.Controls.Add(lw);
-            lPanel.SetControlLayouts();
-        }
+			ui_update();
 
-        public void lpSwapLayer(MapLayer oldLayer, MapLayer newLayer) {
-            foreach (Control lp in lPanel.Controls) {
-                if (lp is LPanel) {
-                    if (((LPanel)lp).mLayerRef == oldLayer) {
-                        ((LPanel)lp).mLayerRef = newLayer;
-                    }
-                }
-            }
-        }
+			animTimer.Elapsed += new System.Timers.ElapsedEventHandler(animTimer_Elapsed);
+			animTimer.Start();
+			animTimer.Enabled = false;
 
-        public void lpInit(Map map) {
-            foreach (LPanel lw in lwLayers) {
-                lw.Dispose();
-            }
-            lwLayers.Clear();
-            for (int i = 0; i < map.RenderManager.Layers.Count; i++) {
-                MapLayer ml = (MapLayer)map.RenderManager.Layers[i];
-                lpAddLayer(ml, true, Global.IsBaseLayer(ml), i);
-            }
-            //			if(Global.lpSelection==null)
-            //				((LPanel)lwLayers[0]).SelectForWrite();
+			Global_zoomChanged();
 
-            l_rstring.Text = Global.ActiveMap.RenderManager.ToRenderString();
-            ui_update();
-        }
-        public void lpDestruct() {
-            lwLayers.Clear();
-            lPanel.Controls.Clear();
-            l_rstring.Text = "";
-        }
-        public void lpUpdate(Map map, MapLayer select) {
-            foreach (LPanel lw in lwLayers) {
-                lw.Dispose();
-            }
-            lwLayers.Clear();
-            for (int i = 0; i < map.RenderManager.Layers.Count; i++) {
-                MapLayer ml = (MapLayer)map.RenderManager.Layers[i];
-                lpAddLayer(ml, true, (ml == select), i);
-            }
-            l_rstring.Text = Global.ActiveMap.RenderManager.ToRenderString();
-            ui_update();
-        }
+			throttleDisplay = new ThrottleBuffer(500, new EventHandler(postRedisplay));
 
-        /// <summary>
-        /// Clean up any resources being used.
-        /// </summary>
-        protected override void Dispose(bool disposing) {
-            if (disposing) {
-                if (components != null) {
-                    components.Dispose();
-                }
-            }
-            base.Dispose(disposing);
-        }
 
-        #region Windows Form Designer generated code
-        /// <summary>
-        /// Required method for Designer support - do not modify
-        /// the contents of this method with the code editor.
-        /// </summary>
-        private void InitializeComponent() {
+			sidebarPanel.ContextMenu = new ContextMenu();
+			foreach (Control ctrl in sidebarPanel.Controls)
+			{
+				if (ctrl is CollapsiblePanel)
+				{
+					CollapsiblePanel panel = (ctrl as CollapsiblePanel);
+					MenuItem toolbarItem = panel.MenuItem.CloneMenu();
+
+					panel.VisibleChanged += delegate(object sender, EventArgs e)
+					{
+						toolbarItem.Checked = panel.Visible;
+					};
+					miViewToolbars.MenuItems.Add(toolbarItem);
+
+					//this is the code that adds the contextmenu that is annoying
+					sidebarPanel.ContextMenu.MenuItems.Add(panel.MenuItem);
+				}
+			}
+
+			// test
+			//Preferences.Current.Save();
+
+			radioButton1.Checked = true;
+		
+			//tilesPanel.CanLargeify = true;
+			tilesPanel.OnLargeified = OnLargeifyTiles;
+		}
+
+		void OnLargeifyTiles(object o)
+		{
+			//ctTilesP.Height = ctTilesP.Size.Height * 2;
+			vspController.Height *= 2;
+		}
+
+		public void lpAddLayer(MapLayer ml, bool IsRendered, bool IsWrite, int layer)
+		{
+			LPanel lw = new LPanel(lPanel, ml, IsRendered, IsWrite, layer);
+			lwLayers.Add(lw);
+			lPanel.Controls.Add(lw);
+			lPanel.SetControlLayouts();
+		}
+
+		public void lpSwapLayer(MapLayer oldLayer, MapLayer newLayer)
+		{
+			foreach (Control lp in lPanel.Controls)
+			{
+				if (lp is LPanel)
+				{
+					if (((LPanel)lp).mLayerRef == oldLayer)
+					{
+						((LPanel)lp).mLayerRef = newLayer;
+					}
+				}
+			}
+		}
+
+		public void lpInit(Map map)
+		{
+			foreach (LPanel lw in lwLayers)
+			{
+				lw.Dispose();
+			}
+			lwLayers.Clear();
+			for (int i = 0; i < map.RenderManager.Layers.Count; i++)
+			{
+				MapLayer ml = (MapLayer)map.RenderManager.Layers[i];
+				lpAddLayer(ml, true, Global.IsBaseLayer(ml), i);
+			}
+			//			if(Global.lpSelection==null)
+			//				((LPanel)lwLayers[0]).SelectForWrite();
+
+			l_rstring.Text = Global.ActiveMap.RenderManager.ToRenderString();
+			ui_update();
+		}
+		public void lpDestruct()
+		{
+			lwLayers.Clear();
+			lPanel.Controls.Clear();
+			l_rstring.Text = "";
+		}
+		public void lpUpdate(Map map, MapLayer select)
+		{
+			foreach (LPanel lw in lwLayers)
+			{
+				lw.Dispose();
+			}
+			lwLayers.Clear();
+			for (int i = 0; i < map.RenderManager.Layers.Count; i++)
+			{
+				MapLayer ml = (MapLayer)map.RenderManager.Layers[i];
+				lpAddLayer(ml, true, (ml == select), i);
+			}
+			l_rstring.Text = Global.ActiveMap.RenderManager.ToRenderString();
+			ui_update();
+		}
+
+		/// <summary>
+		/// Clean up any resources being used.
+		/// </summary>
+		protected override void Dispose(bool disposing)
+		{
+			if (disposing)
+			{
+				if (components != null)
+				{
+					components.Dispose();
+				}
+			}
+			base.Dispose(disposing);
+		}
+
+		#region Windows Form Designer generated code
+		/// <summary>
+		/// Required method for Designer support - do not modify
+		/// the contents of this method with the code editor.
+		/// </summary>
+		private void InitializeComponent()
+		{
 			this.components = new System.ComponentModel.Container();
 			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainWindow));
 			this.mainMenu = new System.Windows.Forms.MainMenu(this.components);
@@ -379,6 +419,8 @@ namespace winmaped2 {
 			this.Zoom1x = new System.Windows.Forms.MenuItem();
 			this.miZoom2x = new System.Windows.Forms.MenuItem();
 			this.miZoom4x = new System.Windows.Forms.MenuItem();
+			this.menuItem1 = new System.Windows.Forms.MenuItem();
+			this.miViewNotes = new System.Windows.Forms.MenuItem();
 			this.miHelp = new System.Windows.Forms.MenuItem();
 			this.miShowHelp = new System.Windows.Forms.MenuItem();
 			this.menuItem16 = new System.Windows.Forms.MenuItem();
@@ -394,9 +436,19 @@ namespace winmaped2 {
 			this.toolPanel = new System.Windows.Forms.Panel();
 			this.button1 = new System.Windows.Forms.Button();
 			this.sidebarPanel = new System.Windows.Forms.FlowLayoutPanel();
+			this.toolbarImages = new System.Windows.Forms.ImageList(this.components);
+			this.mapPanel = new System.Windows.Forms.Panel();
+			this.mainpanel = new System.Windows.Forms.Panel();
+			this.openVspDialog = new System.Windows.Forms.OpenFileDialog();
+			this.openImageDialog = new System.Windows.Forms.OpenFileDialog();
+			this.saveVspDialog = new System.Windows.Forms.SaveFileDialog();
+			this.saveImageDialog = new System.Windows.Forms.SaveFileDialog();
+			this.mapController = new winmaped2.MapController();
+			this.sizeGrip = new winmaped2.SizeGrip();
 			this.toolPalletePanel = new winmaped2.CollapsiblePanel();
 			this.groupBox2 = new System.Windows.Forms.GroupBox();
 			this.toolPalette = new winmaped2.ToolPalette();
+			this.radioButton7 = new winmaped2.ToolPalette.ToolButton();
 			this.radioButton6 = new winmaped2.ToolPalette.ToolButton();
 			this.b_runmap = new System.Windows.Forms.Button();
 			this.radioButton5 = new winmaped2.ToolPalette.ToolButton();
@@ -417,6 +469,9 @@ namespace winmaped2 {
 			this.ctTilesP = new System.Windows.Forms.Panel();
 			this.button3 = new System.Windows.Forms.Button();
 			this.vspc_obs = new winmaped2.VSPController();
+			this.g_tiles = new System.Windows.Forms.GroupBox();
+			this.TileViewA = new winmaped2.TileViewer();
+			this.TileViewB = new winmaped2.TileViewer();
 			this.vspController = new winmaped2.VSPController();
 			this.p_zones = new System.Windows.Forms.Panel();
 			this.l_szone = new System.Windows.Forms.Label();
@@ -433,10 +488,12 @@ namespace winmaped2 {
 			this.columnHeader1 = new System.Windows.Forms.ColumnHeader();
 			this.columnHeader2 = new System.Windows.Forms.ColumnHeader();
 			this.b_gotoent = new System.Windows.Forms.Button();
-			this.g_tiles = new System.Windows.Forms.GroupBox();
-			this.TileViewA = new winmaped2.TileViewer();
-			this.TileViewB = new winmaped2.TileViewer();
 			this.g_obs = new System.Windows.Forms.GroupBox();
+			this.btnObsAll = new System.Windows.Forms.Button();
+			this.checkObsRight = new System.Windows.Forms.CheckBox();
+			this.checkObsDown = new System.Windows.Forms.CheckBox();
+			this.checkObsLeft = new System.Windows.Forms.CheckBox();
+			this.checkObsUp = new System.Windows.Forms.CheckBox();
 			this.tv_obs = new winmaped2.TileViewer();
 			this.button4 = new System.Windows.Forms.Button();
 			this.button5 = new System.Windows.Forms.Button();
@@ -449,15 +506,6 @@ namespace winmaped2 {
 			this.groupBox1 = new System.Windows.Forms.GroupBox();
 			this.cb_transeffects = new System.Windows.Forms.CheckBox();
 			this.checkBox1 = new System.Windows.Forms.CheckBox();
-			this.toolbarImages = new System.Windows.Forms.ImageList(this.components);
-			this.mapPanel = new System.Windows.Forms.Panel();
-			this.mainpanel = new System.Windows.Forms.Panel();
-			this.mapController = new winmaped2.MapController();
-			this.sizeGrip = new winmaped2.SizeGrip();
-			this.openVspDialog = new System.Windows.Forms.OpenFileDialog();
-			this.openImageDialog = new System.Windows.Forms.OpenFileDialog();
-			this.saveVspDialog = new System.Windows.Forms.SaveFileDialog();
-			this.saveImageDialog = new System.Windows.Forms.SaveFileDialog();
 			this.clipboardPanel = new winmaped2.CollapsiblePanel();
 			this.mcClipboard = new winmaped2.MapController();
 			((System.ComponentModel.ISupportInitialize)(this.sbpLoadInfo)).BeginInit();
@@ -466,15 +514,17 @@ namespace winmaped2 {
 			((System.ComponentModel.ISupportInitialize)(this.sbpZoom)).BeginInit();
 			this.toolPanel.SuspendLayout();
 			this.sidebarPanel.SuspendLayout();
+			this.mapPanel.SuspendLayout();
+			this.mainpanel.SuspendLayout();
 			this.toolPalletePanel.SuspendLayout();
 			this.toolPalette.SuspendLayout();
 			this.layerPanel.SuspendLayout();
 			this.panel4.SuspendLayout();
 			this.tilesPanel.SuspendLayout();
 			this.ctTilesP.SuspendLayout();
+			this.g_tiles.SuspendLayout();
 			this.p_zones.SuspendLayout();
 			this.p_ents.SuspendLayout();
-			this.g_tiles.SuspendLayout();
 			this.g_obs.SuspendLayout();
 			this.minimapPanel.SuspendLayout();
 			this.ctMinimapP.SuspendLayout();
@@ -482,8 +532,6 @@ namespace winmaped2 {
 			((System.ComponentModel.ISupportInitialize)(this.tb_zoom)).BeginInit();
 			this.panel2.SuspendLayout();
 			this.groupBox1.SuspendLayout();
-			this.mapPanel.SuspendLayout();
-			this.mainpanel.SuspendLayout();
 			this.clipboardPanel.SuspendLayout();
 			this.SuspendLayout();
 			// 
@@ -618,6 +666,7 @@ namespace winmaped2 {
 			// miEditZones
 			// 
 			this.miEditZones.Index = 0;
+			this.miEditZones.Shortcut = System.Windows.Forms.Shortcut.CtrlR;
 			this.miEditZones.Text = "&Edit Zones...";
 			this.miEditZones.Click += new System.EventHandler(this.miEditZones_Click);
 			// 
@@ -690,6 +739,7 @@ namespace winmaped2 {
 			// 
 			this.miImportAgain.Enabled = false;
 			this.miImportAgain.Index = 5;
+			this.miImportAgain.Shortcut = System.Windows.Forms.Shortcut.F5;
 			this.miImportAgain.Text = "Import Again";
 			this.miImportAgain.Click += new System.EventHandler(this.miImportAgain_Click);
 			// 
@@ -766,7 +816,9 @@ namespace winmaped2 {
             this.menuItem2,
             this.Zoom1x,
             this.miZoom2x,
-            this.miZoom4x});
+            this.miZoom4x,
+            this.menuItem1,
+            this.miViewNotes});
 			this.miView.Text = "Vie&w";
 			this.miView.Popup += new System.EventHandler(this.miView_Popup);
 			// 
@@ -803,6 +855,18 @@ namespace winmaped2 {
 			this.miZoom4x.Shortcut = System.Windows.Forms.Shortcut.Ctrl3;
 			this.miZoom4x.Text = "Zoom: 4x";
 			this.miZoom4x.Click += new System.EventHandler(this.menuItem6_Click);
+			// 
+			// menuItem1
+			// 
+			this.menuItem1.Index = 5;
+			this.menuItem1.Text = "-";
+			// 
+			// miViewNotes
+			// 
+			this.miViewNotes.Checked = true;
+			this.miViewNotes.Index = 6;
+			this.miViewNotes.Text = "Notes";
+			this.miViewNotes.Click += new System.EventHandler(this.miViewNotes_Click);
 			// 
 			// miHelp
 			// 
@@ -850,7 +914,7 @@ namespace winmaped2 {
 			// statusBar
 			// 
 			this.statusBar.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-			this.statusBar.Location = new System.Drawing.Point(0, 350);
+			this.statusBar.Location = new System.Drawing.Point(0, 616);
 			this.statusBar.Name = "statusBar";
 			this.statusBar.Panels.AddRange(new System.Windows.Forms.StatusBarPanel[] {
             this.sbpLoadInfo,
@@ -858,14 +922,14 @@ namespace winmaped2 {
             this.sbpSelection,
             this.sbpZoom});
 			this.statusBar.ShowPanels = true;
-			this.statusBar.Size = new System.Drawing.Size(1069, 24);
+			this.statusBar.Size = new System.Drawing.Size(846, 24);
 			this.statusBar.TabIndex = 1;
 			// 
 			// sbpLoadInfo
 			// 
 			this.sbpLoadInfo.AutoSize = System.Windows.Forms.StatusBarPanelAutoSize.Spring;
 			this.sbpLoadInfo.Name = "sbpLoadInfo";
-			this.sbpLoadInfo.Width = 603;
+			this.sbpLoadInfo.Width = 380;
 			// 
 			// sbpCursorInfo
 			// 
@@ -894,9 +958,9 @@ namespace winmaped2 {
 			this.toolPanel.Controls.Add(this.sidebarPanel);
 			this.toolPanel.Dock = System.Windows.Forms.DockStyle.Right;
 			this.toolPanel.ForeColor = System.Drawing.SystemColors.ControlText;
-			this.toolPanel.Location = new System.Drawing.Point(677, 0);
+			this.toolPanel.Location = new System.Drawing.Point(352, 0);
 			this.toolPanel.Name = "toolPanel";
-			this.toolPanel.Size = new System.Drawing.Size(392, 350);
+			this.toolPanel.Size = new System.Drawing.Size(494, 616);
 			this.toolPanel.TabIndex = 2;
 			// 
 			// button1
@@ -906,15 +970,16 @@ namespace winmaped2 {
 			this.button1.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
 			this.button1.Location = new System.Drawing.Point(0, 0);
 			this.button1.Name = "button1";
-			this.button1.Size = new System.Drawing.Size(16, 348);
+			this.button1.Size = new System.Drawing.Size(16, 614);
 			this.button1.TabIndex = 5;
 			this.button1.Text = ">";
 			this.button1.Click += new System.EventHandler(this.button1_Click);
 			// 
 			// sidebarPanel
 			// 
-			this.sidebarPanel.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-						| System.Windows.Forms.AnchorStyles.Right)));
+			this.sidebarPanel.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+									| System.Windows.Forms.AnchorStyles.Left)
+									| System.Windows.Forms.AnchorStyles.Right)));
 			this.sidebarPanel.AutoScroll = true;
 			this.sidebarPanel.Controls.Add(this.toolPalletePanel);
 			this.sidebarPanel.Controls.Add(this.layerPanel);
@@ -922,16 +987,88 @@ namespace winmaped2 {
 			this.sidebarPanel.Controls.Add(this.minimapPanel);
 			this.sidebarPanel.Location = new System.Drawing.Point(18, 4);
 			this.sidebarPanel.Name = "sidebarPanel";
-			this.sidebarPanel.Size = new System.Drawing.Size(369, 344);
+			this.sidebarPanel.Size = new System.Drawing.Size(471, 630);
 			this.sidebarPanel.TabIndex = 16;
-			this.sidebarPanel.MouseClick += new System.Windows.Forms.MouseEventHandler(this.sidebarPanel_MouseClick);
+			// 
+			// toolbarImages
+			// 
+			this.toolbarImages.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("toolbarImages.ImageStream")));
+			this.toolbarImages.TransparentColor = System.Drawing.Color.Transparent;
+			this.toolbarImages.Images.SetKeyName(0, "");
+			this.toolbarImages.Images.SetKeyName(1, "");
+			// 
+			// mapPanel
+			// 
+			this.mapPanel.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+			this.mapPanel.Controls.Add(this.mainpanel);
+			this.mapPanel.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.mapPanel.Location = new System.Drawing.Point(0, 0);
+			this.mapPanel.Name = "mapPanel";
+			this.mapPanel.Size = new System.Drawing.Size(352, 616);
+			this.mapPanel.TabIndex = 5;
+			this.mapPanel.Resize += new System.EventHandler(this.mapPanel_Resize);
+			// 
+			// mainpanel
+			// 
+			this.mainpanel.Controls.Add(this.mapController);
+			this.mainpanel.Controls.Add(this.sizeGrip);
+			this.mainpanel.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.mainpanel.ForeColor = System.Drawing.Color.Coral;
+			this.mainpanel.Location = new System.Drawing.Point(0, 0);
+			this.mainpanel.Name = "mainpanel";
+			this.mainpanel.Size = new System.Drawing.Size(348, 612);
+			this.mainpanel.TabIndex = 10;
+			this.mainpanel.Paint += new System.Windows.Forms.PaintEventHandler(this.mainpanel_Paint);
+			// 
+			// openVspDialog
+			// 
+			this.openVspDialog.Filter = "VSP Files(*.vsp)|*.vsp";
+			this.openVspDialog.RestoreDirectory = true;
+			// 
+			// openImageDialog
+			// 
+			this.openImageDialog.Filter = "Image Files (*.png,*.jpg,*.jpeg,*.pcx,*.bmp,*.tga,*.gif)|*.png;*.jpg;*.jpeg;*.pcx" +
+					";*.bmp;*.tga;*.gif";
+			this.openImageDialog.RestoreDirectory = true;
+			// 
+			// saveVspDialog
+			// 
+			this.saveVspDialog.DefaultExt = "vsp";
+			this.saveVspDialog.Filter = "VSP Files (*.vsp)|*.vsp";
+			this.saveVspDialog.RestoreDirectory = true;
+			// 
+			// saveImageDialog
+			// 
+			this.saveImageDialog.Filter = "Portable Network Graphics File (*.png)|*.png";
+			this.saveImageDialog.RestoreDirectory = true;
+			// 
+			// mapController
+			// 
+			this.mapController.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.mapController.Location = new System.Drawing.Point(0, 0);
+			this.mapController.Name = "mapController";
+			this.mapController.ParentMap = null;
+			this.mapController.Size = new System.Drawing.Size(348, 612);
+			this.mapController.TabIndex = 0;
+			this.mapController.ZoomLevel = 2;
+			// 
+			// sizeGrip
+			// 
+			this.sizeGrip.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+			this.sizeGrip.ForeColor = System.Drawing.Color.Coral;
+			this.sizeGrip.Location = new System.Drawing.Point(328, 614);
+			this.sizeGrip.Name = "sizeGrip";
+			this.sizeGrip.Size = new System.Drawing.Size(16, 16);
+			this.sizeGrip.TabIndex = 3;
 			// 
 			// toolPalletePanel
 			// 
 			this.toolPalletePanel.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-						| System.Windows.Forms.AnchorStyles.Right)));
+									| System.Windows.Forms.AnchorStyles.Right)));
+			this.toolPalletePanel.CanLargeify = false;
 			this.toolPalletePanel.Controls.Add(this.groupBox2);
 			this.toolPalletePanel.Controls.Add(this.toolPalette);
+			this.toolPalletePanel.Largeified = false;
 			this.toolPalletePanel.Location = new System.Drawing.Point(3, 3);
 			this.toolPalletePanel.Name = "toolPalletePanel";
 			this.toolPalletePanel.Size = new System.Drawing.Size(341, 118);
@@ -949,6 +1086,7 @@ namespace winmaped2 {
 			// 
 			// toolPalette
 			// 
+			this.toolPalette.Controls.Add(this.radioButton7);
 			this.toolPalette.Controls.Add(this.radioButton6);
 			this.toolPalette.Controls.Add(this.b_runmap);
 			this.toolPalette.Controls.Add(this.radioButton5);
@@ -960,6 +1098,16 @@ namespace winmaped2 {
 			this.toolPalette.Name = "toolPalette";
 			this.toolPalette.Size = new System.Drawing.Size(168, 94);
 			this.toolPalette.TabIndex = 0;
+			// 
+			// radioButton7
+			// 
+			this.radioButton7.Appearance = System.Windows.Forms.Appearance.Button;
+			this.radioButton7.Image = ((System.Drawing.Image)(resources.GetObject("radioButton7.Image")));
+			this.radioButton7.Location = new System.Drawing.Point(36, 40);
+			this.radioButton7.Name = "radioButton7";
+			this.radioButton7.Size = new System.Drawing.Size(32, 32);
+			this.radioButton7.TabIndex = 7;
+			this.radioButton7.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
 			// 
 			// radioButton6
 			// 
@@ -1029,8 +1177,10 @@ namespace winmaped2 {
 			// 
 			// layerPanel
 			// 
+			this.layerPanel.CanLargeify = false;
 			this.layerPanel.Controls.Add(this.lPanel);
 			this.layerPanel.Controls.Add(this.panel4);
+			this.layerPanel.Largeified = false;
 			this.layerPanel.Location = new System.Drawing.Point(3, 127);
 			this.layerPanel.Name = "layerPanel";
 			this.layerPanel.Size = new System.Drawing.Size(341, 186);
@@ -1125,11 +1275,13 @@ namespace winmaped2 {
 			// tilesPanel
 			// 
 			this.tilesPanel.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-						| System.Windows.Forms.AnchorStyles.Right)));
+									| System.Windows.Forms.AnchorStyles.Right)));
+			this.tilesPanel.CanLargeify = false;
 			this.tilesPanel.Controls.Add(this.ctTilesP);
+			this.tilesPanel.Largeified = false;
 			this.tilesPanel.Location = new System.Drawing.Point(3, 319);
 			this.tilesPanel.Name = "tilesPanel";
-			this.tilesPanel.Size = new System.Drawing.Size(341, 304);
+			this.tilesPanel.Size = new System.Drawing.Size(409, 329);
 			this.tilesPanel.TabIndex = 2;
 			this.tilesPanel.Title = "Tiles";
 			// 
@@ -1138,22 +1290,22 @@ namespace winmaped2 {
 			this.ctTilesP.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
 			this.ctTilesP.Controls.Add(this.button3);
 			this.ctTilesP.Controls.Add(this.vspc_obs);
+			this.ctTilesP.Controls.Add(this.g_tiles);
 			this.ctTilesP.Controls.Add(this.vspController);
 			this.ctTilesP.Controls.Add(this.p_zones);
 			this.ctTilesP.Controls.Add(this.p_ents);
-			this.ctTilesP.Controls.Add(this.g_tiles);
 			this.ctTilesP.Controls.Add(this.g_obs);
 			this.ctTilesP.Controls.Add(this.button4);
 			this.ctTilesP.Controls.Add(this.button5);
 			this.ctTilesP.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.ctTilesP.Location = new System.Drawing.Point(0, 16);
 			this.ctTilesP.Name = "ctTilesP";
-			this.ctTilesP.Size = new System.Drawing.Size(341, 288);
+			this.ctTilesP.Size = new System.Drawing.Size(409, 313);
 			this.ctTilesP.TabIndex = 13;
 			// 
 			// button3
 			// 
-			this.button3.Location = new System.Drawing.Point(192, 176);
+			this.button3.Location = new System.Drawing.Point(192, 208);
 			this.button3.Name = "button3";
 			this.button3.Size = new System.Drawing.Size(144, 24);
 			this.button3.TabIndex = 10;
@@ -1165,15 +1317,46 @@ namespace winmaped2 {
 			this.vspc_obs.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
 			this.vspc_obs.Location = new System.Drawing.Point(0, 0);
 			this.vspc_obs.Name = "vspc_obs";
-			this.vspc_obs.Size = new System.Drawing.Size(340, 164);
+			this.vspc_obs.Size = new System.Drawing.Size(404, 196);
 			this.vspc_obs.TabIndex = 9;
+			// 
+			// g_tiles
+			// 
+			this.g_tiles.Controls.Add(this.TileViewA);
+			this.g_tiles.Controls.Add(this.TileViewB);
+			this.g_tiles.Location = new System.Drawing.Point(8, 200);
+			this.g_tiles.Name = "g_tiles";
+			this.g_tiles.Size = new System.Drawing.Size(178, 104);
+			this.g_tiles.TabIndex = 3;
+			this.g_tiles.TabStop = false;
+			this.g_tiles.Visible = false;
+			// 
+			// TileViewA
+			// 
+			this.TileViewA.ActiveObsTile = null;
+			this.TileViewA.ActiveTile = null;
+			this.TileViewA.ActiveTileIndex = 0;
+			this.TileViewA.Location = new System.Drawing.Point(16, 24);
+			this.TileViewA.Name = "TileViewA";
+			this.TileViewA.Size = new System.Drawing.Size(64, 64);
+			this.TileViewA.TabIndex = 0;
+			// 
+			// TileViewB
+			// 
+			this.TileViewB.ActiveObsTile = null;
+			this.TileViewB.ActiveTile = null;
+			this.TileViewB.ActiveTileIndex = 0;
+			this.TileViewB.Location = new System.Drawing.Point(96, 24);
+			this.TileViewB.Name = "TileViewB";
+			this.TileViewB.Size = new System.Drawing.Size(64, 64);
+			this.TileViewB.TabIndex = 1;
 			// 
 			// vspController
 			// 
 			this.vspController.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
 			this.vspController.Location = new System.Drawing.Point(0, 0);
 			this.vspController.Name = "vspController";
-			this.vspController.Size = new System.Drawing.Size(340, 164);
+			this.vspController.Size = new System.Drawing.Size(404, 196);
 			this.vspController.TabIndex = 0;
 			// 
 			// p_zones
@@ -1257,7 +1440,7 @@ namespace winmaped2 {
 			this.p_ents.Controls.Add(this.b_gotoent);
 			this.p_ents.Location = new System.Drawing.Point(0, 0);
 			this.p_ents.Name = "p_ents";
-			this.p_ents.Size = new System.Drawing.Size(340, 164);
+			this.p_ents.Size = new System.Drawing.Size(404, 164);
 			this.p_ents.TabIndex = 9;
 			this.p_ents.Visible = false;
 			// 
@@ -1305,7 +1488,7 @@ namespace winmaped2 {
 			this.lv_ents.Location = new System.Drawing.Point(0, 28);
 			this.lv_ents.MultiSelect = false;
 			this.lv_ents.Name = "lv_ents";
-			this.lv_ents.Size = new System.Drawing.Size(340, 136);
+			this.lv_ents.Size = new System.Drawing.Size(404, 136);
 			this.lv_ents.TabIndex = 1;
 			this.lv_ents.UseCompatibleStateImageBehavior = false;
 			this.lv_ents.View = System.Windows.Forms.View.Details;
@@ -1333,46 +1516,70 @@ namespace winmaped2 {
 			this.b_gotoent.Text = "Goto";
 			this.b_gotoent.Click += new System.EventHandler(this.b_gotoent_Click);
 			// 
-			// g_tiles
-			// 
-			this.g_tiles.Controls.Add(this.TileViewA);
-			this.g_tiles.Controls.Add(this.TileViewB);
-			this.g_tiles.Location = new System.Drawing.Point(8, 168);
-			this.g_tiles.Name = "g_tiles";
-			this.g_tiles.Size = new System.Drawing.Size(176, 104);
-			this.g_tiles.TabIndex = 3;
-			this.g_tiles.TabStop = false;
-			this.g_tiles.Visible = false;
-			// 
-			// TileViewA
-			// 
-			this.TileViewA.ActiveObsTile = null;
-			this.TileViewA.ActiveTile = null;
-			this.TileViewA.ActiveTileIndex = 0;
-			this.TileViewA.Location = new System.Drawing.Point(16, 24);
-			this.TileViewA.Name = "TileViewA";
-			this.TileViewA.Size = new System.Drawing.Size(64, 64);
-			this.TileViewA.TabIndex = 0;
-			// 
-			// TileViewB
-			// 
-			this.TileViewB.ActiveObsTile = null;
-			this.TileViewB.ActiveTile = null;
-			this.TileViewB.ActiveTileIndex = 0;
-			this.TileViewB.Location = new System.Drawing.Point(96, 24);
-			this.TileViewB.Name = "TileViewB";
-			this.TileViewB.Size = new System.Drawing.Size(64, 64);
-			this.TileViewB.TabIndex = 1;
-			// 
 			// g_obs
 			// 
+			this.g_obs.BackColor = System.Drawing.Color.RoyalBlue;
+			this.g_obs.Controls.Add(this.btnObsAll);
+			this.g_obs.Controls.Add(this.checkObsRight);
+			this.g_obs.Controls.Add(this.checkObsDown);
+			this.g_obs.Controls.Add(this.checkObsLeft);
+			this.g_obs.Controls.Add(this.checkObsUp);
 			this.g_obs.Controls.Add(this.tv_obs);
-			this.g_obs.Location = new System.Drawing.Point(8, 168);
+			this.g_obs.Location = new System.Drawing.Point(8, 200);
 			this.g_obs.Name = "g_obs";
-			this.g_obs.Size = new System.Drawing.Size(96, 104);
+			this.g_obs.Size = new System.Drawing.Size(178, 104);
 			this.g_obs.TabIndex = 9;
 			this.g_obs.TabStop = false;
 			this.g_obs.Visible = false;
+			// 
+			// btnObsAll
+			// 
+			this.btnObsAll.Location = new System.Drawing.Point(112, 40);
+			this.btnObsAll.Name = "btnObsAll";
+			this.btnObsAll.Size = new System.Drawing.Size(16, 15);
+			this.btnObsAll.TabIndex = 5;
+			this.btnObsAll.UseVisualStyleBackColor = true;
+			this.btnObsAll.Click += new System.EventHandler(this.btnObsAll_Click);
+			// 
+			// checkObsRight
+			// 
+			this.checkObsRight.AutoSize = true;
+			this.checkObsRight.Location = new System.Drawing.Point(131, 41);
+			this.checkObsRight.Name = "checkObsRight";
+			this.checkObsRight.Size = new System.Drawing.Size(15, 14);
+			this.checkObsRight.TabIndex = 4;
+			this.checkObsRight.UseVisualStyleBackColor = true;
+			this.checkObsRight.CheckedChanged += new System.EventHandler(this.checkObsXX_CheckedChanged);
+			// 
+			// checkObsDown
+			// 
+			this.checkObsDown.AutoSize = true;
+			this.checkObsDown.Location = new System.Drawing.Point(113, 59);
+			this.checkObsDown.Name = "checkObsDown";
+			this.checkObsDown.Size = new System.Drawing.Size(15, 14);
+			this.checkObsDown.TabIndex = 3;
+			this.checkObsDown.UseVisualStyleBackColor = true;
+			this.checkObsDown.CheckedChanged += new System.EventHandler(this.checkObsXX_CheckedChanged);
+			// 
+			// checkObsLeft
+			// 
+			this.checkObsLeft.AutoSize = true;
+			this.checkObsLeft.Location = new System.Drawing.Point(96, 41);
+			this.checkObsLeft.Name = "checkObsLeft";
+			this.checkObsLeft.Size = new System.Drawing.Size(15, 14);
+			this.checkObsLeft.TabIndex = 2;
+			this.checkObsLeft.UseVisualStyleBackColor = true;
+			this.checkObsLeft.CheckedChanged += new System.EventHandler(this.checkObsXX_CheckedChanged);
+			// 
+			// checkObsUp
+			// 
+			this.checkObsUp.AutoSize = true;
+			this.checkObsUp.Location = new System.Drawing.Point(113, 24);
+			this.checkObsUp.Name = "checkObsUp";
+			this.checkObsUp.Size = new System.Drawing.Size(15, 14);
+			this.checkObsUp.TabIndex = 1;
+			this.checkObsUp.UseVisualStyleBackColor = true;
+			this.checkObsUp.CheckedChanged += new System.EventHandler(this.checkObsXX_CheckedChanged);
 			// 
 			// tv_obs
 			// 
@@ -1386,7 +1593,7 @@ namespace winmaped2 {
 			// 
 			// button4
 			// 
-			this.button4.Location = new System.Drawing.Point(192, 208);
+			this.button4.Location = new System.Drawing.Point(192, 240);
 			this.button4.Name = "button4";
 			this.button4.Size = new System.Drawing.Size(144, 24);
 			this.button4.TabIndex = 10;
@@ -1395,7 +1602,7 @@ namespace winmaped2 {
 			// 
 			// button5
 			// 
-			this.button5.Location = new System.Drawing.Point(192, 240);
+			this.button5.Location = new System.Drawing.Point(192, 272);
 			this.button5.Name = "button5";
 			this.button5.Size = new System.Drawing.Size(144, 24);
 			this.button5.TabIndex = 10;
@@ -1404,8 +1611,10 @@ namespace winmaped2 {
 			// 
 			// minimapPanel
 			// 
+			this.minimapPanel.CanLargeify = false;
 			this.minimapPanel.Controls.Add(this.ctMinimapP);
-			this.minimapPanel.Location = new System.Drawing.Point(3, 629);
+			this.minimapPanel.Largeified = false;
+			this.minimapPanel.Location = new System.Drawing.Point(3, 654);
 			this.minimapPanel.Name = "minimapPanel";
 			this.minimapPanel.Size = new System.Drawing.Size(341, 227);
 			this.minimapPanel.TabIndex = 3;
@@ -1494,83 +1703,14 @@ namespace winmaped2 {
 			this.checkBox1.Text = "Animate";
 			this.checkBox1.CheckedChanged += new System.EventHandler(this.checkBox1_CheckedChanged);
 			// 
-			// toolbarImages
-			// 
-			this.toolbarImages.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("toolbarImages.ImageStream")));
-			this.toolbarImages.TransparentColor = System.Drawing.Color.Transparent;
-			this.toolbarImages.Images.SetKeyName(0, "");
-			this.toolbarImages.Images.SetKeyName(1, "");
-			// 
-			// mapPanel
-			// 
-			this.mapPanel.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-			this.mapPanel.Controls.Add(this.mainpanel);
-			this.mapPanel.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.mapPanel.Location = new System.Drawing.Point(0, 0);
-			this.mapPanel.Name = "mapPanel";
-			this.mapPanel.Size = new System.Drawing.Size(677, 350);
-			this.mapPanel.TabIndex = 5;
-			this.mapPanel.Resize += new System.EventHandler(this.mapPanel_Resize);
-			// 
-			// mainpanel
-			// 
-			this.mainpanel.Controls.Add(this.mapController);
-			this.mainpanel.Controls.Add(this.sizeGrip);
-			this.mainpanel.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.mainpanel.ForeColor = System.Drawing.Color.Coral;
-			this.mainpanel.Location = new System.Drawing.Point(0, 0);
-			this.mainpanel.Name = "mainpanel";
-			this.mainpanel.Size = new System.Drawing.Size(673, 346);
-			this.mainpanel.TabIndex = 10;
-			this.mainpanel.Paint += new System.Windows.Forms.PaintEventHandler(this.mainpanel_Paint);
-			// 
-			// mapController
-			// 
-			this.mapController.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.mapController.Location = new System.Drawing.Point(0, 0);
-			this.mapController.Name = "mapController";
-			this.mapController.ParentMap = null;
-			this.mapController.Size = new System.Drawing.Size(673, 346);
-			this.mapController.TabIndex = 0;
-			this.mapController.ZoomLevel = 2;
-			// 
-			// sizeGrip
-			// 
-			this.sizeGrip.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-			this.sizeGrip.ForeColor = System.Drawing.Color.Coral;
-			this.sizeGrip.Location = new System.Drawing.Point(653, 328);
-			this.sizeGrip.Name = "sizeGrip";
-			this.sizeGrip.Size = new System.Drawing.Size(16, 16);
-			this.sizeGrip.TabIndex = 3;
-			// 
-			// openVspDialog
-			// 
-			this.openVspDialog.Filter = "VSP Files(*.vsp)|*.vsp";
-			this.openVspDialog.RestoreDirectory = true;
-			// 
-			// openImageDialog
-			// 
-			this.openImageDialog.Filter = "Image Files (*.png,*.jpg,*.jpeg,*.pcx,*.bmp,*.tga,*.gif)|*.png;*.jpg;*.jpeg;*.pcx" +
-				";*.bmp;*.tga;*.gif";
-			this.openImageDialog.RestoreDirectory = true;
-			// 
-			// saveVspDialog
-			// 
-			this.saveVspDialog.DefaultExt = "vsp";
-			this.saveVspDialog.Filter = "VSP Files (*.vsp)|*.vsp";
-			this.saveVspDialog.RestoreDirectory = true;
-			// 
-			// saveImageDialog
-			// 
-			this.saveImageDialog.Filter = "Portable Network Graphics File (*.png)|*.png";
-			this.saveImageDialog.RestoreDirectory = true;
-			// 
 			// clipboardPanel
 			// 
 			this.clipboardPanel.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-						| System.Windows.Forms.AnchorStyles.Right)));
+									| System.Windows.Forms.AnchorStyles.Right)));
+			this.clipboardPanel.CanLargeify = false;
 			this.clipboardPanel.Controls.Add(this.mcClipboard);
 			this.clipboardPanel.Enabled = false;
+			this.clipboardPanel.Largeified = false;
 			this.clipboardPanel.Location = new System.Drawing.Point(3, 629);
 			this.clipboardPanel.Name = "clipboardPanel";
 			this.clipboardPanel.Size = new System.Drawing.Size(341, 191);
@@ -1591,7 +1731,7 @@ namespace winmaped2 {
 			// MainWindow
 			// 
 			this.AutoScaleBaseSize = new System.Drawing.Size(5, 13);
-			this.ClientSize = new System.Drawing.Size(1069, 374);
+			this.ClientSize = new System.Drawing.Size(846, 640);
 			this.Controls.Add(this.mapPanel);
 			this.Controls.Add(this.toolPanel);
 			this.Controls.Add(this.statusBar);
@@ -1610,16 +1750,19 @@ namespace winmaped2 {
 			((System.ComponentModel.ISupportInitialize)(this.sbpZoom)).EndInit();
 			this.toolPanel.ResumeLayout(false);
 			this.sidebarPanel.ResumeLayout(false);
+			this.mapPanel.ResumeLayout(false);
+			this.mainpanel.ResumeLayout(false);
 			this.toolPalletePanel.ResumeLayout(false);
 			this.toolPalette.ResumeLayout(false);
 			this.layerPanel.ResumeLayout(false);
 			this.panel4.ResumeLayout(false);
 			this.tilesPanel.ResumeLayout(false);
 			this.ctTilesP.ResumeLayout(false);
+			this.g_tiles.ResumeLayout(false);
 			this.p_zones.ResumeLayout(false);
 			this.p_ents.ResumeLayout(false);
-			this.g_tiles.ResumeLayout(false);
 			this.g_obs.ResumeLayout(false);
+			this.g_obs.PerformLayout();
 			this.minimapPanel.ResumeLayout(false);
 			this.ctMinimapP.ResumeLayout(false);
 			this.groupBox3.ResumeLayout(false);
@@ -1627,554 +1770,631 @@ namespace winmaped2 {
 			((System.ComponentModel.ISupportInitialize)(this.tb_zoom)).EndInit();
 			this.panel2.ResumeLayout(false);
 			this.groupBox1.ResumeLayout(false);
-			this.mapPanel.ResumeLayout(false);
-			this.mainpanel.ResumeLayout(false);
 			this.clipboardPanel.ResumeLayout(false);
 			this.ResumeLayout(false);
 
-        }
-        #endregion
+		}
+		#endregion
 
-        // ..... //
+		// ..... //
 
 
-        public void ui_update(bool dontcare) {
-            if (Global.ActiveMap == null) {
-                miSave.Enabled = false;
-                miSaveAs.Enabled = false;
-                //				miSaveVSP.Enabled=false;
-                //				miSaveVSPAs.Enabled=false;
-                miClose.Enabled = false;
-                miEdit.Visible = false;
-                miView.Visible = false;
-                miMap.Visible = false;
-                miVsp.Visible = false;
-                sidebarPanel.Enabled = false;
-            } else {
-                sidebarPanel.Enabled = true;
-                //				miSaveVSP.Enabled=true;
-                //				miSaveVSPAs.Enabled=true;
-                miSave.Enabled = true;
-                miSaveAs.Enabled = true;
-                miClose.Enabled = true;
-                miEdit.Visible = true;
-                miView.Visible = true;
-                miMap.Visible = true;
-                miVsp.Visible = true;
-                switch (Global.editedLayer.type) {
-                    case LayerType.Obs:
-                        vspController.Visible = false;
-                        p_zones.Visible = false;
-                        p_ents.Visible = false;
-                        vspc_obs.Visible = true;
-                        g_tiles.Visible = false;
-                        g_obs.Visible = true;
-                        b_layerdel.Enabled = false;
-                        b_layerup.Enabled = false;
-                        b_layerdown.Enabled = false;
-                        b_layerproperties.Enabled = false;
-                        break;
-                    case LayerType.Tile:
-                        vspController.Visible = true;
-                        p_zones.Visible = false;
-                        p_ents.Visible = false;
-                        vspc_obs.Visible = false;
-                        g_tiles.Visible = true;
-                        g_obs.Visible = false;
-                        if (!Global.IsBaseLayer(Global.editedLayer))
-                            b_layerdel.Enabled = true;
-                        else b_layerdel.Enabled = false;
-                        b_layerup.Enabled = true;
-                        b_layerdown.Enabled = true;
-                        b_layerproperties.Enabled = true;
-                        break;
-                    case LayerType.Zone:
-                        vspController.Visible = false;
-                        p_zones.Visible = true;
-                        p_ents.Visible = false;
-                        vspc_obs.Visible = false;
-                        g_tiles.Visible = false;
-                        g_obs.Visible = false;
-                        b_layerdel.Enabled = false;
-                        b_layerup.Enabled = false;
-                        b_layerdown.Enabled = false;
-                        b_layerproperties.Enabled = false;
-                        break;
-                    case LayerType.Entity:
-                        vspController.Visible = false;
-                        p_zones.Visible = false;
-                        p_ents.Visible = true;
-                        vspc_obs.Visible = false;
-                        g_tiles.Visible = false;
-                        g_obs.Visible = false;
-                        b_layerdel.Enabled = false;
-                        b_layerup.Enabled = true;
-                        b_layerdown.Enabled = true;
-                        b_layerproperties.Enabled = false;
-                        break;
-                    default:
-                        if (Global.editedLayer is MapLayerSpecial) {
-                            vspController.Visible = true;
-                            p_zones.Visible = false;
-                            p_ents.Visible = false;
-                            vspc_obs.Visible = false;
-                            g_tiles.Visible = true;
-                            g_obs.Visible = false;
-                            b_layerdel.Enabled = false;
-                            b_layerup.Enabled = true;
-                            b_layerdown.Enabled = true;
-                            b_layerproperties.Enabled = false;
-                        }
-                        break;
-                }
-            }
-            Global.VspViewer.CalculateScrollValues();
-            vspc_obs.VspView.CalculateScrollValues();
-            if (Global.SelectedEntity == null)
-                l_sent.Text = "No entity selected";
-            else
-                l_sent.Text = "Selected Entity: " + Global.SelectedEntity.ID.ToString();
-            if (Global.SelectedZone == null)
-                l_szone.Text = "No zone selected";
-            else
-                l_szone.Text = "Selected Zone: " + Global.SelectedZone.ID.ToString();
-            Text = Global.VERSIONINFO.VERSIONSTRING_LONG;
-            if (Global.ActiveMap == null) return;
-            Text += " - ";
-            if (Global.ActiveMap.FileOnDisk == null) Text += "untitled.map";
-            else Text += Global.ActiveMap.FileOnDisk.Name;
-            if (Global.ActiveMap.bAltered) Text += " *";
-        }
-        public void ui_update() {
-            ui_update(false);
-            Global.ForceRedraws();
-        }
-
-        public void update_zone_list() {
-            int selected_index = 0;
-            if (lv_zonelist.SelectedIndices.Count > 0) selected_index = lv_zonelist.SelectedIndices[0];
-            lv_zonelist.Items.Clear();
-            if (Global.ActiveMap == null) return;
-            int ctr = 0;
-            foreach (MapZone mz in Global.ActiveMap.Zones) {
-                ListViewItem lvi = new ListViewItem(new string[] { mz.ID.ToString(), mz.Name });
-                lvi.Tag = mz;
-                lv_zonelist.Items.Add(lvi);
-                if (ctr == selected_index) { lvi.Selected = true; lvi.EnsureVisible(); }
-                ctr++;
-            }
-        }
-        public void update_ent_list() {
-            int selected_index = 0;
-            if (lv_ents.SelectedIndices.Count > 0) selected_index = lv_ents.SelectedIndices[0];
-            lv_ents.Items.Clear();
-            if (Global.ActiveMap == null) return;
-            int ctr = 0;
-            foreach (MapEntity me in Global.ActiveMap.Entities) {
-                ListViewItem lvi = new ListViewItem(new string[] { me.ID.ToString(), me.Description + ";" + me.ChrName });
-                lvi.Tag = me;
-                lv_ents.Items.Add(lvi);
-                if (ctr == selected_index) { lvi.Selected = true; lvi.EnsureVisible(); }
-                ctr++;
-            }
-        }
-        public void LoadMap(string fname) {
-            mMap = Map.LoadMap(fname);
-
-            if (mMap == null)
-                return;
-
-            mru.touch(fname);
-
-            Global.ActiveMap = mMap;
-            Global.ActiveVsp = mMap.vsp;
-            vspController.SetActiveVsp(mMap.vsp);
-            vspc_obs.SetActiveVsp(mMap.vsp);
-            update_zone_list();
-            update_ent_list();
-
-            if (Global.VspViewer != null) {
-                Global.VspViewer.CalculateScrollValues();
-            }
-            if (Global.mapViewer != null) {
-                Global.mapViewer.CalculateScrollValues();
-            }
-            lpInit(mMap);
-            Global.FrameCalc.generate(mMap.vsp.Animations);
-            Global.ForceRedraws();
-            statusBar.Panels[0].Text = "Loaded " + fname;
-            if (mMap.vsp.ObstructionTiles.Count == 0) {
-                if (MessageBox.Show("No obstruction tiles were loaded from the VSP file.  Do you wish MapEd to create the most common basic obstruction tiles for you?", "Help", MessageBoxButtons.YesNo, MessageBoxIcon.Question)
-                        == DialogResult.Yes)
-                    mMap.vsp.AddBasicObstructionTiles();
-            }
-
-
-
-        }
-
-        private void CloseMap() {
-            lpDestruct();
-            Global.ActiveMap = null;
-            Global.ActiveVsp = null;
-            Global.vspController.SetActiveVsp(null);
-            vspc_obs.SetActiveVsp(null);
-            ui_update();
-        }
-
-        private void mitemExit_Click(object sender, System.EventArgs e) {
-            Close();
-        }
-
-        private void mainWindow_Load(object sender, System.EventArgs e) {
-            
-        }
-
-        Map mMap;
-        private void mOpenMap_Click(object sender, System.EventArgs e) {
-            DialogResult dr = openFileDialog.ShowDialog();
-
-            if (dr == DialogResult.Cancel) {
-                return;
-            }
-
-            LoadMap(openFileDialog.FileName);
-            ui_update();
-
-
-        }
-
-        private void mapPanel_Resize(object sender, System.EventArgs e) {
-            //mViewer.UpdateSize(mapPanel);
-            //mvScrollBar.Location = new Point(mapPanel.ClientSize.Width-14,0);
-            //mvScrollBar.Size = new Size(14, mapPanel.ClientSize.Height-14);
-            //mhScrollBar.Location = new Point(0,mapPanel.ClientSize.Height-14);
-            //mhScrollBar.Size = new Size(mapPanel.ClientSize.Width-14, 14);
-        }
-
-        private void button1_Click(object sender, System.EventArgs e) {
-            if (button1.Text == ">") {
-                button1.Text = "<";
-                toolPanel.Size = new Size(16, 0);
-            } else {
-                button1.Text = ">";
-                toolPanel.Size = new Size(408, 0);
-            }
-            Global.ForceRedraws();
-        }
-
-        private void miAbout_Click(object sender, System.EventArgs e) {
-            AboutBox ab = new AboutBox();
-            ab.ShowDialog();
-        }
-
-        private void miEditZones_Click(object sender, System.EventArgs e) {
-            OpenZoneEditor();
-        }
-
-
-        private void miNewLayer_Click(object sender, System.EventArgs e) {
-            if (Global.ActiveMap != null) {
-                NewLayerWindow nlw = new NewLayerWindow();
-
-                DialogResult dr = nlw.ShowDialog();
-
-                if (dr != DialogResult.OK) {
-                    return;
-                }
-
-                // add the layer
-
-                MapLayer ml = new MapLayer(Global.ActiveMap);
-
-                int w = nlw.SelectedSize.Width;
-                int h = nlw.SelectedSize.Height;
-
-                //ml.Height = h;
-                //ml.Width = w;
-                ml.size(w, h);
-
-                ml.parallaxInfo = new ParallaxInfo();
-
-                ml.Translucency = 0;
-
-                Global.ActiveMap.Layers.Add(ml);
-
-                lpAddLayer(ml, true, false, (Global.ActiveMap.Layers.Count - 1));
-
-                // create a render state for this layer
-                Global.ActiveMap.UIState.AddLayer(ml);
-
-                //				Global.ForceRedraws();
-            }
-            ui_update();
-        }
-        // ..... //
-
-        private void WriteDestChanged(winmaped2.Global.LEventArgs e) {
-            if (Global.ActiveMap == null) return;
-            ui_update();
-        }
-        private void menuItem4_Click(object sender, System.EventArgs e) {
-            Global.zoom = 1;
-        }
-
-        private void menuItem5_Click(object sender, System.EventArgs e) {
-            Global.zoom = 2;
-        }
-
-        private void menuItem6_Click(object sender, System.EventArgs e) {
-            Global.zoom = 4;
-        }
-
-        private void miUndo_Click(object sender, System.EventArgs e) {
-            Global.opManager.undo();
-        }
-
-        private void miEdit_Popup(object sender, System.EventArgs e) {
-            if (Global.opManager.isEmpty) {
-                miUndo.Enabled = false;
-                miUndo.Text = "Undo";
-            } else {
-                miUndo.Enabled = true;
-                miUndo.Text = "Undo " + Global.opManager.currOperationName;
-            }
-
-            if (Global.opManager.canRedo) {
-                miRedo.Enabled = true;
-                miRedo.Text = "Redo " + Global.opManager.currRedoName;
-            } else {
-                miRedo.Enabled = false;
-                miRedo.Text = "Redo";
-            }
-
-        }
-
-        private void miView_Popup(object sender, System.EventArgs e) {
-            Zoom1x.Checked = false;
-            miZoom2x.Checked = false;
-            miZoom4x.Checked = false;
-
-            switch (Global.zoom) {
-                case 1:
-                    Zoom1x.Checked = true;
-                    break;
-                case 2:
-                    miZoom2x.Checked = true;
-                    break;
-                case 4:
-                    miZoom4x.Checked = true;
-                    break;
-            }
-        }
-
-
-        private class MRUMenuItem : MenuItem {
-
-            public FileInfo file;
-
-            public MRUMenuItem(int index, string filename) {
-                file = new FileInfo(filename);
-                Text = index.ToString() + " " + file.Name;
-                MergeOrder = 1;
-            }
-        }
-        private void FileMenu_Popup(object sender, System.EventArgs e) {
-
-            ArrayList alRemove = new ArrayList();
-            foreach (MenuItem mi in miFile.MenuItems)
-                if (mi is MRUMenuItem)
-                    alRemove.Add(mi);
-            foreach (MenuItem mi in alRemove)
-                miFile.MenuItems.Remove(mi);
-            ArrayList mrui = mru.getMRU();
-            if (mrui.Count == 0) {
-                mruSeparator.Visible = false;
-            } else mruSeparator.Visible = true;
-            for (int i = 0; i < mrui.Count; i++) {
-                MRUMenuItem mi = new MRUMenuItem(1 + i, (string)mrui[i]);
-                mi.Click += new EventHandler(mru_Click);
-                miFile.MenuItems.Add(mruSeparator.Index + i + 1, mi);
-            }
-        }
-        private void mru_Click(object sender, EventArgs e) {
-            string fname = ((MRUMenuItem)sender).file.FullName;
-            FileInfo fi = new FileInfo(fname);
-            if (!fi.Exists) {
-                statusBar.Panels[0].Text = "Unable to load " + fname;
-                mru.untouch(fname);
-            }
-            LoadMap(fname);
-            ui_update();
-        }
-
-        private void button3_Click(object sender, System.EventArgs e) {
-            ColorDialog cd = new ColorDialog(Color.FromArgb(0, 0, 0));
-            cd.ShowDialog();
-
-        }
-        private void GetVspName() {
-            GetVspNameWnd gvnm = new GetVspNameWnd();
-            gvnm.ShowDialog();
-            //Errors.Error(gvnm.VspName);
-            Global.ActiveMap.vsp.fname = gvnm.VspName;
-        }
-
-        private bool CheckVSPLoc(string map, string vsp) {
-            FileInfo fi_v = new FileInfo(vsp);
-            if (map.ToLower() == fi_v.FullName.Substring(0, map.Length).ToLower())
-                return true;
-            return false;
-        }
-        private void SaveVsp(Vsp24 v, bool ForcePrompt) {
-            string vspname;
-            if (ForcePrompt || v.FileOnDisk == null) {
-                saveVspDialog.ShowDialog();
-
-                vspname = saveVspDialog.FileName;
-                v.Write(vspname);
-            } else
-                v.Write();
-        }
-        private void SaveMap(Map m, bool ForcePrompt) {
-            string mapname;
-            string vspname;
-            Vsp24 vsp = m.vsp;
-            if (ForcePrompt || m.FileOnDisk == null) {
-                // get location of map
-                if (m.FileOnDisk != null)
-                    saveFileDialog.FileName = m.FileOnDisk.FullName;
-                else saveFileDialog.FileName = "untitled.map";
-                if (saveFileDialog.ShowDialog() != DialogResult.OK) return;
-
-                mapname = saveFileDialog.FileName;
-                FileInfo fimap = new FileInfo(mapname);
-                DirectoryInfo dimap = fimap.Directory;
-                string dm = dimap.FullName;
-
-                bool done = false;
-                while (!done) {
-                    if (vsp.FileOnDisk != null)
-                        saveVspDialog.FileName = vsp.FileOnDisk.FullName;
-                    else saveVspDialog.FileName = Path.Combine(dimap.FullName,Path.GetFileNameWithoutExtension(fimap.Name)) + ".vsp";
-                    saveVspDialog.ShowDialog();
-
-                    vspname = saveVspDialog.FileName;
-                    if (CheckVSPLoc(dm, vspname)) {
-                        // got a valid vsp filename
-                        // write vsp.
-                        vsp.Write(vspname);
-                        // write map
-                        m.WriteMap(mapname);
-
-                        mru.touch(mapname);
-
-                        statusBar.Panels[0].Text = "Saved " + Global.ActiveMap.FileOnDisk.FullName;
-
-                        done = true;
-                    } else {
-                        DialogResult dr = MessageBox.Show("The VSP must be located in the same directory, or a sub-directory of that directory, as the map file. Please choose such a location.", "Warning", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
-                        if (dr == DialogResult.Cancel)
-                            done = true;
-                    }
-                }
-            } else {
-                // write vsp
-                vsp.Write();
-
-                // write map
-                m.WriteMap();
-
-                statusBar.Panels[0].Text = "Saved " + Global.ActiveMap.FileOnDisk.FullName;
-            }
-        }
-
-        private void miSave_Click(object sender, System.EventArgs e) {
-            SaveMap(Global.ActiveMap, false);
-            ui_update();
-        }
-        private void miSaveAs_Click(object sender, System.EventArgs e) {
-            SaveMap(Global.ActiveMap, true);
-            ui_update();
-        }
-        private bool CloseCheck() {
-            if (Global.ActiveMap == null) return false;
-            if (!Global.ActiveMap.bAltered) return false;
-            DialogResult dr = MessageBox.Show("You have unsaved data. Save changes?", "Closing", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Information);
-            if (dr == DialogResult.Yes) {
-                SaveMap(Global.ActiveMap, false);
-                return false;
-            }
-            if (dr == DialogResult.No)
-                return false;
-            if (dr == DialogResult.Cancel)
-                return true;
-            return false;
-        }
-        private bool VspCloseCheck() {
-            if (Global.ActiveMap == null) return false;
-            if (Global.ActiveMap.vsp == null) return false;
-            if (!Global.ActiveMap.vsp.bAltered) return false;
-            DialogResult dr = MessageBox.Show("You have unsaved VSP data. Save changes?", "Closing", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Information);
-            if (dr == DialogResult.Yes) {
-                SaveVsp(Global.ActiveMap.vsp, false);
-                return false;
-            }
-            if (dr == DialogResult.No)
-                return false;
-            if (dr == DialogResult.Cancel)
-                return true;
-            return false;
-        }
-
-        private void miClose_Click(object sender, System.EventArgs e) {
-            // close file.
-            bool c = CloseCheck();
-            if (c == false) // go ahead and close
+		public void ui_update(bool dontcare)
+		{
+			if (Global.ActiveMap == null)
 			{
-                CloseMap();
-            }
-        }
+				miSave.Enabled = false;
+				miSaveAs.Enabled = false;
+				//				miSaveVSP.Enabled=false;
+				//				miSaveVSPAs.Enabled=false;
+				miClose.Enabled = false;
+				miEdit.Visible = false;
+				miView.Visible = false;
+				miMap.Visible = false;
+				miVsp.Visible = false;
+				sidebarPanel.Enabled = false;
+			}
+			else
+			{
+				sidebarPanel.Enabled = true;
+				//				miSaveVSP.Enabled=true;
+				//				miSaveVSPAs.Enabled=true;
+				miSave.Enabled = true;
+				miSaveAs.Enabled = true;
+				miClose.Enabled = true;
+				miEdit.Visible = true;
+				miView.Visible = true;
+				miMap.Visible = true;
+				miVsp.Visible = true;
+				switch (Global.editedLayer.type)
+				{
+					case LayerType.Obs:
+						vspController.Visible = false;
+						p_zones.Visible = false;
+						p_ents.Visible = false;
+						vspc_obs.Visible = true;
+						g_tiles.Visible = false;
+						g_obs.Visible = true;
+						b_layerdel.Enabled = false;
+						b_layerup.Enabled = false;
+						b_layerdown.Enabled = false;
+						b_layerproperties.Enabled = false;
+						break;
+					case LayerType.Tile:
+						vspController.Visible = true;
+						p_zones.Visible = false;
+						p_ents.Visible = false;
+						vspc_obs.Visible = false;
+						g_tiles.Visible = true;
+						g_obs.Visible = false;
+						if (!Global.IsBaseLayer(Global.editedLayer))
+							b_layerdel.Enabled = true;
+						else b_layerdel.Enabled = false;
+						b_layerup.Enabled = true;
+						b_layerdown.Enabled = true;
+						b_layerproperties.Enabled = true;
+						break;
+					case LayerType.Zone:
+						vspController.Visible = false;
+						p_zones.Visible = true;
+						p_ents.Visible = false;
+						vspc_obs.Visible = false;
+						g_tiles.Visible = false;
+						g_obs.Visible = false;
+						b_layerdel.Enabled = false;
+						b_layerup.Enabled = false;
+						b_layerdown.Enabled = false;
+						b_layerproperties.Enabled = false;
+						break;
+					case LayerType.Entity:
+						vspController.Visible = false;
+						p_zones.Visible = false;
+						p_ents.Visible = true;
+						vspc_obs.Visible = false;
+						g_tiles.Visible = false;
+						g_obs.Visible = false;
+						b_layerdel.Enabled = false;
+						b_layerup.Enabled = true;
+						b_layerdown.Enabled = true;
+						b_layerproperties.Enabled = false;
+						break;
+					default:
+						if (Global.editedLayer is MapLayerSpecial)
+						{
+							vspController.Visible = true;
+							p_zones.Visible = false;
+							p_ents.Visible = false;
+							vspc_obs.Visible = false;
+							g_tiles.Visible = true;
+							g_obs.Visible = false;
+							b_layerdel.Enabled = false;
+							b_layerup.Enabled = true;
+							b_layerdown.Enabled = true;
+							b_layerproperties.Enabled = false;
+						}
+						break;
+				}
+			}
+			Global.VspViewer.CalculateScrollValues();
+			vspc_obs.VspView.CalculateScrollValues();
+			if (Global.SelectedEntity == null)
+				l_sent.Text = "No entity selected";
+			else
+				l_sent.Text = "Selected Entity: " + Global.SelectedEntity.ID.ToString();
+			if (Global.SelectedZone == null)
+				l_szone.Text = "No zone selected";
+			else
+				l_szone.Text = "Selected Zone: " + Global.SelectedZone.ID.ToString();
+			Text = Global.VERSIONINFO.VERSIONSTRING_LONG;
+			if (Global.ActiveMap == null) return;
+			Text += " - ";
+			if (Global.ActiveMap.FileOnDisk == null) Text += "untitled.map";
+			else Text += Global.ActiveMap.FileOnDisk.Name;
+			if (Global.ActiveMap.bAltered) Text += " *";
+		}
+		public void ui_update()
+		{
+			ui_update(false);
+			Global.ForceRedraws();
+		}
+
+		public void update_zone_list()
+		{
+			int selected_index = 0;
+			if (lv_zonelist.SelectedIndices.Count > 0) selected_index = lv_zonelist.SelectedIndices[0];
+			lv_zonelist.Items.Clear();
+			if (Global.ActiveMap == null) return;
+			int ctr = 0;
+			foreach (MapZone mz in Global.ActiveMap.Zones)
+			{
+				ListViewItem lvi = new ListViewItem(new string[] { mz.ID.ToString(), mz.Name });
+				lvi.Tag = mz;
+				lv_zonelist.Items.Add(lvi);
+				if (ctr == selected_index) { lvi.Selected = true; lvi.EnsureVisible(); }
+				ctr++;
+			}
+		}
+		public void update_ent_list()
+		{
+			int selected_index = 0;
+			if (lv_ents.SelectedIndices.Count > 0) selected_index = lv_ents.SelectedIndices[0];
+			lv_ents.Items.Clear();
+			if (Global.ActiveMap == null) return;
+			int ctr = 0;
+			foreach (MapEntity me in Global.ActiveMap.Entities)
+			{
+				ListViewItem lvi = new ListViewItem(new string[] { me.ID.ToString(), me.Description + ";" + me.ChrName });
+				lvi.Tag = me;
+				lv_ents.Items.Add(lvi);
+				if (ctr == selected_index) { lvi.Selected = true; lvi.EnsureVisible(); }
+				ctr++;
+			}
+		}
+		public void LoadMap(string fname)
+		{
+			mMap = Map.LoadMap(fname);
+
+			if (mMap == null)
+				return;
+
+			mru.touch(fname);
+
+			Global.ActiveMap = mMap;
+			Global.ActiveVsp = mMap.vsp;
+			vspController.SetActiveVsp(mMap.vsp);
+			vspc_obs.SetActiveVsp(mMap.vsp);
+			update_zone_list();
+			update_ent_list();
+
+			if (Global.VspViewer != null)
+			{
+				Global.VspViewer.CalculateScrollValues();
+			}
+			if (Global.mapViewer != null)
+			{
+				Global.mapViewer.CalculateScrollValues();
+			}
+			lpInit(mMap);
+			Global.FrameCalc.generate(mMap.vsp.Animations);
+			Global.ForceRedraws();
+			statusBar.Panels[0].Text = "Loaded " + fname;
+			if (mMap.vsp.ObstructionTiles.Count == 0)
+			{
+				if (MessageBox.Show("No obstruction tiles were loaded from the VSP file.  Do you wish MapEd to create the most common basic obstruction tiles for you?", "Help", MessageBoxButtons.YesNo, MessageBoxIcon.Question)
+								== DialogResult.Yes)
+					mMap.vsp.AddBasicObstructionTiles();
+			}
 
 
 
-        private void miMapProperties_Click(object sender, System.EventArgs e) {
-            if (Global.ActiveMap == null) return;
-            MapPropertiesWnd mpw = new MapPropertiesWnd();
-            Map m = Global.ActiveMap;
+		}
 
-            mpw.t_title.Text = m.FormalName;
-            mpw.t_music.Text = m.MusicFileName;
-            mpw.t_rstring.Text = m.RenderString;
-            mpw.n_px.Value = m.PlayerStartX;
-            mpw.n_py.Value = m.PlayerStartY;
-            mpw.t_aescript.Text = m.AutoExecEvent;
+		private void CloseMap()
+		{
+			lpDestruct();
+			Global.ActiveMap = null;
+			Global.ActiveVsp = null;
+			Global.vspController.SetActiveVsp(null);
+			vspc_obs.SetActiveVsp(null);
+			ui_update();
+		}
 
-            DialogResult dr = mpw.ShowDialog();
-            if (dr == DialogResult.Cancel) return;
+		private void mitemExit_Click(object sender, System.EventArgs e)
+		{
+			Close();
+		}
 
-            m.FormalName = mpw.t_title.Text;
-            m.MusicFileName = mpw.t_music.Text;
-            m.RenderString = mpw.t_rstring.Text;
-            m.PlayerStartX = (int)mpw.n_px.Value;
-            m.PlayerStartY = (int)mpw.n_py.Value;
-            m.AutoExecEvent = mpw.t_aescript.Text;
+		private void mainWindow_Load(object sender, System.EventArgs e)
+		{
 
-            m.touch();
-            ui_update();
-        }
+		}
 
-        private void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e) {
-            e.Cancel = CloseCheck();
-            if (e.Cancel == false)
-                Preferences.Current.Save();
-        }
+		Map mMap;
+		private void mOpenMap_Click(object sender, System.EventArgs e)
+		{
+			DialogResult dr = openFileDialog.ShowDialog();
 
-        private void mainpanel_Paint(object sender, System.Windows.Forms.PaintEventArgs e) {
+			if (dr == DialogResult.Cancel)
+			{
+				return;
+			}
 
-        }
+			LoadMap(openFileDialog.FileName);
+			ui_update();
 
-        private void mi_zonelist_Popup(object sender, System.EventArgs e) {/*
+
+		}
+
+		private void mapPanel_Resize(object sender, System.EventArgs e)
+		{
+			//mViewer.UpdateSize(mapPanel);
+			//mvScrollBar.Location = new Point(mapPanel.ClientSize.Width-14,0);
+			//mvScrollBar.Size = new Size(14, mapPanel.ClientSize.Height-14);
+			//mhScrollBar.Location = new Point(0,mapPanel.ClientSize.Height-14);
+			//mhScrollBar.Size = new Size(mapPanel.ClientSize.Width-14, 14);
+		}
+
+		private void button1_Click(object sender, System.EventArgs e)
+		{
+			if (button1.Text == ">")
+			{
+				button1.Text = "<";
+				toolPanel.Size = new Size(16, 0);
+			}
+			else
+			{
+				button1.Text = ">";
+				toolPanel.Size = new Size(408, 0);
+			}
+			Global.ForceRedraws();
+		}
+
+		private void miAbout_Click(object sender, System.EventArgs e)
+		{
+			AboutBox ab = new AboutBox();
+			ab.ShowDialog();
+		}
+
+		private void miEditZones_Click(object sender, System.EventArgs e)
+		{
+			OpenZoneEditor();
+		}
+
+
+		private void miNewLayer_Click(object sender, System.EventArgs e)
+		{
+			if (Global.ActiveMap != null)
+			{
+				NewLayerWindow nlw = new NewLayerWindow();
+
+				DialogResult dr = nlw.ShowDialog();
+
+				if (dr != DialogResult.OK)
+				{
+					return;
+				}
+
+				// add the layer
+
+				MapLayer ml = new MapLayer(Global.ActiveMap);
+
+				int w = nlw.SelectedSize.Width;
+				int h = nlw.SelectedSize.Height;
+
+				//ml.Height = h;
+				//ml.Width = w;
+				ml.size(w, h);
+
+				ml.parallaxInfo = new ParallaxInfo();
+
+				ml.Translucency = 0;
+
+				Global.ActiveMap.Layers.Add(ml);
+
+				lpAddLayer(ml, true, false, (Global.ActiveMap.Layers.Count - 1));
+
+				// create a render state for this layer
+				Global.ActiveMap.UIState.AddLayer(ml);
+
+				//				Global.ForceRedraws();
+			}
+			ui_update();
+		}
+		// ..... //
+
+		private void WriteDestChanged(winmaped2.Global.LEventArgs e)
+		{
+			if (Global.ActiveMap == null) return;
+			ui_update();
+		}
+		private void menuItem4_Click(object sender, System.EventArgs e)
+		{
+			Global.zoom = 1;
+		}
+
+		private void menuItem5_Click(object sender, System.EventArgs e)
+		{
+			Global.zoom = 2;
+		}
+
+		private void menuItem6_Click(object sender, System.EventArgs e)
+		{
+			Global.zoom = 4;
+		}
+
+		private void miUndo_Click(object sender, System.EventArgs e)
+		{
+			Global.opManager.undo();
+		}
+
+		private void miEdit_Popup(object sender, System.EventArgs e)
+		{
+			if (Global.opManager.isEmpty)
+			{
+				miUndo.Enabled = false;
+				miUndo.Text = "Undo";
+			}
+			else
+			{
+				miUndo.Enabled = true;
+				miUndo.Text = "Undo " + Global.opManager.currOperationName;
+			}
+
+			if (Global.opManager.canRedo)
+			{
+				miRedo.Enabled = true;
+				miRedo.Text = "Redo " + Global.opManager.currRedoName;
+			}
+			else
+			{
+				miRedo.Enabled = false;
+				miRedo.Text = "Redo";
+			}
+
+		}
+
+		private void miView_Popup(object sender, System.EventArgs e)
+		{
+			Zoom1x.Checked = false;
+			miZoom2x.Checked = false;
+			miZoom4x.Checked = false;
+
+			switch (Global.zoom)
+			{
+				case 1:
+					Zoom1x.Checked = true;
+					break;
+				case 2:
+					miZoom2x.Checked = true;
+					break;
+				case 4:
+					miZoom4x.Checked = true;
+					break;
+			}
+		}
+
+
+		private class MRUMenuItem : MenuItem
+		{
+
+			public FileInfo file;
+
+			public MRUMenuItem(int index, string filename)
+			{
+				file = new FileInfo(filename);
+				Text = index.ToString() + " " + file.Name;
+				MergeOrder = 1;
+			}
+		}
+		private void FileMenu_Popup(object sender, System.EventArgs e)
+		{
+
+			ArrayList alRemove = new ArrayList();
+			foreach (MenuItem mi in miFile.MenuItems)
+				if (mi is MRUMenuItem)
+					alRemove.Add(mi);
+			foreach (MenuItem mi in alRemove)
+				miFile.MenuItems.Remove(mi);
+			ArrayList mrui = mru.getMRU();
+			if (mrui.Count == 0)
+			{
+				mruSeparator.Visible = false;
+			}
+			else mruSeparator.Visible = true;
+			for (int i = 0; i < mrui.Count; i++)
+			{
+				MRUMenuItem mi = new MRUMenuItem(1 + i, (string)mrui[i]);
+				mi.Click += new EventHandler(mru_Click);
+				miFile.MenuItems.Add(mruSeparator.Index + i + 1, mi);
+			}
+		}
+		private void mru_Click(object sender, EventArgs e)
+		{
+			string fname = ((MRUMenuItem)sender).file.FullName;
+			FileInfo fi = new FileInfo(fname);
+			if (!fi.Exists)
+			{
+				statusBar.Panels[0].Text = "Unable to load " + fname;
+				mru.untouch(fname);
+			}
+			LoadMap(fname);
+			ui_update();
+		}
+
+		private void button3_Click(object sender, System.EventArgs e)
+		{
+			ColorDialog cd = new ColorDialog(Color.FromArgb(0, 0, 0));
+			cd.ShowDialog();
+
+		}
+		private void GetVspName()
+		{
+			GetVspNameWnd gvnm = new GetVspNameWnd();
+			gvnm.ShowDialog();
+			//Errors.Error(gvnm.VspName);
+			Global.ActiveMap.vsp.fname = gvnm.VspName;
+		}
+
+		private bool CheckVSPLoc(string map, string vsp)
+		{
+			FileInfo fi_v = new FileInfo(vsp);
+			if (map.ToLower() == fi_v.FullName.Substring(0, map.Length).ToLower())
+				return true;
+			return false;
+		}
+		private void SaveVsp(Vsp24 v, bool ForcePrompt)
+		{
+			string vspname;
+			if (ForcePrompt || v.FileOnDisk == null)
+			{
+				saveVspDialog.ShowDialog();
+
+				vspname = saveVspDialog.FileName;
+				v.Write(vspname);
+			}
+			else
+				v.Write();
+		}
+		private void SaveMap(Map m, bool ForcePrompt)
+		{
+			string mapname;
+			string vspname;
+			Vsp24 vsp = m.vsp;
+			if (ForcePrompt || m.FileOnDisk == null)
+			{
+				// get location of map
+				if (m.FileOnDisk != null)
+					saveFileDialog.FileName = m.FileOnDisk.FullName;
+				else saveFileDialog.FileName = "untitled.map";
+				if (saveFileDialog.ShowDialog() != DialogResult.OK) return;
+
+				mapname = saveFileDialog.FileName;
+				FileInfo fimap = new FileInfo(mapname);
+				DirectoryInfo dimap = fimap.Directory;
+				string dm = dimap.FullName;
+
+				bool done = false;
+				while (!done)
+				{
+					if (vsp.FileOnDisk != null)
+						saveVspDialog.FileName = vsp.FileOnDisk.FullName;
+					else saveVspDialog.FileName = Path.Combine(dimap.FullName, Path.GetFileNameWithoutExtension(fimap.Name)) + ".vsp";
+					saveVspDialog.ShowDialog();
+
+					vspname = saveVspDialog.FileName;
+					if (CheckVSPLoc(dm, vspname))
+					{
+						// got a valid vsp filename
+						// write vsp.
+						vsp.Write(vspname);
+						// write map
+						m.WriteMap(mapname);
+
+						mru.touch(mapname);
+
+						statusBar.Panels[0].Text = "Saved " + Global.ActiveMap.FileOnDisk.FullName;
+
+						done = true;
+					}
+					else
+					{
+						DialogResult dr = MessageBox.Show("The VSP must be located in the same directory, or a sub-directory of that directory, as the map file. Please choose such a location.", "Warning", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
+						if (dr == DialogResult.Cancel)
+							done = true;
+					}
+				}
+			}
+			else
+			{
+				// write vsp
+				vsp.Write();
+
+				// write map
+				m.WriteMap();
+
+				statusBar.Panels[0].Text = "Saved " + Global.ActiveMap.FileOnDisk.FullName;
+			}
+		}
+
+		private void miSave_Click(object sender, System.EventArgs e)
+		{
+			SaveMap(Global.ActiveMap, false);
+			ui_update();
+		}
+		private void miSaveAs_Click(object sender, System.EventArgs e)
+		{
+			SaveMap(Global.ActiveMap, true);
+			ui_update();
+		}
+		private bool CloseCheck()
+		{
+			if (Global.ActiveMap == null) return false;
+			if (!Global.ActiveMap.bAltered) return false;
+			DialogResult dr = MessageBox.Show("You have unsaved data. Save changes?", "Closing", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Information);
+			if (dr == DialogResult.Yes)
+			{
+				SaveMap(Global.ActiveMap, false);
+				return false;
+			}
+			if (dr == DialogResult.No)
+				return false;
+			if (dr == DialogResult.Cancel)
+				return true;
+			return false;
+		}
+		private bool VspCloseCheck()
+		{
+			if (Global.ActiveMap == null) return false;
+			if (Global.ActiveMap.vsp == null) return false;
+			if (!Global.ActiveMap.vsp.bAltered) return false;
+			DialogResult dr = MessageBox.Show("You have unsaved VSP data. Save changes?", "Closing", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Information);
+			if (dr == DialogResult.Yes)
+			{
+				SaveVsp(Global.ActiveMap.vsp, false);
+				return false;
+			}
+			if (dr == DialogResult.No)
+				return false;
+			if (dr == DialogResult.Cancel)
+				return true;
+			return false;
+		}
+
+		private void miClose_Click(object sender, System.EventArgs e)
+		{
+			// close file.
+			bool c = CloseCheck();
+			if (c == false) // go ahead and close
+			{
+				CloseMap();
+			}
+		}
+
+
+
+		private void miMapProperties_Click(object sender, System.EventArgs e)
+		{
+			if (Global.ActiveMap == null) return;
+			MapPropertiesWnd mpw = new MapPropertiesWnd();
+			Map m = Global.ActiveMap;
+
+			mpw.t_title.Text = m.FormalName;
+			mpw.t_music.Text = m.MusicFileName;
+			mpw.t_rstring.Text = m.RenderString;
+			mpw.n_px.Value = m.PlayerStartX;
+			mpw.n_py.Value = m.PlayerStartY;
+			mpw.t_aescript.Text = m.AutoExecEvent;
+
+			DialogResult dr = mpw.ShowDialog();
+			if (dr == DialogResult.Cancel) return;
+
+			m.FormalName = mpw.t_title.Text;
+			m.MusicFileName = mpw.t_music.Text;
+			m.RenderString = mpw.t_rstring.Text;
+			m.PlayerStartX = (int)mpw.n_px.Value;
+			m.PlayerStartY = (int)mpw.n_py.Value;
+			m.AutoExecEvent = mpw.t_aescript.Text;
+			if (mpw.t_vspfile.Text != "")
+				m.vsp = InputOutput.ReadVsp24(new FileInfo(mpw.t_vspfile.Text));
+
+			m.touch();
+			ui_update();
+		}
+
+		private void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+		{
+			e.Cancel = CloseCheck();
+			if (e.Cancel == false)
+				Preferences.Current.Save();
+		}
+
+		private void mainpanel_Paint(object sender, System.Windows.Forms.PaintEventArgs e)
+		{
+
+		}
+
+		private void mi_zonelist_Popup(object sender, System.EventArgs e)
+		{/*
 			foreach(MenuItem mi in mi_zone.MenuItems)
 				if(mi is ZoneMenuItem)
 					mi_zone.MenuItems.Remove(mi);
@@ -2185,311 +2405,390 @@ namespace winmaped2 {
 				mi.mapzone = mz;
 				mi_zone.MenuItems.Add(mi);
 			}*/
-        }
+		}
 
-        private void menuItem2_Click(object sender, System.EventArgs e) {
-            OpenEntityEditor();
-        }
+		private void menuItem2_Click(object sender, System.EventArgs e)
+		{
+			OpenEntityEditor();
+		}
 
-        private void Global_CursorLocationChanged(winmaped2.Global.xyEventArgs e) {
-            if (e.overmap)
-                statusBar.Panels[1].Text = "(" + e.x + ", " + e.y + ")";
-        }
+		private void Global_CursorLocationChanged(winmaped2.Global.xyEventArgs e)
+		{
+			if (e.overmap)
+				statusBar.Panels[1].Text = "(" + e.x + ", " + e.y + ")";
+		}
 
-        private void MainWindow_KeyDown(object sender, System.Windows.Forms.KeyEventArgs e) {
-        }
+		private void MainWindow_KeyDown(object sender, System.Windows.Forms.KeyEventArgs e)
+		{
+		}
 
-        private void miAppendFromVsp_Click(object sender, System.EventArgs e) {
-        }
+		private void miAppendFromVsp_Click(object sender, System.EventArgs e)
+		{
+		}
 
-        private void miAddBlankTiles_Click(object sender, System.EventArgs e) {
-        }
+		private void miAddBlankTiles_Click(object sender, System.EventArgs e)
+		{
+		}
 
-        private void miAppendFromImage_Click(object sender, System.EventArgs e) {
-        }
+		private void miAppendFromImage_Click(object sender, System.EventArgs e)
+		{
+		}
 
-        public void OpenEntityEditor() {
-            EntityEditWnd eew = new EntityEditWnd();
-            eew.init(Global.ActiveMap);
-            if (eew.ShowDialog() == DialogResult.Cancel) return;
-            Global.ActiveMap.Entities = eew.EditedEntities;
-            update_ent_list();
-            Global.ActiveMap.touch();
-        }
-        public void OpenZoneEditor() {
-            if (Global.ActiveMap == null)
-                return;
-            EditZoneWnd ezw = new EditZoneWnd();
-            ezw.init(Global.ActiveMap, Global.ActiveMap.Zones);
-            if (ezw.ShowDialog() == DialogResult.Cancel) return;
-            Global.ActiveMap.Zones = ezw.AlteredZones;
-            Global.ActiveMap.ZoneLayer.Data = ezw.AlteredZoneLayer.Data;
-            update_zone_list();
-            Global.ActiveMap.touch();
-        }
+		public void OpenEntityEditor()
+		{
+			EntityEditWnd eew = new EntityEditWnd();
+			eew.init(Global.ActiveMap);
+			if (eew.ShowDialog() == DialogResult.Cancel) return;
+			Global.ActiveMap.Entities = eew.EditedEntities;
+			update_ent_list();
+			Global.ActiveMap.touch();
+		}
+		public void OpenZoneEditor()
+		{
+			if (Global.ActiveMap == null)
+				return;
+			EditZoneWnd ezw = new EditZoneWnd();
+			ezw.init(Global.ActiveMap, Global.ActiveMap.Zones);
+			MapZone mz = null;
+			if (lv_zonelist.SelectedIndices.Count > 0)
+			{
+				mz = (MapZone) lv_zonelist.SelectedItems[0].Tag;
+				ezw.seek(mz);
+			}
+			if (ezw.ShowDialog(mz) == DialogResult.Cancel) return;
+			Global.ActiveMap.Zones = ezw.AlteredZones;
+			Global.ActiveMap.ZoneLayer.Data = ezw.AlteredZoneLayer.Data;
+			update_zone_list();
+			lv_zonelist.SelectedIndices.Clear();
+			if (ezw.lv_zones.SelectedIndices.Count > 0)
+			{
+				lv_zonelist.SelectedIndices.Add(ezw.lv_zones.SelectedIndices[0]);
+				lv_zonelist.SelectedItems[0].EnsureVisible();
+			}
+			Global.ActiveMap.touch();
+		}
 
-        private void b_editents_Click(object sender, System.EventArgs e) {
-            OpenEntityEditor();
-        }
+		private void b_editents_Click(object sender, System.EventArgs e)
+		{
+			OpenEntityEditor();
+		}
 
-        private void button2_Click(object sender, System.EventArgs e) {
-            OpenZoneEditor();
-        }
+		private void button2_Click(object sender, System.EventArgs e)
+		{
+			OpenZoneEditor();
+		}
 
-        private void miNewMap_Click(object sender, System.EventArgs e) {
-            bool c = CloseCheck();
-            if (c == true) {
-                return;
-            } else {
-                CloseMap();
-            }
-            NewMapWnd nmw = new NewMapWnd();
-            if (nmw.ShowDialog() != DialogResult.OK) return;
-            Map m = nmw.CreateMap();
-            Global.ActiveMap = m;
-            lpInit(m);
+		private void miNewMap_Click(object sender, System.EventArgs e)
+		{
+			bool c = CloseCheck();
+			if (c == true)
+			{
+				return;
+			}
+			else
+			{
+				CloseMap();
+			}
+			NewMapWnd nmw = new NewMapWnd();
+			if (nmw.ShowDialog() != DialogResult.OK) return;
+			Map m = nmw.CreateMap();
+			Global.ActiveMap = m;
+			lpInit(m);
 
-            Global.ActiveVsp = m.vsp;
+			Global.ActiveVsp = m.vsp;
 
-            vspController.SetActiveVsp(m.vsp);
-            vspc_obs.SetActiveVsp(m.vsp);
+			vspController.SetActiveVsp(m.vsp);
+			vspc_obs.SetActiveVsp(m.vsp);
 
-            if (m.vsp.ObstructionTiles.Count == 0) {
-                if (MessageBox.Show("Your VSP does not have any obstructions tiles. Would you like MapEd to generate the most commonly used basic obstruction tiles?", "Obstruction Tiles", MessageBoxButtons.YesNo, MessageBoxIcon.Question)
-                        == DialogResult.Yes)
-                    m.vsp.AddBasicObstructionTiles();
-            }
+			if (m.vsp.ObstructionTiles.Count == 0)
+			{
+				if (MessageBox.Show("Your VSP does not have any obstructions tiles. Would you like MapEd to generate the most commonly used basic obstruction tiles?", "Obstruction Tiles", MessageBoxButtons.YesNo, MessageBoxIcon.Question)
+								== DialogResult.Yes)
+					m.vsp.AddBasicObstructionTiles();
+			}
 
-            update_zone_list();
-            update_ent_list();
+			update_zone_list();
+			update_ent_list();
 
-            ui_update();
-        }
+			ui_update();
+		}
 
-        private void mi_rft_Click(object sender, System.EventArgs e) {
-            FileType.Register(".map", "Verge3 Map File");
-            MessageBox.Show("Type registered.", "Done", MessageBoxButtons.OK, MessageBoxIcon.Information);
-        }
+		private void mi_rft_Click(object sender, System.EventArgs e)
+		{
+			FileType.Register(".map", "Verge3 Map File");
+			MessageBox.Show("Type registered.", "Done", MessageBoxButtons.OK, MessageBoxIcon.Information);
+		}
 
-        private void lv_ents_SelectedIndexChanged(object sender, System.EventArgs e) {
-            if (lv_ents.SelectedIndices.Count == 0) {
-                Global.SelectedEntity = null;
-                b_gotoent.Enabled = false;
-            } else {
-                ListViewItem lvi = lv_ents.SelectedItems[0];
-                MapEntity me = (MapEntity)lvi.Tag;
-                Global.SelectedEntity = me;
-                b_gotoent.Enabled = true;
-            }
-            ui_update();
-        }
+		private void lv_ents_SelectedIndexChanged(object sender, System.EventArgs e)
+		{
+			if (lv_ents.SelectedIndices.Count == 0)
+			{
+				Global.SelectedEntity = null;
+				b_gotoent.Enabled = false;
+			}
+			else
+			{
+				ListViewItem lvi = lv_ents.SelectedItems[0];
+				MapEntity me = (MapEntity)lvi.Tag;
+				Global.SelectedEntity = me;
+				b_gotoent.Enabled = true;
+			}
+			ui_update();
+		}
 
-        private void lv_zonelist_SelectedIndexChanged(object sender, System.EventArgs e) {
-            if (lv_zonelist.SelectedIndices.Count == 0) {
-                Global.SelectedZone = null;
-            } else {
-                ListViewItem lvi = lv_zonelist.SelectedItems[0];
-                MapZone mz = (MapZone)lvi.Tag;
-                Global._SelectedZone = mz;
-            }
-            ui_update();
-        }
+		private void lv_zonelist_SelectedIndexChanged(object sender, System.EventArgs e)
+		{
+			if (lv_zonelist.SelectedIndices.Count == 0)
+			{
+				Global.SelectedZone = null;
+			}
+			else
+			{
+				ListViewItem lvi = lv_zonelist.SelectedItems[0];
+				MapZone mz = (MapZone)lvi.Tag;
+				Global._SelectedZone = mz;
+			}
+			ui_update();
+		}
 
-        private void lv_ents_DoubleClick(object sender, System.EventArgs e) {
-            if (lv_ents.SelectedItems.Count == 0) return;
-            MapEntity me = (MapEntity)lv_ents.SelectedItems[0].Tag;
-            EntityEditWnd eew = new EntityEditWnd();
-            eew.init(Global.ActiveMap);
-            eew.seek(me);
-            if (eew.ShowDialog() == DialogResult.Cancel) return;
-            Global.ActiveMap.Entities = eew.EditedEntities;
-            update_ent_list();
-            Global.ActiveMap.touch();
-            ui_update();
-        }
+		private void lv_ents_DoubleClick(object sender, System.EventArgs e)
+		{
+			if (lv_ents.SelectedItems.Count == 0) return;
+			MapEntity me = (MapEntity)lv_ents.SelectedItems[0].Tag;
+			EntityEditWnd eew = new EntityEditWnd();
+			eew.init(Global.ActiveMap);
+			eew.seek(me);
+			if (eew.ShowDialog() == DialogResult.Cancel) return;
+			Global.ActiveMap.Entities = eew.EditedEntities;
+			update_ent_list();
+			Global.ActiveMap.touch();
+			ui_update();
+		}
 
-        private void lv_zonelist_DoubleClick(object sender, System.EventArgs e) {
-            if (lv_zonelist.SelectedItems.Count == 0) return;
-            MapZone mz = (MapZone)lv_zonelist.SelectedItems[0].Tag;
-            EditZoneWnd ezw = new EditZoneWnd();
-            ezw.init(Global.ActiveMap, Global.ActiveMap.Zones);
-            ezw.seek(mz);
-            if (ezw.ShowDialog() == DialogResult.Cancel) return;
-            Global.ActiveMap.Zones = ezw.AlteredZones;
-            Global.ActiveMap.ZoneLayer.Data = ezw.AlteredZoneLayer.Data;
-            update_zone_list();
-            Global.ActiveMap.touch();
-        }
+		private void lv_zonelist_DoubleClick(object sender, System.EventArgs e)
+		{
+			if (lv_zonelist.SelectedItems.Count == 0) return;
+			MapZone mz = (MapZone)lv_zonelist.SelectedItems[0].Tag;
+			EditZoneWnd ezw = new EditZoneWnd();
+			ezw.init(Global.ActiveMap, Global.ActiveMap.Zones);
+			ezw.seek(mz);
+			if (ezw.ShowDialog() == DialogResult.Cancel) return;
+			Global.ActiveMap.Zones = ezw.AlteredZones;
+			Global.ActiveMap.ZoneLayer.Data = ezw.AlteredZoneLayer.Data;
+			update_zone_list();
+			lv_zonelist.SelectedIndices.Clear();
+			if (ezw.lv_zones.SelectedIndices.Count > 0)
+			{
+				lv_zonelist.SelectedIndices.Add(ezw.lv_zones.SelectedIndices[0]);
+				lv_zonelist.SelectedItems[0].EnsureVisible();
+			}
 
-        private void b_gotoent_Click(object sender, System.EventArgs e) {
-            if (Global.SelectedEntity == null) return;
-            MapEntity me = Global.SelectedEntity;
-            Global.mapViewer.SeekTo(me.TileX, me.TileY);
-        }
+			Global.ActiveMap.touch();
+		}
 
-        private void miAppendFromImageGrid_Click(object sender, System.EventArgs e) {
-        }
+		private void b_gotoent_Click(object sender, System.EventArgs e)
+		{
+			if (Global.SelectedEntity == null) return;
+			MapEntity me = Global.SelectedEntity;
+			Global.mapViewer.SeekTo(me.TileX, me.TileY);
+		}
+
+		private void miAppendFromImageGrid_Click(object sender, System.EventArgs e)
+		{
+		}
 
 
 
-        private void miExportToImage_Click(object sender, System.EventArgs e) {
-            if (Global.ActiveMap == null) return;
-            if (saveImageDialog.ShowDialog() != DialogResult.OK) return;
-            Bitmap bmp = Global.ActiveMap.vsp.ExportToBitmap();
-            bmp.Save(saveImageDialog.FileName);
-        }
+		private void miExportToImage_Click(object sender, System.EventArgs e)
+		{
+			if (Global.ActiveMap == null) return;
+			if (saveImageDialog.ShowDialog() != DialogResult.OK) return;
+			Bitmap bmp = Global.ActiveMap.vsp.ExportToBitmap();
+			bmp.Save(saveImageDialog.FileName);
+		}
 
-        private void miChangeVspExisting_Click(object sender, System.EventArgs e) {
+		private void miChangeVspExisting_Click(object sender, System.EventArgs e)
+		{
 
-        }
+		}
 
-        private void Global_SelectedZoneChanged() {
-            if (Global.SelectedZone == null) return;
-            foreach (ListViewItem lvi in lv_zonelist.Items) {
-                if (lvi.Tag == Global.SelectedZone) {
-                    lvi.Selected = true;
-                    lvi.EnsureVisible();
-                }
-            }
-        }
+		private void Global_SelectedZoneChanged()
+		{
+			if (Global.SelectedZone == null) return;
+			foreach (ListViewItem lvi in lv_zonelist.Items)
+			{
+				if (lvi.Tag == Global.SelectedZone)
+				{
+					lvi.Selected = true;
+					lvi.EnsureVisible();
+				}
+			}
+		}
 
-        private void lPanel_Paint(object sender, System.Windows.Forms.PaintEventArgs e) {
+		private void lPanel_Paint(object sender, System.Windows.Forms.PaintEventArgs e)
+		{
 
-        }
+		}
 
-        private void b_layerproperties_Click(object sender, System.EventArgs e) {
-            if (Global.editedLayer == null || Global.editedLayer.type != LayerType.Tile) return;
-            MapLayer mLayerRef = Global.editedLayer;
-            LayerPropertiesWnd lpw = new LayerPropertiesWnd();
-            lpw.init(mLayerRef);
-            if (lpw.ShowDialog() == DialogResult.Cancel) return;
-            lpw.setvalues(mLayerRef);
-            mLayerRef.parentmap.touch();
-        }
+		private void b_layerproperties_Click(object sender, System.EventArgs e)
+		{
+			if (Global.editedLayer == null || Global.editedLayer.type != LayerType.Tile) return;
+			MapLayer mLayerRef = Global.editedLayer;
+			LayerPropertiesWnd lpw = new LayerPropertiesWnd();
+			lpw.init(mLayerRef);
+			if (lpw.ShowDialog() == DialogResult.Cancel) return;
+			lpw.setvalues(mLayerRef);
+			mLayerRef.parentmap.touch();
+		}
 
-        private void b_layeradd_Click(object sender, System.EventArgs e) {
-            NewLayerWindow nlw = new NewLayerWindow();
-            MapLayer bl = null;
-            foreach (MapLayer ml in Global.ActiveMap.Layers)
-                if (ml.type == LayerType.Tile) {
-                    bl = ml;
-                    break;
-                }
-            if (bl == null)
-                nlw.init(100, 100);
-            else nlw.init(bl.Width, bl.Height);
-            if (nlw.ShowDialog() != DialogResult.OK) return;
+		private void b_layeradd_Click(object sender, System.EventArgs e)
+		{
+			NewLayerWindow nlw = new NewLayerWindow();
+			MapLayer bl = null;
+			foreach (MapLayer ml in Global.ActiveMap.Layers)
+				if (ml.type == LayerType.Tile)
+				{
+					bl = ml;
+					break;
+				}
+			if (bl == null)
+				nlw.init(100, 100);
+			else nlw.init(bl.Width, bl.Height);
+			if (nlw.ShowDialog() != DialogResult.OK) return;
 
-            MapLayer mlz = new MapLayer(Global.ActiveMap);
-            mlz.type = LayerType.Tile;
-            mlz.size(nlw.SelectedSize.Width, nlw.SelectedSize.Height);
-            mlz.name = "Layer " + (Global.ActiveMap.Layers.Count - 3);
-            mlz.parallaxInfo = new ParallaxInfo();
+			MapLayer mlz = new MapLayer(Global.ActiveMap);
+			mlz.type = LayerType.Tile;
+			mlz.size(nlw.SelectedSize.Width, nlw.SelectedSize.Height);
+			mlz.name = "Layer " + (Global.ActiveMap.Layers.Count - 3);
+			mlz.parallaxInfo = new ParallaxInfo();
 
-            //			lpAddLayer(mlz, true,false, );
-            Global.ActiveMap.AddLayer(mlz);
-            lpUpdate(Global.ActiveMap, mlz);
+			//			lpAddLayer(mlz, true,false, );
+			Global.ActiveMap.AddLayer(mlz);
+			lpUpdate(Global.ActiveMap, mlz);
 
-        }
+		}
 
-        ThrottleBuffer throttleDisplay;
-        private void miEditTiles_Click(object sender, System.EventArgs e) {
-            TileEd te = new TileEd();
-            te.init(Global.ActiveMap.vsp, vspController.VspView.SelectedTileF, vspController.VspView.SelectedTileB);
-            te.VspDataChanged += new TileEd.VspDataChangedHandler(te_VspDataChanged);
-            te.ShowDialog();
-        }
+		ThrottleBuffer throttleDisplay;
+		private void miEditTiles_Click(object sender, System.EventArgs e)
+		{
+			TileEd te = new TileEd();
+			te.init(Global.ActiveMap.vsp, vspController.VspView.SelectedTileF, vspController.VspView.SelectedTileB);
+			te.VspDataChanged += new TileEd.VspDataChangedHandler(te_VspDataChanged);
+			te.ShowDialog();
+		}
 
-        private void postRedisplay(object sender, EventArgs args) {
-            Invoke((MethodInvoker)delegate() {
-                Invalidate(true);
-            }
-            );
-        }
+		private void postRedisplay(object sender, EventArgs args)
+		{
+			Invoke((MethodInvoker)delegate()
+			{
+				Invalidate(true);
+			}
+			);
+		}
 
-        private void te_VspDataChanged(Vsp24 vsp, int tileIndex) {
-            throttleDisplay.signal();
-        }
+		private void te_VspDataChanged(Vsp24 vsp, int tileIndex)
+		{
+			throttleDisplay.signal();
+		}
 
-        private void button3_Click_1(object sender, System.EventArgs e) {
-            if (Global.ActiveMap == null) return;
-            if (Global.ActiveMap.FileOnDisk == null) {
-                Errors.Error("Map must be saved to run in the engine.");
-                return;
-            }
-            string mdf = Process.GetCurrentProcess().MainModule.FileName;
-            FileInfo fi = new FileInfo(mdf);
-            FileInfo vfi = new FileInfo(fi.DirectoryName + "\\verge.exe");
-            if (!vfi.Exists) {
-                Errors.Error("Unable to locate verge.exe");
-                return;
-            }
-            ProcessStartInfo psi = new ProcessStartInfo(vfi.FullName, Global.ActiveMap.FileOnDisk.Name);
-            psi.WorkingDirectory = Global.ActiveMap.FileOnDisk.DirectoryName;
-            Process.Start(psi);
-        }
+		private void button3_Click_1(object sender, System.EventArgs e)
+		{
+			if (Global.ActiveMap == null) return;
+			if (Global.ActiveMap.FileOnDisk == null)
+			{
+				Errors.Error("Map must be saved to run in the engine.");
+				return;
+			}
+			string mdf = Process.GetCurrentProcess().MainModule.FileName;
+			FileInfo fi = new FileInfo(mdf);
+			FileInfo vfi = new FileInfo(fi.DirectoryName + "\\verge.exe");
+			if (!vfi.Exists)
+			{
+				Errors.Error("Unable to locate verge.exe");
+				return;
+			}
+			ProcessStartInfo psi = new ProcessStartInfo(vfi.FullName, Global.ActiveMap.FileOnDisk.Name);
+			psi.WorkingDirectory = Global.ActiveMap.FileOnDisk.DirectoryName;
+			Process.Start(psi);
+		}
 
-        private void MainWindow_DragEnter(object sender, System.Windows.Forms.DragEventArgs e) {
-            if (e.Data.GetDataPresent(DataFormats.FileDrop, false)) {
-                e.Effect = DragDropEffects.All;
-            } else
-                e.Effect = DragDropEffects.None;
-        }
+		private void MainWindow_DragEnter(object sender, System.Windows.Forms.DragEventArgs e)
+		{
+			if (e.Data.GetDataPresent(DataFormats.FileDrop, false))
+			{
+				e.Effect = DragDropEffects.All;
+			}
+			else
+				e.Effect = DragDropEffects.None;
+		}
 
-        private void MainWindow_DragDrop(object sender, System.Windows.Forms.DragEventArgs e) {
-            string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
-            if (files.Length > 0) {
-                Errors.Error("Drag/Drop", "Drop one item only, please.");
-                return;
-            }
-        }
+		private void MainWindow_DragDrop(object sender, System.Windows.Forms.DragEventArgs e)
+		{
+			string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
+			if (files.Length > 0)
+			{
+				Errors.Error("Drag/Drop", "Drop one item only, please.");
+				return;
+			}
+		}
 
-        private void mi_ExportClipboard_Click(object sender, System.EventArgs e) {
-            if (Global.ActiveMap == null || Global.ActiveMap.vsp == null) return;
-            Global.ActiveMap.vsp.ExportToClipboard();
-            statusBar.Panels[0].Text = "Exported tiles to clipboard.";
-        }
+		private void mi_ExportClipboard_Click(object sender, System.EventArgs e)
+		{
+			if (Global.ActiveMap == null || Global.ActiveMap.vsp == null) return;
+			Global.ActiveMap.vsp.ExportToClipboard();
+			statusBar.Panels[0].Text = "Exported tiles to clipboard.";
+		}
 
-        private void mi_ImportFromClipboard_Click(object sender, System.EventArgs e) {
+		private void mi_ImportFromClipboard_Click(object sender, System.EventArgs e)
+		{
 
-        }
+		}
 
-        private void miImportClipPadded_Click(object sender, System.EventArgs e) {
+		private void miImportClipPadded_Click(object sender, System.EventArgs e)
+		{
 
-        }
+		}
 
-        private void miRedo_Click(object sender, System.EventArgs e) {
-            Global.opManager.redo();
-        }
+		private void miRedo_Click(object sender, System.EventArgs e)
+		{
+			Global.opManager.redo();
+		}
 
-        private void Global_ActiveMapChanged() {
-            mapController.ParentMap = Global.ActiveMap;
-        }
+		private void Global_ActiveMapChanged()
+		{
+			mapController.ParentMap = Global.ActiveMap;
+		}
 
-        private void mhScrollBar_Scroll(object sender, System.Windows.Forms.ScrollEventArgs e) {
+		private void mhScrollBar_Scroll(object sender, System.Windows.Forms.ScrollEventArgs e)
+		{
 
-        }
+		}
 
-        private void mvScrollBar_Scroll(object sender, System.Windows.Forms.ScrollEventArgs e) {
+		private void mvScrollBar_Scroll(object sender, System.Windows.Forms.ScrollEventArgs e)
+		{
 
-        }
+		}
 
-        private void mViewer_Click(object sender, System.EventArgs e) {
+		private void mViewer_Click(object sender, System.EventArgs e)
+		{
 
-        }
+		}
 
-        private void tpClipboard_Click(object sender, System.EventArgs e) {
+		private void tpClipboard_Click(object sender, System.EventArgs e)
+		{
 
-        }
+		}
 
-        private void Global_ClipboardChanged() {
-            mcClipboard.ParentMap = Global.clipboard;
-        }
+		private void Global_ClipboardChanged()
+		{
+			mcClipboard.ParentMap = Global.clipboard;
+		}
 
-        private void mapController1_Paint(object sender, System.Windows.Forms.PaintEventArgs e) {
-        }
+		private void mapController1_Paint(object sender, System.Windows.Forms.PaintEventArgs e)
+		{
+		}
 
-        private unsafe void ImportTiles(bool repeat) {
+		private unsafe void ImportTiles(bool repeat) {
             Vsp24 v = Global.ActiveMap.vsp;
             Vsp24 vsp = null;
             Bitmap bmp = null;
@@ -2506,7 +2805,8 @@ namespace winmaped2 {
             } else if (id.ISource == ImportSource.Image) {
                 if (!repeat)
                     if (openImageDialog.ShowDialog() != DialogResult.OK) return;
-                bmp = new Bitmap(openImageDialog.FileName);
+								using (var tempbmp = new Bitmap(openImageDialog.FileName))
+									bmp = (Bitmap)tempbmp.Clone();
             } else if (id.ISource == ImportSource.Clipboard) {
                 if (!WindowsClipboard.IsImage) {
                     Errors.Error("There is no image in the clipboard.");
@@ -2538,8 +2838,8 @@ namespace winmaped2 {
                     tstart = 0;
                 }
                 if (id.bAddLayer && (id.ISource == ImportSource.Image || id.ISource == ImportSource.Clipboard)) {
-                    int tw = bmp.Width / 16;
-                    int th = bmp.Height / 16;
+									int tw = bmp.Width / Global.TILE_SIZE;
+									int th = bmp.Height / Global.TILE_SIZE;
 
                     MapLayer mlz = new MapLayer(Global.ActiveMap);
                     mlz.type = LayerType.Tile;
@@ -2583,145 +2883,194 @@ namespace winmaped2 {
             ui_update();
 
         }
-        ImportDialog id = new ImportDialog();
-        private void miImport_Click(object sender, System.EventArgs e) {
-            id.init();
-            if (id.ShowDialog() != DialogResult.OK) return;
-            ImportTiles(false);
-        }
-
-        private void miImportAgain_Click(object sender, System.EventArgs e) {
-            ImportTiles(true);
-        }
-
-        private void miEditAnims_Click(object sender, System.EventArgs e) {
-            AnimationEditor ae = new AnimationEditor();
-            ae.init(Global.ActiveMap);
-            if (ae.ShowDialog() != DialogResult.OK)
-                return;
-            Global.ActiveMap.vsp.Animations = ae.Anims;
-            Global.FrameCalc.generate(ae.Anims);
-        }
-
-        private void VspView_SelectionChanged() {
-            int sb = vspController.VspView.SelectedTileB;
-            int sf = vspController.VspView.SelectedTileF;
-
-            sbpSelection.Text = "Selected Tiles: " + sf + ", " + sb;
-        }
-
-        private void FrameCalc_OnTick() {
-            //			mapController.Invalidate(true);
-        }
-
-        private void animTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e) {
-            mapController.Invoke((MethodInvoker)delegate() {
-                mapController.Invalidate(true);
-            }
-            );
-        }
-
-        private void checkBox1_CheckedChanged(object sender, System.EventArgs e) {
-            Global.RenderOptions.bAnimate = animTimer.Enabled = checkBox1.Checked;
-            mapController.Invoke((MethodInvoker)delegate() {
-                mapController.Invalidate(true);
-            }
-            );
-        }
-
-        private void cb_transeffects_CheckedChanged(object sender, System.EventArgs e) {
-            Global.RenderOptions.bTranslucentEffects = cb_transeffects.Checked;
-            mapController.Invoke((MethodInvoker)delegate() {
-                mapController.Invalidate(true);
-            }
-            );
-        }
-
-        private void b_layerup_Click(object sender, System.EventArgs e) {
-            if (Global.ActiveMap == null) return;
-            Global.ActiveMap.RenderManager.MoveUp(Global.lpSelection.mLayerRef);
-            lpUpdate(Global.ActiveMap, Global.lpSelection.mLayerRef);
-        }
-
-        private void b_layerdown_Click(object sender, System.EventArgs e) {
-            if (Global.ActiveMap == null) return;
-            Global.ActiveMap.RenderManager.MoveDown(Global.lpSelection.mLayerRef);
-            lpUpdate(Global.ActiveMap, Global.lpSelection.mLayerRef);
-        }
-
-        private void b_layerdel_Click(object sender, System.EventArgs e) {
-            if (MessageBox.Show("WARNING: You are about to delete a layer. Are you sure you want to delete this layer?", "Confirm", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning)
-                    == DialogResult.Cancel)
-                return;
-            Global.ActiveMap.DeleteLayer(Global.lpSelection.mLayerRef);
-            lpInit(Global.ActiveMap);
-        }
-
-        private void Global_zoomChanged() {
-            sbpZoom.Text = "Zoom: " + Global.zoom + "x";
-        }
-        private void menuItem14_Click(object sender, System.EventArgs e) {
-            Global.OpenHelp("index.html");
-        }
-
-        private void menuItem1_Click(object sender, System.EventArgs e) {
-            new EditVsp().ShowDialog();
-        }
-
-        private void tb_zoom_Scroll(object sender, System.EventArgs e) {
-            Global.zoom = tb_zoom.Value;
-        }
-        private void zoomchanged() {
-            if (tb_zoom.Value != Global.zoom)
-                tb_zoom.Value = Global.zoom;
-        }
-
-        private void menuItem10_Click(object sender, System.EventArgs e) {
-            MapedPreferences mp = new MapedPreferences();
-            mp.ShowDialog();
-        }
-
-        private void miExportImageGridless_Click(object sender, EventArgs e) {
-            if (Global.ActiveMap == null) return;
-            if (saveImageDialog.ShowDialog() != DialogResult.OK) return;
-            Bitmap bmp = Global.ActiveMap.vsp.ExportToBitmap(0);
-            bmp.Save(saveImageDialog.FileName);
-        }
-
-        private void miExportClipboardGridless_Click(object sender, EventArgs e) {
-            if (Global.ActiveMap == null || Global.ActiveMap.vsp == null) return;
-            Global.ActiveMap.vsp.ExportToClipboard(0);
-            statusBar.Panels[0].Text = "Exported tiles to clipboard.";
-        }
-
-		private void sidebarPanel_MouseClick(object sender, MouseEventArgs e)
+		ImportDialog id = new ImportDialog();
+		private void miImport_Click(object sender, System.EventArgs e)
 		{
-			if (e.Button == MouseButtons.Right)
-				sidebarContextMenu.Show(sidebarPanel, e.Location);
+			id.init();
+			if (id.ShowDialog() != DialogResult.OK) return;
+			ImportTiles(false);
+		}
+
+		private void miImportAgain_Click(object sender, System.EventArgs e)
+		{
+			ImportTiles(true);
+		}
+
+		private void miEditAnims_Click(object sender, System.EventArgs e)
+		{
+			AnimationEditor ae = new AnimationEditor();
+			ae.init(Global.ActiveMap);
+			if (ae.ShowDialog() != DialogResult.OK)
+				return;
+			Global.ActiveMap.vsp.Animations = ae.Anims;
+			Global.FrameCalc.generate(ae.Anims);
+		}
+
+		private void VspView_SelectionChanged()
+		{
+			int sb = vspController.VspView.SelectedTileB;
+			int sf = vspController.VspView.SelectedTileF;
+
+
+
+			sbpSelection.Text = "Selected Tiles: " + sf + ", " + sb;
+		}
+
+		private void FrameCalc_OnTick()
+		{
+			//			mapController.Invalidate(true);
+		}
+
+		private void animTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+		{
+			mapController.Invoke((MethodInvoker)delegate()
+			{
+				mapController.Invalidate(true);
+			}
+			);
+		}
+
+		private void checkBox1_CheckedChanged(object sender, System.EventArgs e)
+		{
+			Global.RenderOptions.bAnimate = animTimer.Enabled = checkBox1.Checked;
+			mapController.Invoke((MethodInvoker)delegate()
+			{
+				mapController.Invalidate(true);
+			}
+			);
+		}
+
+		private void cb_transeffects_CheckedChanged(object sender, System.EventArgs e)
+		{
+			Global.RenderOptions.bTranslucentEffects = cb_transeffects.Checked;
+			mapController.Invoke((MethodInvoker)delegate()
+			{
+				mapController.Invalidate(true);
+			}
+			);
+		}
+
+		private void b_layerup_Click(object sender, System.EventArgs e)
+		{
+			if (Global.ActiveMap == null) return;
+			Global.ActiveMap.RenderManager.MoveUp(Global.lpSelection.mLayerRef);
+			lpUpdate(Global.ActiveMap, Global.lpSelection.mLayerRef);
+		}
+
+		private void b_layerdown_Click(object sender, System.EventArgs e)
+		{
+			if (Global.ActiveMap == null) return;
+			Global.ActiveMap.RenderManager.MoveDown(Global.lpSelection.mLayerRef);
+			lpUpdate(Global.ActiveMap, Global.lpSelection.mLayerRef);
+		}
+
+		private void b_layerdel_Click(object sender, System.EventArgs e)
+		{
+			if (MessageBox.Show("WARNING: You are about to delete a layer. Are you sure you want to delete this layer?", "Confirm", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning)
+							== DialogResult.Cancel)
+				return;
+			Global.ActiveMap.DeleteLayer(Global.lpSelection.mLayerRef);
+			lpInit(Global.ActiveMap);
+		}
+
+		private void Global_zoomChanged()
+		{
+			sbpZoom.Text = "Zoom: " + Global.zoom + "x";
+		}
+		private void menuItem14_Click(object sender, System.EventArgs e)
+		{
+			Global.OpenHelp("index.html");
+		}
+
+		private void menuItem1_Click(object sender, System.EventArgs e)
+		{
+			new EditVsp().ShowDialog();
+		}
+
+		private void tb_zoom_Scroll(object sender, System.EventArgs e)
+		{
+			Global.zoom = tb_zoom.Value;
+		}
+		private void zoomchanged()
+		{
+			if (tb_zoom.Value != Global.zoom)
+				tb_zoom.Value = Global.zoom;
+		}
+
+		private void menuItem10_Click(object sender, System.EventArgs e)
+		{
+			MapedPreferences mp = new MapedPreferences();
+			mp.ShowDialog();
+		}
+
+		private void miExportImageGridless_Click(object sender, EventArgs e)
+		{
+			if (Global.ActiveMap == null) return;
+			if (saveImageDialog.ShowDialog() != DialogResult.OK) return;
+			Bitmap bmp = Global.ActiveMap.vsp.ExportToBitmap(0);
+			bmp.Save(saveImageDialog.FileName);
+		}
+
+		private void miExportClipboardGridless_Click(object sender, EventArgs e)
+		{
+			if (Global.ActiveMap == null || Global.ActiveMap.vsp == null) return;
+			Global.ActiveMap.vsp.ExportToClipboard(0);
+			statusBar.Panels[0].Text = "Exported tiles to clipboard.";
+		}
+
+		private void checkObsXX_CheckedChanged(object sender, EventArgs e)
+		{
+			int obsTileID = 0;
+			obsTileID |= checkObsLeft.Checked ? 1 : 0;
+			obsTileID |= checkObsRight.Checked ? 2 : 0;
+			obsTileID |= checkObsUp.Checked ? 4 : 0;
+			obsTileID |= checkObsDown.Checked ? 8 : 0;
+			Global.ObsVspViewer.SetObstructionViewerA(obsTileID);
 
 		}
 
- 
-    }
+		private void btnObsAll_Click(object sender, EventArgs e)
+		{
+			checkObsLeft.Checked = true;
+			checkObsRight.Checked = true;
+			checkObsDown.Checked = true;
+			checkObsUp.Checked = true;
+		}
+
+		private void miViewNotes_Click(object sender, EventArgs e)
+		{
+			miViewNotes.Checked ^= true;
+			Update();
+		}
 
 
-    public class ZoneMenuItem : MenuItem {
-        public ZoneMenuItem(string name)
-            : base(name) {
-        }
-        public MapZone mapzone;
-    }
-    public class SizeGrip : Control {
-        protected override void OnPaint(PaintEventArgs e) {
-            ControlPaint.DrawSizeGrip(e.Graphics, Parent.BackColor, 0, 0, Width, Height);
-        }
 
-        protected override Size DefaultSize {
-            get {
-                return new Size(SystemInformation.VerticalScrollBarWidth, SystemInformation.HorizontalScrollBarHeight);
-            }
-        }
+	}
 
 
-    }
+	public class ZoneMenuItem : MenuItem
+	{
+		public ZoneMenuItem(string name)
+			: base(name)
+		{
+		}
+		public MapZone mapzone;
+	}
+	public class SizeGrip : Control
+	{
+		protected override void OnPaint(PaintEventArgs e)
+		{
+			ControlPaint.DrawSizeGrip(e.Graphics, Parent.BackColor, 0, 0, Width, Height);
+		}
+
+		protected override Size DefaultSize
+		{
+			get
+			{
+				return new Size(SystemInformation.VerticalScrollBarWidth, SystemInformation.HorizontalScrollBarHeight);
+			}
+		}
+
+
+	}
 }

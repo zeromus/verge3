@@ -74,6 +74,7 @@ namespace winmaped2
 		private System.Windows.Forms.Panel wanderpanel;
 		private System.Windows.Forms.TextBox t_onActivate;
 		private System.Windows.Forms.Label label19;
+		private Button b_dupeent;
 		Map map;
 
 		public ArrayList EditedEntities { get { return entCopy; } }
@@ -85,32 +86,32 @@ namespace winmaped2
 			// Required for Windows Form Designer support
 			//
 			InitializeComponent();
-			c_movetype.SelectedIndex=0;
-			c_facing.SelectedIndex=1;
+			c_movetype.SelectedIndex = 0;
+			c_facing.SelectedIndex = 1;
 			DisableEditor();
-			if(Global.ActiveMap.FileOnDisk==null) button2.Enabled=false;
+			if (Global.ActiveMap.FileOnDisk == null) button2.Enabled = false;
 		}
 		public void init(Map map)
 		{
 			ArrayList ents = map.Entities;
 			this.map = map;
-			foreach(MapEntity me in ents)
+			foreach (MapEntity me in ents)
 				entCopy.Add(me.Clone());
-			foreach(MapEntity me in entCopy)
+			foreach (MapEntity me in entCopy)
 			{
-				ListViewItem lvi = new ListViewItem( new string[] { me.ID.ToString(), me.Description + "; "+me.ChrName } );
+				ListViewItem lvi = new ListViewItem(new string[] { me.ID.ToString(), me.Description + "; " + me.ChrName });
 				lvi.Tag = me;
 				lv_ents.Items.Add(lvi);
 			}
 		}
 		public void seek(MapEntity me)
 		{
-			foreach(ListViewItem lvi in lv_ents.Items)
+			foreach (ListViewItem lvi in lv_ents.Items)
 			{
 				MapEntity me_ = (MapEntity)lvi.Tag;
-				if(me_.ID==me.ID)
+				if (me_.ID == me.ID)
 				{
-					lvi.Selected=true;
+					lvi.Selected = true;
 					lvi.EnsureVisible();
 				}
 			}
@@ -119,16 +120,16 @@ namespace winmaped2
 		/// <summary>
 		/// Clean up any resources being used.
 		/// </summary>
-		protected override void Dispose( bool disposing )
+		protected override void Dispose(bool disposing)
 		{
-			if( disposing )
+			if (disposing)
 			{
-				if(components != null)
+				if (components != null)
 				{
 					components.Dispose();
 				}
 			}
-			base.Dispose( disposing );
+			base.Dispose(disposing);
 		}
 
 		#region Windows Form Designer generated code
@@ -196,6 +197,7 @@ namespace winmaped2
 			this.t_movescript = new System.Windows.Forms.TextBox();
 			this.label6 = new System.Windows.Forms.Label();
 			this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
+			this.b_dupeent = new System.Windows.Forms.Button();
 			this.panel1.SuspendLayout();
 			this.panel4.SuspendLayout();
 			this.panel2.SuspendLayout();
@@ -229,8 +231,8 @@ namespace winmaped2
 			// lv_ents
 			// 
 			this.lv_ents.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-																					  this.ch_entID,
-																					  this.ch_entName});
+            this.ch_entID,
+            this.ch_entName});
 			this.lv_ents.ContextMenu = this.cm_ent;
 			this.lv_ents.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.lv_ents.FullRowSelect = true;
@@ -239,11 +241,12 @@ namespace winmaped2
 			this.lv_ents.Location = new System.Drawing.Point(0, 0);
 			this.lv_ents.MultiSelect = false;
 			this.lv_ents.Name = "lv_ents";
-			this.lv_ents.Size = new System.Drawing.Size(232, 429);
+			this.lv_ents.Size = new System.Drawing.Size(232, 386);
 			this.lv_ents.TabIndex = 1;
+			this.lv_ents.UseCompatibleStateImageBehavior = false;
 			this.lv_ents.View = System.Windows.Forms.View.Details;
-			this.lv_ents.MouseDown += new System.Windows.Forms.MouseEventHandler(this.lv_ents_MouseDown);
 			this.lv_ents.SelectedIndexChanged += new System.EventHandler(this.lv_ents_SelectedIndexChanged);
+			this.lv_ents.MouseDown += new System.Windows.Forms.MouseEventHandler(this.lv_ents_MouseDown);
 			// 
 			// ch_entID
 			// 
@@ -258,9 +261,9 @@ namespace winmaped2
 			// cm_ent
 			// 
 			this.cm_ent.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
-																				   this.m_newent,
-																				   this.menuItem3,
-																				   this.m_delent});
+            this.m_newent,
+            this.menuItem3,
+            this.m_delent});
 			this.cm_ent.Popup += new System.EventHandler(this.cm_ent_Popup);
 			// 
 			// m_newent
@@ -283,12 +286,13 @@ namespace winmaped2
 			// panel4
 			// 
 			this.panel4.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+			this.panel4.Controls.Add(this.b_dupeent);
 			this.panel4.Controls.Add(this.button1);
 			this.panel4.Controls.Add(this.b_delent);
 			this.panel4.Dock = System.Windows.Forms.DockStyle.Bottom;
-			this.panel4.Location = new System.Drawing.Point(0, 429);
+			this.panel4.Location = new System.Drawing.Point(0, 386);
 			this.panel4.Name = "panel4";
-			this.panel4.Size = new System.Drawing.Size(232, 48);
+			this.panel4.Size = new System.Drawing.Size(232, 91);
 			this.panel4.TabIndex = 0;
 			// 
 			// button1
@@ -326,6 +330,7 @@ namespace winmaped2
 			this.b_Cancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
 			this.b_Cancel.Location = new System.Drawing.Point(536, 16);
 			this.b_Cancel.Name = "b_Cancel";
+			this.b_Cancel.Size = new System.Drawing.Size(75, 23);
 			this.b_Cancel.TabIndex = 1;
 			this.b_Cancel.Text = "Cancel";
 			// 
@@ -333,6 +338,7 @@ namespace winmaped2
 			// 
 			this.b_OK.Location = new System.Drawing.Point(448, 16);
 			this.b_OK.Name = "b_OK";
+			this.b_OK.Size = new System.Drawing.Size(75, 23);
 			this.b_OK.TabIndex = 0;
 			this.b_OK.Text = "OK";
 			this.b_OK.Click += new System.EventHandler(this.b_OK_Click);
@@ -384,6 +390,7 @@ namespace winmaped2
 			// 
 			this.label19.Location = new System.Drawing.Point(24, 152);
 			this.label19.Name = "label19";
+			this.label19.Size = new System.Drawing.Size(100, 23);
 			this.label19.TabIndex = 36;
 			this.label19.Text = "onActivate";
 			this.label19.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
@@ -400,6 +407,7 @@ namespace winmaped2
 			// 
 			this.chk_autoface.Location = new System.Drawing.Point(136, 224);
 			this.chk_autoface.Name = "chk_autoface";
+			this.chk_autoface.Size = new System.Drawing.Size(104, 24);
 			this.chk_autoface.TabIndex = 28;
 			this.chk_autoface.Text = "Auto-Face";
 			this.chk_autoface.CheckedChanged += new System.EventHandler(this.eFieldChanged);
@@ -449,13 +457,13 @@ namespace winmaped2
 			this.t_desc.Name = "t_desc";
 			this.t_desc.Size = new System.Drawing.Size(208, 20);
 			this.t_desc.TabIndex = 22;
-			this.t_desc.Text = "";
 			this.t_desc.TextChanged += new System.EventHandler(this.eFieldChanged);
 			// 
 			// label10
 			// 
 			this.label10.Location = new System.Drawing.Point(24, 24);
 			this.label10.Name = "label10";
+			this.label10.Size = new System.Drawing.Size(100, 23);
 			this.label10.TabIndex = 21;
 			this.label10.Text = "Description:";
 			this.label10.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
@@ -464,10 +472,12 @@ namespace winmaped2
 			// 
 			this.c_movetype.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
 			this.c_movetype.Items.AddRange(new object[] {
-															"Off (Stationary)",
-															"Wander Zone",
-															"Wander Rectangle",
-															"Movescript"});
+            "Off (Stationary)",
+            "Wander Zone",
+            "Wander Rectangle",
+            "Movescript",
+						"Wander Anti-Zone"
+			});
 			this.c_movetype.Location = new System.Drawing.Point(136, 288);
 			this.c_movetype.Name = "c_movetype";
 			this.c_movetype.Size = new System.Drawing.Size(121, 21);
@@ -478,6 +488,7 @@ namespace winmaped2
 			// 
 			this.label5.Location = new System.Drawing.Point(16, 288);
 			this.label5.Name = "label5";
+			this.label5.Size = new System.Drawing.Size(100, 23);
 			this.label5.TabIndex = 12;
 			this.label5.Text = "Movement Type:";
 			this.label5.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
@@ -485,21 +496,22 @@ namespace winmaped2
 			// n_movespeed
 			// 
 			this.n_movespeed.Location = new System.Drawing.Point(136, 256);
-			this.n_movespeed.Maximum = new System.Decimal(new int[] {
-																		65535,
-																		0,
-																		0,
-																		0});
+			this.n_movespeed.Maximum = new decimal(new int[] {
+            65535,
+            0,
+            0,
+            0});
 			this.n_movespeed.Name = "n_movespeed";
 			this.n_movespeed.Size = new System.Drawing.Size(56, 20);
 			this.n_movespeed.TabIndex = 11;
-			this.n_movespeed.KeyUp += new System.Windows.Forms.KeyEventHandler(this.n_x_KeyUp);
 			this.n_movespeed.ValueChanged += new System.EventHandler(this.eFieldChanged);
+			this.n_movespeed.KeyUp += new System.Windows.Forms.KeyEventHandler(this.n_x_KeyUp);
 			// 
 			// label4
 			// 
 			this.label4.Location = new System.Drawing.Point(16, 256);
 			this.label4.Name = "label4";
+			this.label4.Size = new System.Drawing.Size(100, 23);
 			this.label4.TabIndex = 10;
 			this.label4.Text = "Movement Speed:";
 			this.label4.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
@@ -508,6 +520,7 @@ namespace winmaped2
 			// 
 			this.ck_isobs.Location = new System.Drawing.Point(136, 200);
 			this.ck_isobs.Name = "ck_isobs";
+			this.ck_isobs.Size = new System.Drawing.Size(104, 24);
 			this.ck_isobs.TabIndex = 9;
 			this.ck_isobs.Text = "Obstruct Others";
 			this.ck_isobs.CheckedChanged += new System.EventHandler(this.eFieldChanged);
@@ -525,6 +538,7 @@ namespace winmaped2
 			// 
 			this.button2.Location = new System.Drawing.Point(288, 120);
 			this.button2.Name = "button2";
+			this.button2.Size = new System.Drawing.Size(75, 23);
 			this.button2.TabIndex = 7;
 			this.button2.Text = "Browse...";
 			this.button2.Click += new System.EventHandler(this.button2_Click);
@@ -535,13 +549,13 @@ namespace winmaped2
 			this.t_chrfile.Name = "t_chrfile";
 			this.t_chrfile.Size = new System.Drawing.Size(136, 20);
 			this.t_chrfile.TabIndex = 6;
-			this.t_chrfile.Text = "";
 			this.t_chrfile.TextChanged += new System.EventHandler(this.eFieldChanged);
 			// 
 			// label3
 			// 
 			this.label3.Location = new System.Drawing.Point(24, 120);
 			this.label3.Name = "label3";
+			this.label3.Size = new System.Drawing.Size(100, 23);
 			this.label3.TabIndex = 5;
 			this.label3.Text = "CHR File:";
 			this.label3.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
@@ -550,10 +564,10 @@ namespace winmaped2
 			// 
 			this.c_facing.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
 			this.c_facing.Items.AddRange(new object[] {
-														  "Up",
-														  "Down",
-														  "Left",
-														  "Right"});
+            "Up",
+            "Down",
+            "Left",
+            "Right"});
 			this.c_facing.Location = new System.Drawing.Point(144, 88);
 			this.c_facing.Name = "c_facing";
 			this.c_facing.Size = new System.Drawing.Size(121, 21);
@@ -565,6 +579,7 @@ namespace winmaped2
 			// 
 			this.label2.Location = new System.Drawing.Point(24, 88);
 			this.label2.Name = "label2";
+			this.label2.Size = new System.Drawing.Size(100, 23);
 			this.label2.TabIndex = 3;
 			this.label2.Text = "Facing:";
 			this.label2.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
@@ -572,30 +587,30 @@ namespace winmaped2
 			// n_y
 			// 
 			this.n_y.Location = new System.Drawing.Point(216, 56);
-			this.n_y.Maximum = new System.Decimal(new int[] {
-																65535,
-																0,
-																0,
-																0});
+			this.n_y.Maximum = new decimal(new int[] {
+            65535,
+            0,
+            0,
+            0});
 			this.n_y.Name = "n_y";
 			this.n_y.Size = new System.Drawing.Size(64, 20);
 			this.n_y.TabIndex = 2;
-			this.n_y.KeyUp += new System.Windows.Forms.KeyEventHandler(this.n_x_KeyUp);
 			this.n_y.ValueChanged += new System.EventHandler(this.eFieldChanged);
+			this.n_y.KeyUp += new System.Windows.Forms.KeyEventHandler(this.n_x_KeyUp);
 			// 
 			// n_x
 			// 
 			this.n_x.Location = new System.Drawing.Point(144, 56);
-			this.n_x.Maximum = new System.Decimal(new int[] {
-																65535,
-																0,
-																0,
-																0});
+			this.n_x.Maximum = new decimal(new int[] {
+            65535,
+            0,
+            0,
+            0});
 			this.n_x.Name = "n_x";
 			this.n_x.Size = new System.Drawing.Size(64, 20);
 			this.n_x.TabIndex = 1;
-			this.n_x.KeyUp += new System.Windows.Forms.KeyEventHandler(this.n_x_KeyUp);
 			this.n_x.ValueChanged += new System.EventHandler(this.eFieldChanged);
+			this.n_x.KeyUp += new System.Windows.Forms.KeyEventHandler(this.n_x_KeyUp);
 			// 
 			// label1
 			// 
@@ -639,21 +654,22 @@ namespace winmaped2
 			// n_wanderdelay
 			// 
 			this.n_wanderdelay.Location = new System.Drawing.Point(104, 0);
-			this.n_wanderdelay.Maximum = new System.Decimal(new int[] {
-																		  65000,
-																		  0,
-																		  0,
-																		  0});
+			this.n_wanderdelay.Maximum = new decimal(new int[] {
+            65000,
+            0,
+            0,
+            0});
 			this.n_wanderdelay.Name = "n_wanderdelay";
 			this.n_wanderdelay.Size = new System.Drawing.Size(56, 20);
 			this.n_wanderdelay.TabIndex = 6;
-			this.n_wanderdelay.KeyUp += new System.Windows.Forms.KeyEventHandler(this.n_x_KeyUp);
 			this.n_wanderdelay.ValueChanged += new System.EventHandler(this.eFieldChanged);
+			this.n_wanderdelay.KeyUp += new System.Windows.Forms.KeyEventHandler(this.n_x_KeyUp);
 			// 
 			// label14
 			// 
 			this.label14.Location = new System.Drawing.Point(0, 0);
 			this.label14.Name = "label14";
+			this.label14.Size = new System.Drawing.Size(100, 23);
 			this.label14.TabIndex = 5;
 			this.label14.Text = "Wander Delay:";
 			this.label14.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
@@ -709,58 +725,58 @@ namespace winmaped2
 			// n_wy1
 			// 
 			this.n_wy1.Location = new System.Drawing.Point(88, 48);
-			this.n_wy1.Maximum = new System.Decimal(new int[] {
-																  65000,
-																  0,
-																  0,
-																  0});
+			this.n_wy1.Maximum = new decimal(new int[] {
+            65000,
+            0,
+            0,
+            0});
 			this.n_wy1.Name = "n_wy1";
 			this.n_wy1.Size = new System.Drawing.Size(40, 20);
 			this.n_wy1.TabIndex = 1;
-			this.n_wy1.KeyUp += new System.Windows.Forms.KeyEventHandler(this.n_x_KeyUp);
 			this.n_wy1.ValueChanged += new System.EventHandler(this.eFieldChanged);
+			this.n_wy1.KeyUp += new System.Windows.Forms.KeyEventHandler(this.n_x_KeyUp);
 			// 
 			// n_wx1
 			// 
 			this.n_wx1.Location = new System.Drawing.Point(32, 48);
-			this.n_wx1.Maximum = new System.Decimal(new int[] {
-																  65000,
-																  0,
-																  0,
-																  0});
+			this.n_wx1.Maximum = new decimal(new int[] {
+            65000,
+            0,
+            0,
+            0});
 			this.n_wx1.Name = "n_wx1";
 			this.n_wx1.Size = new System.Drawing.Size(40, 20);
 			this.n_wx1.TabIndex = 1;
-			this.n_wx1.KeyUp += new System.Windows.Forms.KeyEventHandler(this.n_x_KeyUp);
 			this.n_wx1.ValueChanged += new System.EventHandler(this.eFieldChanged);
+			this.n_wx1.KeyUp += new System.Windows.Forms.KeyEventHandler(this.n_x_KeyUp);
 			// 
 			// n_wy0
 			// 
 			this.n_wy0.Location = new System.Drawing.Point(88, 16);
-			this.n_wy0.Maximum = new System.Decimal(new int[] {
-																  65000,
-																  0,
-																  0,
-																  0});
+			this.n_wy0.Maximum = new decimal(new int[] {
+            65000,
+            0,
+            0,
+            0});
 			this.n_wy0.Name = "n_wy0";
 			this.n_wy0.Size = new System.Drawing.Size(40, 20);
 			this.n_wy0.TabIndex = 1;
-			this.n_wy0.KeyUp += new System.Windows.Forms.KeyEventHandler(this.n_x_KeyUp);
 			this.n_wy0.ValueChanged += new System.EventHandler(this.eFieldChanged);
+			this.n_wy0.KeyUp += new System.Windows.Forms.KeyEventHandler(this.n_x_KeyUp);
 			// 
 			// n_wx0
 			// 
 			this.n_wx0.Location = new System.Drawing.Point(32, 16);
-			this.n_wx0.Maximum = new System.Decimal(new int[] {
-																  65000,
-																  0,
-																  0,
-																  0});
+			this.n_wx0.Maximum = new decimal(new int[] {
+            65000,
+            0,
+            0,
+            0});
 			this.n_wx0.Name = "n_wx0";
 			this.n_wx0.Size = new System.Drawing.Size(40, 20);
 			this.n_wx0.TabIndex = 1;
-			this.n_wx0.KeyUp += new System.Windows.Forms.KeyEventHandler(this.n_x_KeyUp);
 			this.n_wx0.ValueChanged += new System.EventHandler(this.eFieldChanged);
+			this.n_wx0.KeyUp += new System.Windows.Forms.KeyEventHandler(this.n_x_KeyUp);
 			// 
 			// label8
 			// 
@@ -784,19 +800,19 @@ namespace winmaped2
 			// t_movescript
 			// 
 			this.t_movescript.CharacterCasing = System.Windows.Forms.CharacterCasing.Upper;
-			this.t_movescript.Font = new System.Drawing.Font("Courier New", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((System.Byte)(0)));
+			this.t_movescript.Font = new System.Drawing.Font("Courier New", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
 			this.t_movescript.Location = new System.Drawing.Point(120, 16);
 			this.t_movescript.Name = "t_movescript";
 			this.t_movescript.Size = new System.Drawing.Size(192, 21);
 			this.t_movescript.TabIndex = 15;
-			this.t_movescript.Text = "";
-			this.t_movescript.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.t_movescript_KeyPress);
 			this.t_movescript.TextChanged += new System.EventHandler(this.eFieldChanged);
+			this.t_movescript.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.t_movescript_KeyPress);
 			// 
 			// label6
 			// 
 			this.label6.Location = new System.Drawing.Point(8, 16);
 			this.label6.Name = "label6";
+			this.label6.Size = new System.Drawing.Size(100, 23);
 			this.label6.TabIndex = 14;
 			this.label6.Text = "Movement Script:";
 			this.label6.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
@@ -804,6 +820,16 @@ namespace winmaped2
 			// openFileDialog
 			// 
 			this.openFileDialog.Filter = "V3 CHR Files (*.chr)|*.chr";
+			// 
+			// b_dupeent
+			// 
+			this.b_dupeent.Enabled = false;
+			this.b_dupeent.Location = new System.Drawing.Point(8, 47);
+			this.b_dupeent.Name = "b_dupeent";
+			this.b_dupeent.Size = new System.Drawing.Size(104, 32);
+			this.b_dupeent.TabIndex = 1;
+			this.b_dupeent.Text = "Dupe Selected";
+			this.b_dupeent.Click += new System.EventHandler(this.b_dupeent_Click);
 			// 
 			// EntityEditWnd
 			// 
@@ -824,6 +850,7 @@ namespace winmaped2
 			this.panel2.ResumeLayout(false);
 			this.panel3.ResumeLayout(false);
 			this.g_edit.ResumeLayout(false);
+			this.g_edit.PerformLayout();
 			this.g_wanderzone.ResumeLayout(false);
 			((System.ComponentModel.ISupportInitialize)(this.n_movespeed)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.n_y)).EndInit();
@@ -837,86 +864,76 @@ namespace winmaped2
 			((System.ComponentModel.ISupportInitialize)(this.n_wy0)).EndInit();
 			((System.ComponentModel.ISupportInitialize)(this.n_wx0)).EndInit();
 			this.g_movescript.ResumeLayout(false);
+			this.g_movescript.PerformLayout();
 			this.ResumeLayout(false);
 
 		}
 		#endregion
 
-		private void button1_Click(object sender, System.EventArgs e)
-		{
-			MapEntity me = new MapEntity();
-			me.ID = entCopy.Count;
-			entCopy.Add(me);
-			ListViewItem lvi = new ListViewItem( new string[] { me.ID.ToString(), me.Description + "; "+me.ChrName } );
-			lvi.Tag=me;
-			lv_ents.Items.Add(lvi);
-			lvi.Selected=true;
-			lvi.EnsureVisible();
-		}
-
 		private void label7_Click(object sender, System.EventArgs e)
 		{
-		
+
 		}
 
 		private void panel2_Paint(object sender, System.Windows.Forms.PaintEventArgs e)
 		{
-		
+
 		}
 		MapZone get_ent_zone(int entity)
 		{
 			MapEntity me = (MapEntity)entCopy[entity];
-			if(map.Zones.Count==0) return null;
-			MapZone mz = (MapZone)map.Zones[ map.ZoneLayer.getTile(me.TileX,me.TileY) ];
+			if (map.Zones.Count == 0) return null;
+			MapZone mz = (MapZone)map.Zones[map.ZoneLayer.getTile(me.TileX, me.TileY)];
 			return mz;
 		}
 
 		private void c_movetype_SelectedIndexChanged(object sender, System.EventArgs e)
 		{
 			int c = c_movetype.SelectedIndex;
-			g_wanderrect.Visible=false;
-			g_movescript.Visible=false;
-			g_wanderzone.Visible=false;
-			switch(c)
+			g_wanderrect.Visible = false;
+			g_movescript.Visible = false;
+			g_wanderzone.Visible = false;
+			switch (c)
 			{
 				case 3:
-					g_wanderrect.Visible=false;
-					g_wanderzone.Visible=false;
-					g_movescript.Visible=true;
+					g_wanderrect.Visible = false;
+					g_wanderzone.Visible = false;
+					g_movescript.Visible = true;
 					break;
 				case 2:
-					g_wanderrect.Visible=true;
-					if(g_wanderzone.Controls.Contains(wanderpanel))
+					g_wanderrect.Visible = true;
+					if (g_wanderzone.Controls.Contains(wanderpanel))
 						g_wanderzone.Controls.Remove(wanderpanel);
 					g_wanderrect.Controls.Add(wanderpanel);
 					wanderpanel.Location = new Point(wanderpanel.Location.X, 104);
-					g_wanderzone.Visible=false;
-					g_movescript.Visible=false;
+					g_wanderzone.Visible = false;
+					g_movescript.Visible = false;
 					break;
+				case 4:
 				case 1:
-					g_wanderrect.Visible=false;
-					g_wanderzone.Visible=true;
-					if(g_wanderrect.Controls.Contains(wanderpanel))
+					g_wanderrect.Visible = false;
+					g_wanderzone.Visible = true;
+					if (g_wanderrect.Controls.Contains(wanderpanel))
 						g_wanderrect.Controls.Remove(wanderpanel);
 					g_wanderzone.Controls.Add(wanderpanel);
 					wanderpanel.Location = new Point(wanderpanel.Location.X, 48);
-					g_movescript.Visible=false;
+					g_movescript.Visible = false;
 					MapZone mz = get_ent_zone(0);
-                    l_wzone.Text = "Entity will restrict movement to zone "+((mz==null)?0:mz.ID);
+					l_wzone.Text = "Entity will restrict movement to zone " + ((mz == null) ? 0 : mz.ID);
 					break;
-				default:break;
-			}			
+				default: break;
+			}
 		}
 
 		private void button2_Click(object sender, System.EventArgs e)
 		{
 			openFileDialog.InitialDirectory = map.FileOnDisk.Directory.FullName;
-			if(openFileDialog.ShowDialog()==DialogResult.Cancel)
+			if (openFileDialog.ShowDialog() == DialogResult.Cancel)
 				return;
-			string f = Helper.GetRelativePath(map.FileOnDisk.Directory.FullName,openFileDialog.FileName);
+			string f = Helper.GetRelativePath(map.FileOnDisk.Directory.FullName, openFileDialog.FileName);
 			t_chrfile.Text = f;
 		}
-		bool bInvokeItems=true;
+		bool bInvokeItems = true;
 		void DisableEditor()
 		{
 			g_edit.Enabled = false;
@@ -931,17 +948,17 @@ namespace winmaped2
 		}
 		void UpdateListView()
 		{
-			if(lv_ents.SelectedItems.Count==0)return;
+			if (lv_ents.SelectedItems.Count == 0) return;
 			ListViewItem lvi = (ListViewItem)lv_ents.SelectedItems[0];
 			MapEntity me = (MapEntity)lvi.Tag;
-			lvi.SubItems[1].Text = me.Description + "; "+me.ChrName;
+			lvi.SubItems[1].Text = me.Description + "; " + me.ChrName;
 		}
 		void ResetListView()
 		{
 			lv_ents.Items.Clear();
-			foreach(MapEntity me in entCopy)
+			foreach (MapEntity me in entCopy)
 			{
-				ListViewItem lvi = new ListViewItem( new string[] { me.ID.ToString(), me.Description + "; "+me.ChrName } );
+				ListViewItem lvi = new ListViewItem(new string[] { me.ID.ToString(), me.Description + "; " + me.ChrName });
 				lvi.Tag = me;
 				lv_ents.Items.Add(lvi);
 			}
@@ -949,18 +966,18 @@ namespace winmaped2
 		MapEntity curr;
 		void FieldsToItem()
 		{
-			if(!bInvokeItems) return;
-			if(lv_ents.SelectedItems.Count==0)return;
-			if(curr==null) return;
-			
+			if (!bInvokeItems) return;
+			if (lv_ents.SelectedItems.Count == 0) return;
+			if (curr == null) return;
+
 			MapEntity me = curr;
 			me.Description = t_desc.Text;
 			me.TileX = (int)n_x.Value;
 			me.TileY = (int)n_y.Value;
 			me.Facing = (int)c_facing.SelectedIndex + 1;
 			me.ChrName = t_chrfile.Text;
-			me.ObeyObstruction = ck_obeyobs.Checked?1:0;
-			me.IsObstruction = ck_isobs.Checked?1:0;
+			me.ObeyObstruction = ck_obeyobs.Checked ? 1 : 0;
+			me.IsObstruction = ck_isobs.Checked ? 1 : 0;
 			me.Speed = (int)n_movespeed.Value;
 			me.MoveType = (int)c_movetype.SelectedIndex;
 			me.WanderRectangle.x0 = (int)n_wx0.Value;
@@ -969,19 +986,19 @@ namespace winmaped2
 			me.WanderRectangle.y1 = (int)n_wy1.Value;
 			me.MoveScript = t_movescript.Text;
 			me.WanderDelay = (int)n_wanderdelay.Value;
-			me.AutoFace = chk_autoface.Checked?1:0;
+			me.AutoFace = chk_autoface.Checked ? 1 : 0;
 			me.onActivate = t_onActivate.Text;
 		}
 		void ItemsToField(MapEntity me)
 		{
-			bInvokeItems=false;
+			bInvokeItems = false;
 			t_desc.Text = me.Description;
 			n_x.Value = me.TileX;
 			n_y.Value = me.TileY;
-			c_facing.SelectedIndex = me.Facing -1;
+			c_facing.SelectedIndex = me.Facing - 1;
 			t_chrfile.Text = me.ChrName;
-			ck_obeyobs.Checked = (me.ObeyObstruction==1);
-			ck_isobs.Checked = (me.IsObstruction==1);
+			ck_obeyobs.Checked = (me.ObeyObstruction == 1);
+			ck_isobs.Checked = (me.IsObstruction == 1);
 			n_movespeed.Value = me.Speed;
 			c_movetype.SelectedIndex = me.MoveType;
 			n_wx0.Value = me.WanderRectangle.x0;
@@ -990,63 +1007,66 @@ namespace winmaped2
 			n_wy1.Value = me.WanderRectangle.y1;
 			t_movescript.Text = me.MoveScript;
 			n_wanderdelay.Value = me.WanderDelay;
-			chk_autoface.Checked = (me.AutoFace==1);
+			chk_autoface.Checked = (me.AutoFace == 1);
 			t_onActivate.Text = me.onActivate;
-			bInvokeItems=true;
+			bInvokeItems = true;
 		}
 
 		private void lv_ents_SelectedIndexChanged(object sender, System.EventArgs e)
 		{
 			FieldsToItem();
-			if(lv_ents.SelectedIndices.Count==0)
+			if (lv_ents.SelectedIndices.Count == 0)
 			{
 				EmptyFields();
 				DisableEditor();
-				b_delent.Enabled=false;
+				b_delent.Enabled = false;
+				b_dupeent.Enabled = false;
 				return;
 			}
+			b_delent.Enabled = true;
+			b_dupeent.Enabled = true;
 			ListViewItem lvi = (ListViewItem)lv_ents.SelectedItems[0];
 			MapEntity me = (MapEntity)lvi.Tag;
 			curr = me;
 			ItemsToField(me);
 			EnableEditor();
-			b_delent.Enabled=true;
+			b_delent.Enabled = true;
 		}
 		private void eFieldChanged(object sender, System.EventArgs e)
 		{
 			FieldsToItem();
-			UpdateListView();			
+			UpdateListView();
 		}
 
 		private void c_facing_DoubleClick(object sender, System.EventArgs e)
 		{
-		
+
 		}
 
 		private void n_x_KeyUp(object sender, System.Windows.Forms.KeyEventArgs e)
 		{
-			FieldsToItem();		
-			UpdateListView();			
+			FieldsToItem();
+			UpdateListView();
 		}
 
 		private void t_movescript_KeyPress(object sender, System.Windows.Forms.KeyPressEventArgs e)
 		{
 			// compare to valid chars
 			char c = e.KeyChar.ToString().ToUpper()[0];
-//			MessageBox.Show(""+(int)e.KeyChar);
-			char[] valid = new char[] {'P','T','L','R','U','D','S','W','F','B','X','Y','Z',(char)8};
-			if(char.IsDigit(c))return;
+			//			MessageBox.Show(""+(int)e.KeyChar);
+			char[] valid = new char[] { 'P', 'T', 'L', 'R', 'U', 'D', 'S', 'W', 'F', 'B', 'X', 'Y', 'Z', (char)8 };
+			if (char.IsDigit(c)) return;
 			bool ok = false;
-			foreach(char ch in valid)
-				if(ch==c)
-					ok=true;
+			foreach (char ch in valid)
+				if (ch == c)
+					ok = true;
 			e.Handled = !ok;
 		}
 
 		private void cm_ent_Popup(object sender, System.EventArgs e)
 		{
-			if(lv_ents.SelectedItems.Count==0) m_delent.Enabled=false;
-			else m_delent.Enabled=true;
+			if (lv_ents.SelectedItems.Count == 0) m_delent.Enabled = false;
+			else m_delent.Enabled = true;
 		}
 
 		private void lv_ents_MouseDown(object sender, System.Windows.Forms.MouseEventArgs e)
@@ -1058,30 +1078,20 @@ namespace winmaped2
 			MapEntity me = new MapEntity();
 			me.ID = entCopy.Count;
 			entCopy.Add(me);
-			ListViewItem lvi = new ListViewItem( new string[] { me.ID.ToString(), me.Description + "; "+me.ChrName } );
-			lvi.Tag=me;
+			ListViewItem lvi = new ListViewItem(new string[] { me.ID.ToString(), me.Description + "; " + me.ChrName });
+			lvi.Tag = me;
 			lv_ents.Items.Add(lvi);
-			lvi.Selected=true;
-			lvi.EnsureVisible();	
+			lvi.Selected = true;
+			lvi.EnsureVisible();
 		}
 		private void update_IDs()
 		{
-			for(int i=0;i<entCopy.Count;i++)
+			for (int i = 0; i < entCopy.Count; i++)
 			{
 				MapEntity me = (MapEntity)entCopy[i];
 				me.ID = i;
 			}
 			ResetListView();
-		}
-
-		private void m_delent_Click(object sender, System.EventArgs e)
-		{
-			if(lv_ents.SelectedItems.Count==0) return;
-			MapEntity me = (MapEntity) lv_ents.SelectedItems[0].Tag;
-			if( MessageBox.Show("Are you sure you want to delete Entity #" + me.ID + "? This action can not be undone. \r\nWARNING: If there are entities in the list with a higher ID than this entity, they will be shifted down and will henceforth have a different ID.", "Warning", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning)
-				== DialogResult.Cancel ) return;
-			entCopy.Remove(me);
-			update_IDs();
 		}
 
 		private void b_OK_Click(object sender, System.EventArgs e)
@@ -1096,6 +1106,35 @@ namespace winmaped2
 			Global.OpenHelp("index.html");
 		}
 
+		private void b_dupeent_Click(object sender, EventArgs e)
+		{
+			MapEntity meSel = (MapEntity)lv_ents.SelectedItems[0].Tag;
+			MapEntity meNew = meSel.Clone();
+			entCopy.Add(meNew);
+			update_IDs();
+		}
+
+		private void m_delent_Click(object sender, System.EventArgs e)
+		{
+			if (lv_ents.SelectedItems.Count == 0) return;
+			MapEntity me = (MapEntity)lv_ents.SelectedItems[0].Tag;
+			if (MessageBox.Show("Are you sure you want to delete Entity #" + me.ID + "? This action can not be undone. \r\nWARNING: If there are entities in the list with a higher ID than this entity, they will be shifted down and will henceforth have a different ID.", "Warning", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning)
+				== DialogResult.Cancel) return;
+			entCopy.Remove(me);
+			update_IDs();
+		}
+
+		private void button1_Click(object sender, System.EventArgs e)
+		{
+			MapEntity me = new MapEntity();
+			me.ID = entCopy.Count;
+			entCopy.Add(me);
+			ListViewItem lvi = new ListViewItem(new string[] { me.ID.ToString(), me.Description + "; " + me.ChrName });
+			lvi.Tag = me;
+			lv_ents.Items.Add(lvi);
+			lvi.Selected = true;
+			lvi.EnsureVisible();
+		}
 
 	}
 }
