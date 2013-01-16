@@ -1,7 +1,7 @@
 ﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
   <PropertyGroup>
     <ProjectType>Local</ProjectType>
-    <ProductVersion>9.0.30729</ProductVersion>
+    <ProductVersion>9.0.21022</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{F646E122-D28B-4DB6-BB43-5FEB0B469C9D}</ProjectGuid>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -289,22 +289,21 @@
     <Compile Include="pr2\LockedBitmap.cs" />
     <Compile Include="pr2\Render.cs" />
     <Compile Include="pr2\RenderImage.cs" />
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
     <EmbeddedResource Include="controls\ColorPicker.resx">
       <DependentUpon>ColorPicker.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="controls\LPanel.resx">
       <DependentUpon>LPanel.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="controls\MapController.resx">
       <DependentUpon>MapController.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="controls\mapView.resx">
       <DependentUpon>mapView.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="controls\SidePanel.resx">
       <SubType>Designer</SubType>
@@ -316,76 +315,95 @@
     </EmbeddedResource>
     <EmbeddedResource Include="controls\ToggleButton.resx">
       <DependentUpon>ToggleButton.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="controls\ToolPalette.resx">
       <DependentUpon>ToolPalette.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="controls\vspView.resx">
       <DependentUpon>vspView.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="dialogs\AboutBox.resx">
       <DependentUpon>AboutBox.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="dialogs\AnimationEditor.resx">
       <DependentUpon>AnimationEditor.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="dialogs\AppendTilesWnd.resx">
       <DependentUpon>AppendTilesWnd.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="dialogs\ColorDialog.resx">
       <DependentUpon>ColorDialog.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="dialogs\EditEntityWnd.resx">
       <DependentUpon>EditEntityWnd.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="dialogs\EditVsp.resx">
       <DependentUpon>EditVsp.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="dialogs\EditZoneWnd.resx">
       <DependentUpon>EditZoneWnd.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="dialogs\GetVspNameWnd.resx">
       <DependentUpon>GetVspNameWnd.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="dialogs\ImportDialog.resx">
       <DependentUpon>ImportDialog.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="dialogs\LayerPropertiesWnd.resx">
       <DependentUpon>LayerPropertiesWnd.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="dialogs\LayerResizerWnd.resx">
       <DependentUpon>LayerResizerWnd.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="dialogs\LayerTool.resx">
       <DependentUpon>LayerTool.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="dialogs\mainWindow.resx">
       <DependentUpon>mainWindow.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="dialogs\MapedPreferences.resx">
       <DependentUpon>MapedPreferences.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="dialogs\MapPropertiesWnd.resx">
       <DependentUpon>MapPropertiesWnd.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="dialogs\NewLayerWindow.resx">
       <DependentUpon>NewLayerWindow.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="dialogs\NewMapWnd.resx">
       <DependentUpon>NewMapWnd.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="dialogs\TileEd.resx">
       <DependentUpon>TileEd.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="HardcodedPluginControlPanels\BasicToolsForm.resx">
       <DependentUpon>BasicToolsForm.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="HardcodedPluginControlPanels\ResizerForm.resx">
       <DependentUpon>ResizerForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Properties\Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="resources\bitmaps\render.bmp" />
     <EmbeddedResource Include="resources\bitmaps\write.bmp" />
@@ -416,6 +434,7 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Properties\" />
     <Folder Include="resources\cursors\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
